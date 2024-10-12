@@ -7,8 +7,8 @@ import { PlayerSkinType } from "./enums/PlayerSkinType";
 export class Player extends Entity {
 	@type("string") name: string;
 	@type("int8") weapon: WeaponType;
-	@type("int8") healing?: HealingType;
 	@type("int32") drunkiness: number;
 	@type("int8") skin: PlayerSkinType;
+	@type("int8") healing?: HealingType;
 	@type("int64") canPickup?: number;
 }
