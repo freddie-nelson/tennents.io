@@ -12,8 +12,6 @@ USER node
 
 RUN pnpm i
 
-RUN pnpm run setup
-
 RUN pnpm run build
 
 EXPOSE 3000
