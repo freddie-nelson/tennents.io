@@ -54,6 +54,7 @@ export class GameEngine {
 		r,
 		velX,
 		velY,
+		type,
 	}: {
 		x: number;
 		y: number;
@@ -61,6 +62,7 @@ export class GameEngine {
 		r: number;
 		velX: number;
 		velY: number;
+		type: EntityType;
 	}): Matter.Body {
 		this.id++;
 
@@ -69,6 +71,7 @@ export class GameEngine {
 			velocity: { x: velX, y: velY },
 		});
 		entity.plugin.id = this.id;
+		entity.plugin.type = type;
 		Matter.Body.setVelocity(entity, {
 			x: velX,
 			y: velY,
@@ -136,13 +139,24 @@ export class GameEngine {
 			velX: 0,
 			velY: 0,
 			radius: GameEngine.PLAYER_RADIUS,
+			type: EntityType.PLAYER,
 		});
 		entity.frictionAir = 0.1;
 
 		return this.id;
 	}
 
-	addProjectile({ x, y, r }: { x: number; y: number; r: number }): number {
+	addProjectile({
+		x,
+		y,
+		r,
+		ownerId,
+	}: {
+		x: number;
+		y: number;
+		r: number;
+		ownerId: number;
+	}): number {
 		const dx = Math.cos(r);
 		const dy = Math.sin(r);
 
@@ -153,8 +167,10 @@ export class GameEngine {
 			velX: dx * GameEngine.PROJECTILE_SPEED,
 			velY: dy * GameEngine.PROJECTILE_SPEED,
 			radius: GameEngine.PROJECTILE_RADIUS,
+			type: EntityType.PROJECTILE,
 		});
 		entity.frictionAir = 0;
+		entity.plugin.ownerId = ownerId;
 		entity.plugin.lifetime = GameEngine.PROJECTILE_LIFETIME;
 
 		return this.id;
