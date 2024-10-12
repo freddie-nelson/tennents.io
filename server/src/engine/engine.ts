@@ -71,12 +71,15 @@ export class GameEngine {
 	}
 
 	addProjectile({ x, y, r }: { x: number; y: number; r: number }): number {
+		const dx = Math.cos(r);
+		const dy = Math.sin(r);
+
 		const entity = this.addEntity({
-			x,
-			y,
+			x: x + dx * GameEngine.PLAYER_RADIUS,
+			y: y + dy * GameEngine.PLAYER_RADIUS,
 			r,
-			velX: Math.cos(r) * GameEngine.PROJECTILE_SPEED,
-			velY: Math.sin(r) * GameEngine.PROJECTILE_SPEED,
+			velX: dx * GameEngine.PROJECTILE_SPEED,
+			velY: dy * GameEngine.PROJECTILE_SPEED,
 			radius: GameEngine.PROJECTILE_RADIUS,
 		});
 

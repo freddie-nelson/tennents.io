@@ -12,11 +12,10 @@ import { GameState } from "./schema/GameState";
 import { Player } from "./schema/Player";
 import { Entity } from "./schema/Entity";
 import { Vector } from "./schema/Vector";
+import { GameConfig } from "./schema/GameConfig";
+import { Projectile } from "./schema/projectile";
 
 import { getHealingAmountFromHealingType } from "../rules/healing";
-import { GameConfig } from "./schema/GameConfig";
-import { Weapon } from "./schema/Weapon";
-import { Projectile } from "./schema/projectile";
 
 export class GameRoom extends Room<GameState> {
 	maxClients = 10;
