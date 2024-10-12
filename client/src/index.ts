@@ -1,6 +1,5 @@
 import { API } from "./api/colyseus";
-import "./game/game";
-import Game from "./game/game";
+import Game from "./game/Game";
 
 const api = new API();
 
