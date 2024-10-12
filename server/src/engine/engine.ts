@@ -6,11 +6,12 @@ import { EntityType } from "../rooms/schema/enums/EntityType";
 import { Player } from "../rooms/schema/Player";
 
 export class GameEngine {
-	private static DRUNKINESS_LOSS: number = 0.1;
-	private static PLAYER_RADIUS: number = 1;
-	private static PROJECTILE_RADIUS: number = 0.5;
-	private static PROJECTILE_LIFETIME: number = 100;
-	private static PROJECTILE_SPEED: number = 0.1;
+	static readonly DRUNKINESS_LOSS: number = 0.1;
+	static readonly PLAYER_RADIUS: number = 1;
+	static readonly PLAYER_SPEED: number = 0.1;
+	static readonly PROJECTILE_RADIUS: number = 0.5;
+	static readonly PROJECTILE_LIFETIME: number = 100;
+	static readonly PROJECTILE_SPEED: number = 0.2;
 
 	private engine: Matter.Engine;
 	private entities: Map<number, Matter.Body>;
@@ -141,8 +142,8 @@ export class GameEngine {
 		const dy = Math.sin(r);
 
 		const entity = this.addEntity({
-			x: x + dx * GameEngine.PLAYER_RADIUS * 2,
-			y: y + dy * GameEngine.PLAYER_RADIUS * 2,
+			x: x + dx * GameEngine.PLAYER_RADIUS * 0.8,
+			y: y + dy * GameEngine.PLAYER_RADIUS * 0.8,
 			r,
 			velX: dx * GameEngine.PROJECTILE_SPEED,
 			velY: dy * GameEngine.PROJECTILE_SPEED,

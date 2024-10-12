@@ -34,7 +34,7 @@ export class GameRoom extends Room<GameState> {
     this.state.config = new GameConfig();
     this.state.config.maxDrunkiness = 100;
     this.state.config.maxPlayers = this.maxClients;
-    this.state.config.playerSpeed = 0.1;
+    this.state.config.playerSpeed = GameEngine.PLAYER_SPEED;
 
     // EVENT HANDLERS
 
