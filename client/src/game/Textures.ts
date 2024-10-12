@@ -1,37 +1,51 @@
 import { Assets, Texture } from "pixi.js";
-import { EntityType } from "../../../server/src/rooms/schema/enums/EntityType";
 import { PlayerSkinType } from "../../../server/src/rooms/schema/enums/PlayerSkinType";
+import { WeaponType } from "../../../server/src/rooms/schema/enums/WeaponType";
+import { HealingType } from "../../../server/src/rooms/schema/enums/HealingType";
 
 export default abstract class Textures {
   private static textures = new Map<string, Texture>();
 
   static async initTextures() {
-    const playerColors = [
-      PlayerSkinType.RED,
-      PlayerSkinType.GREEN,
-      PlayerSkinType.BLUE,
-      PlayerSkinType.YELLOW,
-      PlayerSkinType.PURPLE,
-      PlayerSkinType.ORANGE,
-      PlayerSkinType.PINK,
-      PlayerSkinType.CYAN,
-      PlayerSkinType.GRAY,
-      PlayerSkinType.LIME,
-    ];
+    const playerColors = Object.values(PlayerSkinType).filter((c) => typeof c !== "string");
 
     for (const color of playerColors) {
       const key = PlayerSkinType[color][0] + PlayerSkinType[color].toLowerCase().slice(1);
       const texture = await Assets.load(`/images/Players/${key}Player.svg`);
       this.textures.set(`player_${color}`, texture);
     }
-  }
 
-  static getTexture(entityType: EntityType): Texture {
-    if (!this.textures.has(entityType.toString())) {
-      throw new Error(`Texture for ${entityType} not found`);
+    const weaponTypes = Object.values(WeaponType).filter((t) => typeof t !== "string");
+    for (const type of weaponTypes) {
+      const key = WeaponType[type];
+      const texture = await Assets.load(`/images/Attack/${key}.svg`);
+      this.textures.set(key, texture);
     }
 
-    return this.textures.get(entityType.toString())!;
+    const healingTypes = Object.values(HealingType).filter((t) => typeof t !== "string");
+    for (const type of healingTypes) {
+      const key = HealingType[type];
+      const texture = await Assets.load(`/images/Heal/${key}.svg`);
+      this.textures.set(key, texture);
+    }
+  }
+
+  static getWeaponTexture(weaponType: WeaponType): Texture {
+    const key = WeaponType[weaponType];
+    if (!this.textures.has(key)) {
+      throw new Error(`Texture for ${weaponType} not found`);
+    }
+
+    return this.textures.get(key)!;
+  }
+
+  static getHealingTexture(healingType: HealingType): Texture {
+    const key = HealingType[healingType];
+    if (!this.textures.has(key)) {
+      throw new Error(`Texture for ${healingType} not found`);
+    }
+
+    return this.textures.get(key)!;
   }
 
   static getPlayerTexture(skin: PlayerSkinType): Texture {
