@@ -84,7 +84,7 @@ export class GameRoom extends Room<GameState> {
 					`${this.playerClients.get(client.sessionId)}`
 				)
 			);
-			entity.drunkiness = Math.min(
+			entity.drunkiness = Math.max(
 				0,
 				entity.drunkiness -
 					getHealingAmountFromHealingType(entity.healing)
