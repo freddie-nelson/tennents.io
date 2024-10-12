@@ -23,7 +23,7 @@ export class GameRoom extends Room<GameState> {
 	private TIME_TO_START = 10;
 	private timeToStartInterval: NodeJS.Timeout | undefined;
 	private playersToStart = 1;
-	private engine: GameEngine = new GameEngine();
+	private engine: GameEngine = new GameEngine(this.onCollisionStart);
 	private playerClients: Map<string, number> = new Map(); // client.sessionId -> entity.id
 
 	onCreate(options: any) {
