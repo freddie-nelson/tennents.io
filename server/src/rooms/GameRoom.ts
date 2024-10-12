@@ -16,25 +16,32 @@ import { GameConfig } from "./schema/GameConfig";
 import { Projectile } from "./schema/projectile";
 
 import { getHealingAmountFromHealingType } from "../rules/healing";
+import { GameStateType } from "./schema/enums/GameStateType";
 
 export class GameRoom extends Room<GameState> {
 	maxClients = 10;
-	private engine: GameEngine = new GameEngine(this.onCollisionStart);
+	private TIME_TO_START = 10;
+	private timeToStartInterval: NodeJS.Timeout | undefined;
+	private playersToStart = 1;
+	private engine: GameEngine = new GameEngine();
 	private playerClients: Map<string, number> = new Map(); // client.sessionId -> entity.id
 
 	onCreate(options: any) {
 		this.setState(new GameState());
-		this.engine.update(this.clock.deltaTime, this.state.entities);
 
 		this.setPatchRate(1000 / 30);
 		this.onBeforePatch = () => {
-			this.engine.update(this.clock.deltaTime, this.state.entities);
+			if (this.state.state === GameStateType.STARTED) {
+				this.engine.update(this.clock.deltaTime, this.state.entities);
+			}
 		};
 
 		this.state.config = new GameConfig();
 		this.state.config.maxDrunkiness = 100;
 		this.state.config.maxPlayers = this.maxClients;
 		this.state.config.playerSpeed = GameEngine.PLAYER_SPEED;
+		this.state.config.playersToStart = this.playersToStart;
+		this.state.state = GameStateType.WAITING;
 
 		// EVENT HANDLERS
 

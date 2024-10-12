@@ -4,7 +4,8 @@
   padding: 0;
 }
 
-body {
+body,
+.starting {
   width: 100vw;
   height: 100vh;
   overflow: hidden;
@@ -16,6 +17,7 @@ body {
   background-repeat: no-repeat;
   background-size: cover;
   background-position: center;
+  text-align: center;
 }
 
 h1 {
@@ -93,10 +95,10 @@ h1 {
   overflow: hidden;
 }
 
-.flexCenterParent{
+.flexCenterParent {
   display: flex;
   align-items: center;
-  justify-content: center
+  justify-content: center;
 }
 
 .fallingTextAnimation {
@@ -106,6 +108,23 @@ h1 {
 }
 
 @keyframes fallingTextAnim {
-  0% {top: -50vh;}
-  100% {top: 0vh}
+  0% {
+    top: -50vh;
+  }
+  100% {
+    top: 0vh;
+  }
+}
+
+.starting {
+  position: absolute;
+  top: 0;
+  left: 0;
+  flex-direction: column;
+  z-index: 10;
+}
+
+.starting h1 {
+  font-size: 5rem;
+  text-transform: uppercase;
 }
