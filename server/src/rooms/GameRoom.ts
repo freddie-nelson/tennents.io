@@ -23,9 +23,9 @@ import { getDrunkinessAmountFromWeaponType } from "../rules/weapon";
 
 export class GameRoom extends Room<GameState> {
   maxClients = 10;
-  private TIME_TO_START = 3;
+  private TIME_TO_START = process.env.NODE_ENV === "production" ? 20 : 3;
   private timeToStartInterval: NodeJS.Timeout | undefined;
-  private playersToStart = 1;
+  private playersToStart = process.env.NODE_ENV === "production" ? 4 : 1;
   private engine: GameEngine = new GameEngine(this.onCollisionStart.bind(this));
   private playerClients: Map<string, number> = new Map(); // client.sessionId -> entity.id
 
