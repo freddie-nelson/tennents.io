@@ -23,13 +23,26 @@ export class GameEngine {
     this.id = 0;
 
     this.initMap();
+    this.initCollisions();
   }
 
-  // HELPERS
+  // HELPERS - INITIALIZATION
 
   private initMap() {
     // TODO
   }
+
+  private initCollisions() {
+    Matter.Events.on(this.engine, "collisionStart", this.onCollisionStart);
+  }
+
+  // HELPERS - COLLISIONS
+
+  private onCollisionStart(event: Matter.IEventCollision<Matter.Engine>) {
+    // TODO
+  }
+
+  // HELPERS - ENTITIES
 
   private addEntity({
     x,
@@ -99,7 +112,7 @@ export class GameEngine {
     }
   }
 
-  // CREATION
+  // METHODS - ENTITIES
 
   addPlayer({ x, y, r }: { x: number; y: number; r: number }): number {
     const entity = this.addEntity({
@@ -133,12 +146,19 @@ export class GameEngine {
     return this.id;
   }
 
-  // GENERAL
+  removeEntity(id: number) {
+    const entity = this.entities.get(id);
+    this.entities.delete(id);
+    if (Matter.Composite.get(this.engine.world, entity.id, entity.type) !== null) {
+      Matter.Composite.remove(this.engine.world, entity);
+    }
+  }
 
   update(delta: number, stateEntities: MapSchema<Entity, string>) {
     Matter.Engine.update(this.engine, delta);
 
     for (const entity of this.entities.values()) {
+      // entities with a lifetime
       if (!entity.plugin.lifetime) continue;
 
       entity.plugin.lifetime--;
@@ -151,20 +171,12 @@ export class GameEngine {
     this.updateStateEntities(stateEntities);
   }
 
-  removeEntity(id: number) {
-    const entity = this.entities.get(id);
-    this.entities.delete(id);
-    if (Matter.Composite.get(this.engine.world, entity.id, entity.type) !== null) {
-      Matter.Composite.remove(this.engine.world, entity);
-    }
-  }
-
   dispose() {
     Matter.World.clear(this.engine.world, false);
     Matter.Engine.clear(this.engine);
   }
 
-  // EVENT HANDLERS
+  // METHODS - EVENT HANDLERS
 
   handleMove({ id, speed, x, y }: { id: number; speed: number; x: number; y: number }) {
     const entity = this.entities.get(id);
