@@ -268,13 +268,21 @@ export class GameRoom extends Room<GameState> {
         continue;
       }
 
-      if (bodyA.plugin.type === EntityType.PROJECTILE) {
+      if (
+        bodyA.plugin.type === EntityType.PROJECTILE &&
+        bodyB.plugin.type !== EntityType.HEALING &&
+        bodyB.plugin.type !== EntityType.WEAPON
+      ) {
         this.engine.removeEntity(bodyA.plugin.id);
         this.state.entities.delete(`${bodyA.plugin.id}`);
         continue;
       }
 
-      if (bodyB.plugin.type === EntityType.PROJECTILE) {
+      if (
+        bodyB.plugin.type === EntityType.PROJECTILE &&
+        bodyA.plugin.type !== EntityType.HEALING &&
+        bodyA.plugin.type !== EntityType.WEAPON
+      ) {
         this.engine.removeEntity(bodyB.plugin.id);
         this.state.entities.delete(`${bodyB.plugin.id}`);
         continue;
