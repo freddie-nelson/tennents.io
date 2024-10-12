@@ -2,83 +2,161 @@ import Matter from "matter-js";
 import { MapSchema } from "@colyseus/schema";
 
 import { Entity } from "../rooms/schema/Entity";
+import { EntityType } from "../rooms/schema/enums/EntityType";
+import { Player } from "../rooms/schema/Player";
 
 export class GameEngine {
-	private engine: Matter.Engine;
-	private entities: Map<number, Matter.Body>;
-	private id: number;
+  private static DRUNKINESS_GAIN: number = 0.1;
+  private static PLAYER_RADIUS: number = 1;
+  private static PROJECTILE_RADIUS: number = 0.5;
 
-	constructor() {
-		this.engine = Matter.Engine.create({ gravity: { x: 0, y: 0 } });
-		this.entities = new Map<number, Matter.Body>();
-		this.id = 0;
+  private static PROJECTILE_SPEED: number = 5;
 
-		this.initMap();
-	}
+  private engine: Matter.Engine;
+  private entities: Map<number, Matter.Body>;
+  private id: number;
 
-	// HELPERS
+  constructor() {
+    this.engine = Matter.Engine.create({ gravity: { x: 0, y: 0 } });
+    this.entities = new Map<number, Matter.Body>();
+    this.id = 0;
 
-	private initMap() {
-		// TODO
-	}
+    this.initMap();
+  }
 
-	// GENERAL
+  // HELPERS
 
-	addEntity(x: number, y: number, radius: number): number {
-		this.id++;
+  private initMap() {
+    // TODO
+  }
 
-		const entity = Matter.Bodies.circle(x, y, radius);
-		entity.frictionAir = 0.1;
-		this.entities.set(this.id, entity);
-		Matter.Composite.add(this.engine.world, entity);
+  private addEntity({
+    x,
+    y,
+    radius,
+    r,
+    velX,
+    velY,
+  }: {
+    x: number;
+    y: number;
+    radius: number;
+    r: number;
+    velX: number;
+    velY: number;
+  }): Matter.Body {
+    this.id++;
 
-		return this.id;
-	}
+    const entity = Matter.Bodies.circle(x, y, radius, {
+      angle: r,
+      velocity: { x: velX, y: velY },
+    });
+    Matter.Body.setVelocity(entity, {
+      x: velX,
+      y: velY,
+    });
+    this.entities.set(this.id, entity);
+    Matter.Composite.add(this.engine.world, entity);
 
-	removeEntity(id: number) {
-		const entity = this.entities.get(id);
-		this.entities.delete(id);
-		Matter.Composite.remove(this.engine.world, entity);
-	}
+    return entity;
+  }
 
-	dispose() {
-		Matter.World.clear(this.engine.world, false);
-		Matter.Engine.clear(this.engine);
-	}
+  // CREATION
 
-	updateStateEntities(stateEntities: MapSchema<Entity, string>) {
-		for (const [id, entity] of stateEntities) {
-			const gameEntity = this.entities.get(parseInt(id));
+  addPlayer({ x, y, r }: { x: number; y: number; r: number }): number {
+    const entity = this.addEntity({
+      x,
+      y,
+      r,
+      velX: 0,
+      velY: 0,
+      radius: GameEngine.PLAYER_RADIUS,
+    });
+    entity.frictionAir = 0.1;
 
-			entity.pos.x = gameEntity.position.x;
-			entity.pos.y = gameEntity.position.y;
+    return this.id;
+  }
 
-			entity.velocity.x = gameEntity.velocity.x;
-			entity.velocity.y = gameEntity.velocity.y;
+  addProjectile({ x, y, r }: { x: number; y: number; r: number }): number {
+    const dx = Math.cos(r);
+    const dy = Math.sin(r);
 
-			entity.rotation = gameEntity.angle;
-		}
-	}
+    const entity = this.addEntity({
+      x: x + dx * GameEngine.PLAYER_RADIUS * 2,
+      y: y + dy * GameEngine.PLAYER_RADIUS * 2,
+      r,
+      velX: dx * GameEngine.PROJECTILE_SPEED,
+      velY: dy * GameEngine.PROJECTILE_SPEED,
+      radius: GameEngine.PROJECTILE_RADIUS,
+    });
+    entity.frictionAir = 0;
 
-	// EVENT HANDLERS
+    return this.id;
+  }
 
-	handleMove({
-		id,
-		speed,
-		x,
-		y,
-	}: {
-		id: number;
-		speed: number;
-		x: number;
-		y: number;
-	}) {
-		const entity = this.entities.get(id);
-		Matter.Body.setVelocity(entity, { x: x * speed, y: y * speed });
-	}
+  // GENERAL
 
-	handleRotation({ id, r }: { id: number; r: number }) {
-		const entity = this.entities.get(id);
-		Matter.Body.setAngle(entity, r);
-	}
+  update(delta: number) {
+    Matter.Engine.update(this.engine, delta);
+  }
+
+  removeEntity(id: number) {
+    const entity = this.entities.get(id);
+    this.entities.delete(id);
+    Matter.Composite.remove(this.engine.world, entity);
+  }
+
+  dispose() {
+    Matter.World.clear(this.engine.world, false);
+    Matter.Engine.clear(this.engine);
+  }
+
+  updateStateEntities(stateEntities: MapSchema<Entity, string>) {
+    for (const [id, entity] of stateEntities) {
+      const gameEntity = this.entities.get(parseInt(id));
+
+      let changed = false;
+      if (entity.pos.x !== gameEntity.position.x || entity.pos.y !== gameEntity.position.y) {
+        entity.pos.x = gameEntity.position.x;
+        entity.pos.y = gameEntity.position.y;
+
+        changed = true;
+      }
+
+      if (entity.velocity.x !== gameEntity.velocity.x || entity.velocity.y !== gameEntity.velocity.y) {
+        entity.velocity.x = gameEntity.velocity.x;
+        entity.velocity.y = gameEntity.velocity.y;
+
+        changed = true;
+      }
+
+      if (entity.rotation !== gameEntity.angle) {
+        entity.rotation = gameEntity.angle;
+
+        changed = true;
+      }
+
+      if (entity.type === EntityType.PLAYER) {
+        const player = entity as Player;
+        player.drunkiness += GameEngine.DRUNKINESS_GAIN;
+        changed = true;
+      }
+
+      if (changed) {
+        stateEntities.set(id, entity);
+      }
+    }
+  }
+
+  // EVENT HANDLERS
+
+  handleMove({ id, speed, x, y }: { id: number; speed: number; x: number; y: number }) {
+    const entity = this.entities.get(id);
+    Matter.Body.setVelocity(entity, { x: x * speed, y: y * speed });
+  }
+
+  handleRotation({ id, r }: { id: number; r: number }) {
+    const entity = this.entities.get(id);
+    Matter.Body.setAngle(entity, r);
+  }
 }

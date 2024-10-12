@@ -70,3 +70,42 @@ h1 {
   font-size: 1.5rem;
   border-radius: 0.5rem;
 }
+
+.fullscreen {
+  width: 100vw;
+  height: 100vh;
+  top: 0;
+  left: 0;
+  position: absolute;
+  z-index: 1000;
+}
+
+.video-style {
+  object-fit: cover;
+}
+
+.fallingText {
+  text-align: center;
+  width: 80vw;
+  color: #ff0000;
+  z-index: 1001;
+  font-size: 12vh;
+  overflow: hidden;
+}
+
+.flexCenterParent{
+  display: flex;
+  align-items: center;
+  justify-content: center
+}
+
+.fallingTextAnimation {
+  animation-name: fallingTextAnim;
+  animation-duration: 0.075s;
+  animation-timing-function: ease-in;
+}
+
+@keyframes fallingTextAnim {
+  0% {top: -50vh;}
+  100% {top: 0vh}
+}

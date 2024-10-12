@@ -31,7 +31,7 @@ export default class Entity {
     // this.pos.y += this.velocity.y * dt;
 
     this.sprite!.position.set(this.pos.x, this.pos.y);
-    this.sprite!.rotation = this.rotation;
+    this.sprite!.rotation = this.rotation - Math.PI / 2;
   }
 
   createSprite() {
@@ -63,8 +63,11 @@ export default class Entity {
         this.sprite.texture = Textures.getHealingTexture((this as any as Healing).healingType);
         break;
       case EntityType.WEAPON:
-      case EntityType.PROJECTILE:
         this.sprite.texture = Textures.getWeaponTexture((this as any as Weapon).weaponType);
+        break;
+
+      case EntityType.PROJECTILE:
+        this.sprite.texture = Textures.getWeaponTexture((this as any as Projectile).projectileType);
         break;
 
       default:

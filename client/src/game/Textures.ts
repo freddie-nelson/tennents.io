@@ -11,7 +11,7 @@ export default abstract class Textures {
 
     for (const color of playerColors) {
       const key = PlayerSkinType[color][0] + PlayerSkinType[color].toLowerCase().slice(1);
-      const texture = await Assets.load(`/images/Players/${key}Player.svg`);
+      const texture: Texture = await Assets.load(`/images/Players/${key}Player.svg`);
       this.textures.set(`player_${color}`, texture);
     }
 
@@ -31,6 +31,7 @@ export default abstract class Textures {
   }
 
   static getWeaponTexture(weaponType: WeaponType): Texture {
+    console.log(weaponType);
     const key = WeaponType[weaponType];
     if (!this.textures.has(key)) {
       throw new Error(`Texture for ${weaponType} not found`);

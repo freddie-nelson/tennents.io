@@ -1,5 +1,6 @@
 import { API, Room } from "./api/colyseus";
-import Game, { gameContainer } from "./game/Game";
+import Game, { gameContainer } from "./game/game";
+import loseScreen from "./game/loseScreen";
 
 const api = new API();
 
@@ -29,4 +30,6 @@ joinForm.addEventListener("submit", async (event) => {
 
   game = new Game(room);
   game.init();
+
+  // loseScreen(6)
 });

@@ -26,6 +26,22 @@ window.addEventListener("keyup", (e) => {
   key.set(e.key, false);
 });
 
+const mousePos = new Vec2(0, 0);
+let isMousePressed = false;
+
+window.addEventListener("mousemove", (e) => {
+  mousePos.x = e.clientX;
+  mousePos.y = e.clientY;
+});
+
+window.addEventListener("mousedown", () => {
+  isMousePressed = true;
+});
+
+window.addEventListener("mouseup", () => {
+  isMousePressed = false;
+});
+
 const isKeyDown = (...k: string[]) =>
   typeof k === "string" ? key.get(k) ?? false : k.some((k) => key.get(k) ?? false);
 
@@ -35,6 +51,8 @@ export default class Game {
   public readonly entities: Map<number, Entity> = new Map();
   public you: Player | null = null;
   public readonly room: Room;
+
+  public onStageChanges: ((game: Game) => void)[] = [];
 
   constructor(room: Room) {
     this.app = new Application();
@@ -59,9 +77,12 @@ export default class Game {
 
     this.app.stage.addChild(this.world);
 
-    this.app.ticker.add(this.update.bind(this));
+    this.app.ticker.add(() => this.update());
 
-    this.room.onStateChange((state) => this.sync(state));
+    this.room.onStateChange((state) => {
+      this.sync(state);
+      this.onStageChanges.forEach((cb) => cb(this));
+    });
     this.sync(this.room.state);
 
     this.room.onLeave(() => {
@@ -69,6 +90,10 @@ export default class Game {
     });
 
     this.app.start();
+  }
+
+  onStageChange(cb: (game: Game) => void) {
+    this.onStageChanges.push(cb);
   }
 
   private update() {
@@ -81,8 +106,7 @@ export default class Game {
     }
 
     if (this.you) {
-      console.log(this.you.pos.x, this.you.pos.y);
-      // this.world.pivot.set(this.you.pos.x, this.you.pos.y);
+      this.world.pivot.set(this.you.pos.x, this.you.pos.y);
     }
 
     const worldSprites = new Set(this.world.children);
@@ -93,6 +117,8 @@ export default class Game {
     }
 
     this.handleMovement();
+    this.handleRotation();
+    this.handleShoot();
   }
 
   private handleMovement() {
@@ -111,7 +137,32 @@ export default class Game {
     }
 
     if (this.you && (moveVec.x !== 0 || moveVec.y !== 0)) {
+      const drunkinessPercent = this.you.drunkiness / this.room.state.config.maxDrunkiness;
+
+      if (drunkinessPercent > 0.3) {
+        moveVec.mul(Math.random() * 0.2);
+      } else if (drunkinessPercent > 0.6) {
+        moveVec.mul(Math.random() * 0.4);
+      } else if (drunkinessPercent > 0.8) {
+        moveVec.mul(Math.random() * 0.7);
+      }
+
       this.room.send(MessageType.MOVE, { x: moveVec.x, y: moveVec.y });
+    }
+  }
+
+  private handleRotation() {
+    if (this.you) {
+      const dir = mousePos.sub(new Vec2(this.app.screen.width / 2, this.app.screen.height / 2)).normalize();
+      const rotation = dir.angle();
+
+      this.room.send(MessageType.ROTATE, { r: rotation });
+    }
+  }
+
+  private handleShoot() {
+    if (this.you && isMousePressed) {
+      this.room.send(MessageType.SHOOT);
     }
   }
 
