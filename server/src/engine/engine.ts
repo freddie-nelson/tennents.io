@@ -4,7 +4,6 @@ import { MapSchema } from "@colyseus/schema";
 import { Entity } from "../rooms/schema/Entity";
 import { EntityType } from "../rooms/schema/enums/EntityType";
 import { Player } from "../rooms/schema/Player";
-import { TileType } from "../../../shared/map/enums/TileType";
 
 export class GameEngine {
 	static readonly DRUNKINESS_LOSS: number = 0.1;
@@ -173,6 +172,30 @@ export class GameEngine {
 		entity.frictionAir = 0;
 		entity.plugin.ownerId = ownerId;
 		entity.plugin.lifetime = GameEngine.PROJECTILE_LIFETIME;
+
+		return this.id;
+	}
+
+	addPickup({
+		x,
+		y,
+		type,
+	}: {
+		x: number;
+		y: number;
+		type: EntityType.WEAPON | EntityType.HEALING;
+	}): number {
+		const entity = this.addEntity({
+			x,
+			y,
+			r: 0,
+			velX: 0,
+			velY: 0,
+			radius: GameEngine.PLAYER_RADIUS,
+			type,
+		});
+		entity.isStatic = true;
+		entity.isSensor = true;
 
 		return this.id;
 	}
