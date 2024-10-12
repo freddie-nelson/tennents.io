@@ -15,6 +15,8 @@ import { Entity } from "./schema/Entity";
 import { Vector } from "./schema/Vector";
 import { GameConfig } from "./schema/GameConfig";
 import { Projectile } from "./schema/projectile";
+import { Healing } from "./schema/Healing";
+import { Weapon } from "./schema/Weapon";
 
 import { getHealingAmountFromHealingType } from "../rules/healing";
 import { getDrunkinessAmountFromWeaponType } from "../rules/weapon";
@@ -163,9 +165,24 @@ export class GameRoom extends Room<GameState> {
 				)
 			);
 
+			if (player.canPickup === undefined) {
+				return;
+			}
+
+			const entity = this.state.entities.get(`${player.canPickup}`);
+			if (!entity) return;
+
+			if (entity.type === EntityType.HEALING) {
+				player.healing = (<Healing>entity).healingType;
+			} else if (entity.type === EntityType.WEAPON) {
+				player.weapon = (<Weapon>entity).weaponType;
+			}
+
 			// destroy the entity of the floor
-			// set the player's weapon to the weapon of the floor entity
-			// TODO
+			this.engine.removeEntity(player.canPickup);
+			this.state.entities.delete(`${player.canPickup}`);
+
+			player.canPickup = undefined;
 		});
 	}
 
