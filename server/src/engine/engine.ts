@@ -154,7 +154,9 @@ export class GameEngine {
   removeEntity(id: number) {
     const entity = this.entities.get(id);
     this.entities.delete(id);
-    Matter.Composite.remove(this.engine.world, entity);
+    if (Matter.Composite.get(this.engine.world, entity.id, entity.type) !== null) {
+      Matter.Composite.remove(this.engine.world, entity);
+    }
   }
 
   dispose() {
