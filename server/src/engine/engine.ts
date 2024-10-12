@@ -34,7 +34,9 @@ export class GameEngine {
 		return this.addEntity(0, 0, GameEngine.PLAYER_RADIUS);
 	}
 
-	updateEntities(stateEntities: MapSchema<Entity, string>) {
+	updateGameEntity() {}
+
+	updateStateEntities(stateEntities: MapSchema<Entity, string>) {
 		for (const [id, entity] of stateEntities) {
 			const gameEntity = this.entities.get(parseInt(id));
 			GameRoom.updateVector(

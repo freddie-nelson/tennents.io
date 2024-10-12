@@ -21,14 +21,23 @@ export class GameRoom extends Room<GameState> {
 		this.engine.initMap();
 
 		this.setState(new GameState());
-		this.engine.updateEntities(this.state.entities);
+		this.engine.updateStateEntities(this.state.entities);
 
 		this.setPatchRate(1000 / 30);
 		this.onBeforePatch = () => {
-			this.engine.updateEntities(this.state.entities);
+			this.engine.updateStateEntities(this.state.entities);
 		};
 
-		this.onMessage(MessageType.MOVE, (client, message) => {});
+		// EVENT HANDLERS
+
+		this.onMessage(MessageType.MOVE, (client, message) => {
+			/**
+			 * message
+			 * velocity vector
+			 * {x: number, y: number}
+			 */
+		});
+
 		this.onMessage(MessageType.ROTATE, (client, message) => {});
 		this.onMessage(MessageType.HEAL, (client, message) => {});
 		this.onMessage(MessageType.SHOOT, (client, message) => {});
@@ -58,6 +67,7 @@ export class GameRoom extends Room<GameState> {
 
 		// add to room state entities
 		this.state.entities.set(`${player.id}`, player);
+		this.state.players.set(client.sessionId, player.id);
 	}
 
 	onLeave(client: Client, consented: boolean) {
@@ -70,6 +80,7 @@ export class GameRoom extends Room<GameState> {
 
 		// remove entity from room state entities
 		this.state.entities.delete(`${id}`);
+		this.state.players.delete(client.sessionId);
 
 		// update playerClients mapping
 		this.playerClients.delete(client.sessionId);
