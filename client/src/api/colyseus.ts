@@ -13,7 +13,9 @@ export class API {
     this.client = new Colyseus.Client("ws://localhost:2567");
   }
 
-  joinOrCreate() {
-    return this.client.joinOrCreate<GameState>("room");
+  joinOrCreate(name: string) {
+    return this.client.joinOrCreate<GameState>("room", {
+      name,
+    });
   }
 }
