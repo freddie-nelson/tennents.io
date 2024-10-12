@@ -1,4 +1,4 @@
-import Entity from "./Entity";
+import Entity from "./entity";
 
 import { WeaponType } from "../../../server/src/rooms/schema/enums/WeaponType";
 import { HealingType } from "../../../server/src/rooms/schema/enums/HealingType";
