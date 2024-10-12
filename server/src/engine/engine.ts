@@ -78,8 +78,8 @@ export class GameEngine {
 		const dy = Math.sin(r);
 
 		const entity = this.addEntity({
-			x: x + dx * GameEngine.PLAYER_RADIUS,
-			y: y + dy * GameEngine.PLAYER_RADIUS,
+			x: x + dx * 100,
+			y: y + dy * 100,
 			r,
 			velX: dx * GameEngine.PROJECTILE_SPEED,
 			velY: dy * GameEngine.PROJECTILE_SPEED,
