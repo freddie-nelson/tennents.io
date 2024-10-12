@@ -4,6 +4,7 @@ import Game, { gameContainer } from "./game/Game";
 const api = new API();
 
 let room: Room | null = null;
+
 const game = new Game();
 
 const joinForm = document.getElementById("join-form") as HTMLFormElement;
@@ -14,7 +15,6 @@ joinForm.addEventListener("submit", async (event) => {
   event.preventDefault();
 
   const name = nameInput.value;
-  console.log(name);
 
   if (typeof name !== "string" || name.length === 0 || name.length >= 20) {
     alert("Name must be a string with at least 1 character and less than 20 characters");
