@@ -136,6 +136,16 @@ export default class Game {
     }
 
     if (this.you && (moveVec.x !== 0 || moveVec.y !== 0)) {
+      const drunkinessPercent = this.you.drunkiness / this.room.state.config.maxDrunkiness;
+
+      if (drunkinessPercent > 0.3) {
+        moveVec.mul(Math.random() * 0.2);
+      } else if (drunkinessPercent > 0.6) {
+        moveVec.mul(Math.random() * 0.4);
+      } else if (drunkinessPercent > 0.8) {
+        moveVec.mul(Math.random() * 0.7);
+      }
+
       this.room.send(MessageType.MOVE, { x: moveVec.x, y: moveVec.y });
     }
   }
