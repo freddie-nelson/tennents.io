@@ -133,9 +133,9 @@ export default class Game {
       if (this.room.state.state === GameStateType.STARTED) {
         startingContainer.style.display = "none";
       } else if (this.room.state.state === GameStateType.WAITING) {
-        startingContainerText.innerText = `Waiting for players... (${this.room.state.players.size}/${this.room.state.config.playersToStart})`;
+        startingContainerText.innerText = `Waiting for players... (${this.room.state.players.size}/${this.room.state.config.maxPlayers})`;
       } else if (this.room.state.state === GameStateType.STARTING) {
-        startingContainerText.innerText = `Game starting in ${this.room.state.timeToStart} seconds (${this.room.state.players.size}/${this.room.state.config.playersToStart})`;
+        startingContainerText.innerText = `Game starting in ${this.room.state.timeToStart} seconds (${this.room.state.players.size}/${this.room.state.config.maxPlayers})`;
       }
     }
 

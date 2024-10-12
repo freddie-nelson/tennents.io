@@ -167,6 +167,7 @@ export class GameRoom extends Room<GameState> {
 			this.state.state === GameStateType.ENDED
 		) {
 			client.leave();
+			return;
 		}
 
 		if (
@@ -205,7 +206,7 @@ export class GameRoom extends Room<GameState> {
 			options.name,
 			WeaponType.TENNENTS_LIGHT,
 			0,
-			PlayerSkinType.RED
+			this.clients.length - 1
 		);
 
 		this.state.entities.set(`${player.id}`, player);
@@ -225,10 +226,6 @@ export class GameRoom extends Room<GameState> {
 		this.state.players.delete(client.sessionId);
 
 		this.playerClients.delete(client.sessionId);
-
-		if (this.clients.length < 2) {
-			this.disconnect();
-		}
 	}
 
 	onDispose() {
