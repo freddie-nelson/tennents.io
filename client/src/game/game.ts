@@ -5,7 +5,7 @@ import { Entity as ServerEntity } from "../../../server/src/rooms/schema/Entity"
 import { Player as ServerPlayer } from "../../../server/src/rooms/schema/Player";
 import { Healing as ServerHealing } from "../../../server/src/rooms/schema/Healing";
 import { Weapon as ServerWeapon } from "../../../server/src/rooms/schema/Weapon";
-import { Projectile as ServerProjectile } from "../../../server/src/rooms/schema/Projectile";
+import { Projectile as ServerProjectile } from "../../../server/src/rooms/schema/Projectiles";
 import Vec2 from "./Vec2";
 import { EntityType } from "../../../server/src/rooms/schema/enums/EntityType";
 import Player from "./Player";
