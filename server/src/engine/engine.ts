@@ -14,11 +14,19 @@ export class GameEngine {
 	static readonly PROJECTILE_SPEED: number = 0.2;
 
 	private engine: Matter.Engine;
+	private collisionCallback: (
+		event: Matter.IEventCollision<Matter.Engine>
+	) => void;
 	private entities: Map<number, Matter.Body>;
 	private id: number;
 
-	constructor() {
+	constructor(
+		collisionCallback: (
+			event: Matter.IEventCollision<Matter.Engine>
+		) => void
+	) {
 		this.engine = Matter.Engine.create({ gravity: { x: 0, y: 0 } });
+		this.collisionCallback = collisionCallback;
 		this.entities = new Map<number, Matter.Body>();
 		this.id = 0;
 
@@ -33,21 +41,7 @@ export class GameEngine {
 	}
 
 	private initCollisions() {
-		Matter.Events.on(this.engine, "collisionStart", this.onCollisionStart);
-	}
-
-	// HELPERS - COLLISIONS
-
-	private onCollisionStart(event: Matter.IEventCollision<Matter.Engine>) {
-		const pairs = event.pairs;
-
-		for (const pair of pairs) {
-			const bodyA = pair.bodyA;
-			const bodyB = pair.bodyB;
-
-			// broadcast collision event to room
-			// using bodyA.plugin.id and bodyB.plugin.id
-		}
+		Matter.Events.on(this.engine, "collisionStart", this.collisionCallback);
 	}
 
 	// HELPERS - ENTITIES
