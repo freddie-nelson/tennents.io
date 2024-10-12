@@ -1,6 +1,6 @@
 import { API, Room } from "./api/colyseus";
 import Game, { gameContainer } from "./game/game";
-import loseScreen from "./game/loseScreen";
+import HUD from "./game/hud";
 
 const api = new API();
 
@@ -30,6 +30,5 @@ joinForm.addEventListener("submit", async (event) => {
 
   game = new Game(room);
   game.init();
-
-  // loseScreen(6)
+  const hud = new HUD(game, 1) // Good Values -> 0.8 - 1.3
 });
