@@ -2,11 +2,11 @@ import { Room, Client } from "@colyseus/core";
 import { GameState } from "./schema/GameState";
 import { Player } from "./schema/Player";
 import { MessageType } from "./schema/enums/MessageType";
-import { Engine } from "../engine/engine";
+import { GameEngine } from "../engine/engine";
 
 export class MyRoom extends Room<GameState> {
 	public maxClients: number = 10;
-	private engine: Engine = new Engine();
+	private engine: GameEngine = new GameEngine();
 
 	onCreate(options: { name: string }) {
 		this.setState(new GameState());

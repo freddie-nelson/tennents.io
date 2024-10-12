@@ -1,6 +1,6 @@
 import Matter from "matter-js";
 
-export class Engine {
+export class GameEngine {
 	private engine: Matter.Engine = Matter.Engine.create();
 	private entities: Map<number, Matter.Body> = new Map<number, Matter.Body>();
 	private id: number = 0;
