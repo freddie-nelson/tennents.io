@@ -39,7 +39,15 @@ export class GameEngine {
 	// HELPERS - COLLISIONS
 
 	private onCollisionStart(event: Matter.IEventCollision<Matter.Engine>) {
-		// TODO
+		const pairs = event.pairs;
+
+		for (const pair of pairs) {
+			const bodyA = pair.bodyA;
+			const bodyB = pair.bodyB;
+
+			// broadcast collision event to room
+			// using bodyA.plugin.id and bodyB.plugin.id
+		}
 	}
 
 	// HELPERS - ENTITIES
@@ -65,12 +73,14 @@ export class GameEngine {
 			angle: r,
 			velocity: { x: velX, y: velY },
 		});
+		entity.plugin.id = this.id;
 		Matter.Body.setVelocity(entity, {
 			x: velX,
 			y: velY,
 		});
-		this.entities.set(this.id, entity);
+
 		Matter.Composite.add(this.engine.world, entity);
+		this.entities.set(this.id, entity);
 
 		return entity;
 	}
