@@ -1,6 +1,8 @@
 import Matter from "matter-js";
 
 export class GameEngine {
+	private static PLAYER_RADIUS: number = 1;
+
 	private engine: Matter.Engine = Matter.Engine.create();
 	private entities: Map<number, Matter.Body> = new Map<number, Matter.Body>();
 	private id: number = 0;
@@ -21,5 +23,13 @@ export class GameEngine {
 	dispose() {
 		Matter.World.clear(this.engine.world, false);
 		Matter.Engine.clear(this.engine);
+	}
+
+	// Methods
+
+	initMap() {}
+
+	addPlayer(): number {
+		return this.addEntity(0, 0, GameEngine.PLAYER_RADIUS);
 	}
 }

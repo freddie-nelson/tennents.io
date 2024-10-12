@@ -4,11 +4,15 @@ import { Player } from "./schema/Player";
 import { MessageType } from "./schema/enums/MessageType";
 import { GameEngine } from "../engine/engine";
 
-export class MyRoom extends Room<GameState> {
-	public maxClients: number = 10;
+export class GameRoom extends Room<GameState> {
+	maxClients = 10;
+
 	private engine: GameEngine = new GameEngine();
+	private playerClients: Map<Client, number> = new Map();
 
 	onCreate(options: { name: string }) {
+		this.engine.initMap();
+
 		this.setState(new GameState());
 
 		this.onMessage(MessageType.MOVE, (client, message) => {});
@@ -20,16 +24,24 @@ export class MyRoom extends Room<GameState> {
 
 	onJoin(client: Client, options: { name: string }) {
 		console.log(client.sessionId, "joined!");
-		// TODO - Create a player entity in the engine
-		this.state.entities.set(client.sessionId, new Player());
+
+		const player = new Player();
+		const id = this.engine.addPlayer();
+		player.id = id;
+
+		this.playerClients.set(client, this.state.entities.length); // map client to player entity index
+		this.state.entities.push(player);
 	}
 
 	onLeave(client: Client, consented: boolean) {
 		console.log(client.sessionId, "left!");
+
+		const id = this.playerClients.get(client);
 	}
 
 	onDispose() {
 		console.log("room", this.roomId, "disposing...");
+
 		this.engine.dispose();
 	}
 }
