@@ -32,11 +32,12 @@ export class GameEngine {
     this.id = 0;
 
     this.initCollisions();
+    this.initMap();
   }
 
   // HELPERS - INITIALIZATION
 
-  async initMap() {
+  initMap() {
     const map = new GameMap(mapJson);
     map.tiles.forEach((tile) => {
       if (tile.isPlayerSpawn) {
