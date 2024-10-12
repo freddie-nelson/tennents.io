@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="95mm"
+   height="73mm"
+   viewBox="0 0 95 73"
+   version="1.1"
+   id="svg1"
+   inkscape:version="1.3.2 (091e20e, 2023-11-25, custom)"
+   sodipodi:docname="GreenPlayer.svg"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview1"
+     pagecolor="#ffffff"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:document-units="mm"
+     inkscape:zoom="0.69219276"
+     inkscape:cx="397.28818"
+     inkscape:cy="172.63977"
+     inkscape:window-width="1920"
+     inkscape:window-height="991"
+     inkscape:window-x="-9"
+     inkscape:window-y="-9"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="layer2" />
+  <defs
+     id="defs1" />
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1">
+    <path
+       style="fill:#de8787;fill-opacity:1;stroke-width:0.210829"
+       d="m 70.389591,16.952402 c 0,0 11.71748,-1.741791 18.108849,9.405648 6.39136,11.14744 3.99459,19.50803 4.79351,26.82354 0.79891,7.31551 -8.521809,29.6104 -17.043619,12.19251 -8.52181,-17.41788 -2.66306,-11.84416 -2.66306,-11.84416 L 60.536251,30.18998 Z"
+       id="path2-7" />
+    <path
+       style="fill:#de8787;fill-opacity:1;stroke-width:0.20631"
+       d="m 23.50266,16.050131 c 0,0 -11.220552,-1.741791 -17.3408686,9.405649 -6.12030701,11.14744 -3.825182,19.50803 -4.590221,26.82354 -0.76502901,7.31551 8.160407,29.6104 16.3208136,12.19251 8.160407,-17.41788 2.550121,-11.84416 2.550121,-11.84416 L 32.938127,29.28771 Z"
+       id="path2-7-8" />
+  </g>
+  <g
+     inkscape:groupmode="layer"
+     id="layer2"
+     inkscape:label="Layer 2">
+    <ellipse
+       style="fill:#0e4a00;fill-opacity:1;stroke-width:0.214;stroke-dasharray:none"
+       id="path1"
+       cx="47.397686"
+       cy="36.503845"
+       rx="35.166023"
+       ry="35.739384"
+       inkscape:label="path1" />
+  </g>
+</svg>
