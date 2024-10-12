@@ -148,6 +148,7 @@ export class GameRoom extends Room<GameState> {
 
     if (this.state.state === GameStateType.STARTED || this.state.state === GameStateType.ENDED) {
       client.leave();
+      return;
     }
 
     if (this.clients.length >= this.playersToStart && this.timeToStartInterval === undefined) {
@@ -171,7 +172,7 @@ export class GameRoom extends Room<GameState> {
 
     const player = new Player();
     GameRoom.updateEntity(player, id, EntityType.PLAYER, new Vector(), new Vector(), 0);
-    GameRoom.updatePlayer(player, options.name, WeaponType.TENNENTS_LIGHT, 0, PlayerSkinType.RED);
+    GameRoom.updatePlayer(player, options.name, WeaponType.TENNENTS_LIGHT, 0, this.clients.length - 1);
 
     this.state.entities.set(`${player.id}`, player);
     this.state.players.set(client.sessionId, player.id);
@@ -190,10 +191,6 @@ export class GameRoom extends Room<GameState> {
     this.state.players.delete(client.sessionId);
 
     this.playerClients.delete(client.sessionId);
-
-    if (this.clients.length < 2) {
-      this.disconnect();
-    }
   }
 
   onDispose() {
