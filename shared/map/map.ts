@@ -1,4 +1,4 @@
-import { GameTile } from './tile'; 
+import { GameTile } from "./tile";
 import { TileType } from "./enums/TileType";
 
 export class GameMap {
@@ -18,58 +18,77 @@ export class GameMap {
 
   private processTiles(tilemapData: any): GameTile[] {
     const tiles: GameTile[] = [];
-    const layer = tilemapData.layers[0]; 
+    const layer = tilemapData.layers[0];
 
     for (let i = 0; i < layer.data.length; i++) {
       const tileId = layer.data[i];
-      if (tileId > 0) { // Ignore empty tiles (ID 0)
-        const x = (i % this.width) * this.tileWidth;
-        const y = Math.floor(i / this.width) * this.tileHeight;
+      if (tileId > 0) {
+        // Ignore empty tiles (ID 0)
+        const x = i % this.width;
+        const y = Math.floor(i / this.width);
 
-        
-        const isCollidable = this.isCollidableTile(tileId);
-        const isPlayerSpawn = this.isPlayerSpawnTile(tileId);
-        const isCrate = this.isCrateTile(tileId);
-        const isPickupSpawn = this.isPickupSpawnTile(tileId);
+        const type = tileId as TileType;
 
-        
-        tiles.push(new GameTile(x, y, tileId, isCollidable, isPlayerSpawn, isCrate, isPickupSpawn));
+        const isCollidable = this.isCollidableTile(type);
+        const isPlayerSpawn = this.isPlayerSpawnTile(type);
+        const isCrate = this.isCrateTile(type);
+        const isPickupSpawn = this.isPickupSpawnTile(type);
+
+        tiles.push(new GameTile(x, y, type, isCollidable, isPlayerSpawn, isCrate, isPickupSpawn));
       }
     }
     return tiles;
   }
 
-  private mapTileIdToTileType(tileId: number): TileType {
-    switch (tileId) {
-      case 1:
-        return TileType.Floor;
-      case 2:
-        return TileType.Wall;
-      case 3:
-        return TileType.PlayerSpawn;
-      case 4:
-        return TileType.Crate;
-      case 5:
-        return TileType.PickupSpawn;
-      default:
-        return TileType.Floor; 
-    }
-  }
-    
   private isCollidableTile(type: TileType): boolean {
-    return type === TileType.Wall; // Walls are collidable
+    if (
+      type === TileType.WOODEN_FLOOR ||
+      type === TileType.STONE_TILE ||
+      type === TileType.SINK ||
+      type === TileType.ELEVATOR_LEFT ||
+      type === TileType.ELEVATOR_RIGHT ||
+      type === TileType.COBBLESTONE
+    ) {
+      return false;
+    }
+
+    return true;
   }
 
   private isPlayerSpawnTile(type: TileType): boolean {
-    return type === TileType.PlayerSpawn; // Player spawn points
+    if (type === TileType.COBBLESTONE || type === TileType.WOODEN_FLOOR || type === TileType.SINK) {
+      return Math.random() < 0.5;
+    }
+
+    return false;
   }
 
   private isCrateTile(type: TileType): boolean {
-    return type === TileType.Crate; // Crates - maybe redundant?
+    return false;
   }
 
   private isPickupSpawnTile(type: TileType): boolean {
-    return type === TileType.PickupSpawn; // Pickup spawn points
+    if (
+      type === TileType.POOL_BOTTOM_LEFT ||
+      type === TileType.POOL_BOTTOM_RIGHT ||
+      type === TileType.POOL_LEFT ||
+      type === TileType.POOL_RIGHT ||
+      type === TileType.POOL_TOP_LEFT ||
+      type === TileType.POOL_TOP_RIGHT ||
+      type === TileType.TABLE_SIDE ||
+      type === TileType.TABLE_UP ||
+      type === TileType.TOILET ||
+      type === TileType.BAR_DOWN ||
+      type === TileType.BAR_LEFT ||
+      type === TileType.BAR_LEFT_DRAUGHT ||
+      type === TileType.BAR_RIGHT ||
+      type === TileType.BAR_RIGHT_DRAGHT ||
+      type === TileType.BAR_UP
+    ) {
+      return Math.random() < 0.3;
+    }
+
+    return false;
   }
 }
 
@@ -83,11 +102,10 @@ export async function loadTilemap(url: string): Promise<GameMap> {
   return new GameMap(tilemapData);
 }
 
-
-loadTilemap('shared/map/mapproject.json')
+loadTilemap("shared/map/mapproject.json")
   .then((gameMap) => {
-    console.log('Parsed GameMap:', gameMap.tiles);
+    console.log("Parsed GameMap:", gameMap.tiles);
   })
   .catch((error) => {
-    console.error('Error loading tilemap:', error);
+    console.error("Error loading tilemap:", error);
   });

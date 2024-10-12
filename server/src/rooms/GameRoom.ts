@@ -26,7 +26,9 @@ export class GameRoom extends Room<GameState> {
   private engine: GameEngine = new GameEngine(this.onCollisionStart);
   private playerClients: Map<string, number> = new Map(); // client.sessionId -> entity.id
 
-  onCreate(options: any) {
+  async onCreate(options: any) {
+    await this.engine.initMap();
+
     this.setState(new GameState());
 
     this.setPatchRate(1000 / 30);
@@ -46,9 +48,9 @@ export class GameRoom extends Room<GameState> {
     // EVENT HANDLERS
 
     this.onMessage(MessageType.MOVE, (client, message) => {
-      console.log(
-        `received MessageType.MOVE | client.sessionId - ${client.sessionId} | message - ${message}`
-      );
+      // console.log(
+      //   `received MessageType.MOVE | client.sessionId - ${client.sessionId} | message - ${message}`
+      // );
 
       /**
        * message
@@ -63,9 +65,9 @@ export class GameRoom extends Room<GameState> {
     });
 
     this.onMessage(MessageType.ROTATE, (client, message) => {
-      console.log(
-        `received MessageType.ROTATE | client.sessionId - ${client.sessionId} | message - ${message}`
-      );
+      // console.log(
+      //   `received MessageType.ROTATE | client.sessionId - ${client.sessionId} | message - ${message}`
+      // );
 
       /**
        * message
@@ -78,9 +80,9 @@ export class GameRoom extends Room<GameState> {
     });
 
     this.onMessage(MessageType.HEAL, (client, message) => {
-      console.log(
-        `received MessageType.HEAL | client.sessionId - ${client.sessionId} | message - ${message}`
-      );
+      // console.log(
+      //   `received MessageType.HEAL | client.sessionId - ${client.sessionId} | message - ${message}`
+      // );
 
       /**
        * message
@@ -96,9 +98,9 @@ export class GameRoom extends Room<GameState> {
     });
 
     this.onMessage(MessageType.SHOOT, (client, message) => {
-      console.log(
-        `received MessageType.SHOOT | client.sessionId - ${client.sessionId} | message - ${message}`
-      );
+      // console.log(
+      //   `received MessageType.SHOOT | client.sessionId - ${client.sessionId} | message - ${message}`
+      // );
 
       /**
        * message
@@ -132,10 +134,9 @@ export class GameRoom extends Room<GameState> {
     });
 
     this.onMessage(MessageType.PICKUP, (client, message) => {
-      console.log(
-        `received MessageType.PICKUP | client.sessionId - ${client.sessionId} | message - ${message}`
-      );
-
+      // console.log(
+      //   `received MessageType.PICKUP | client.sessionId - ${client.sessionId} | message - ${message}`
+      // );
       /**
        * message
        */
@@ -164,9 +165,10 @@ export class GameRoom extends Room<GameState> {
       }, 1000);
     }
 
+    const playerSpawn = this.engine.getSpawnableTile();
     const id = this.engine.addPlayer({
-      x: 0,
-      y: 0,
+      x: playerSpawn.x,
+      y: playerSpawn.y,
       r: 0,
     });
 
