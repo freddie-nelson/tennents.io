@@ -4,59 +4,54 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
-importers:
+dependencies:
+  '@colyseus/monitor':
+    specifier: ^0.15.0
+    version: 0.15.8
+  '@colyseus/playground':
+    specifier: ^0.15.3
+    version: 0.15.14(express@4.21.1)
+  '@colyseus/tools':
+    specifier: ^0.15.0
+    version: 0.15.42(@colyseus/schema@2.0.35)
+  colyseus:
+    specifier: ^0.15.0
+    version: 0.15.17(@colyseus/schema@2.0.35)(express@4.21.1)
+  express:
+    specifier: ^4.18.2
+    version: 4.21.1
+  matter-js:
+    specifier: ^0.20.0
+    version: 0.20.0
 
-  .:
-    dependencies:
-      '@colyseus/monitor':
-        specifier: ^0.15.0
-        version: 0.15.8
-      '@colyseus/playground':
-        specifier: ^0.15.3
-        version: 0.15.14(express@4.21.1)
-      '@colyseus/tools':
-        specifier: ^0.15.0
-        version: 0.15.42(@colyseus/schema@2.0.35)
-      colyseus:
-        specifier: ^0.15.0
-        version: 0.15.17(@colyseus/schema@2.0.35)(express@4.21.1)
-      express:
-        specifier: ^4.18.2
-        version: 4.21.1
-      matter-js:
-        specifier: ^0.20.0
-        version: 0.20.0
-      my-app:
-        specifier: 'file:'
-        version: file:(@colyseus/schema@2.0.35)
-    devDependencies:
-      '@colyseus/loadtest':
-        specifier: ^0.15.0
-        version: 0.15.7
-      '@colyseus/testing':
-        specifier: ^0.15.0
-        version: 0.15.3(@colyseus/schema@2.0.35)
-      '@types/express':
-        specifier: ^4.17.1
-        version: 4.17.21
-      '@types/matter-js':
-        specifier: ^0.19.7
-        version: 0.19.7
-      '@types/mocha':
-        specifier: ^10.0.1
-        version: 10.0.9
-      mocha:
-        specifier: ^10.2.0
-        version: 10.7.3
-      rimraf:
-        specifier: ^5.0.0
-        version: 5.0.10
-      tsx:
-        specifier: ^4.10.2
-        version: 4.19.1
-      typescript:
-        specifier: ^5.0.4
-        version: 5.6.3
+devDependencies:
+  '@colyseus/loadtest':
+    specifier: ^0.15.0
+    version: 0.15.7
+  '@colyseus/testing':
+    specifier: ^0.15.0
+    version: 0.15.3(@colyseus/schema@2.0.35)
+  '@types/express':
+    specifier: ^4.17.1
+    version: 4.17.21
+  '@types/matter-js':
+    specifier: ^0.19.7
+    version: 0.19.7
+  '@types/mocha':
+    specifier: ^10.0.1
+    version: 10.0.9
+  mocha:
+    specifier: ^10.2.0
+    version: 10.7.3
+  rimraf:
+    specifier: ^5.0.0
+    version: 5.0.10
+  tsx:
+    specifier: ^4.10.2
+    version: 4.19.1
+  typescript:
+    specifier: ^5.0.4
+    version: 5.6.3
 
 packages:
 

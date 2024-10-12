@@ -1,4 +1,4 @@
-import { Application, BackgroundLoader } from "pixi.js";
+import { Application, Container } from "pixi.js";
 import Entity from "./Entity";
 import { Room } from "../api/colyseus";
 import { Entity as ServerEntity } from "../../../server/src/rooms/schema/Entity";
@@ -13,159 +13,247 @@ import Healing from "./Healing";
 import Weapon from "./Weapon";
 import Projectile from "./Projectile";
 import { GameState } from "../../../server/src/rooms/schema/GameState";
+import Textures from "./Textures";
+import { MessageType } from "../../../server/src/rooms/schema/enums/MessageType";
 
 export const gameContainer = document.querySelector(".game") as HTMLElement;
 
+const key = new Map<string, boolean>();
+window.addEventListener("keydown", (e) => {
+	key.set(e.key, true);
+});
+window.addEventListener("keyup", (e) => {
+	key.set(e.key, false);
+});
+
+const isKeyDown = (...k: string[]) =>
+	typeof k === "string"
+		? key.get(k) ?? false
+		: k.some((k) => key.get(k) ?? false);
+
 export default class Game {
-  public readonly app: Application;
-  public readonly entities: Map<number, Entity> = new Map();
-  public readonly room: Room;
+	public readonly app: Application;
+	public readonly world: Container = new Container();
+	public readonly entities: Map<number, Entity> = new Map();
+	public you: Player | null = null;
+	public readonly room: Room;
 
-  constructor(room: Room) {
-    this.app = new Application();
-    this.room = room;
-  }
+	constructor(room: Room) {
+		this.app = new Application();
+		this.room = room;
+	}
 
-  async init() {
-    await this.app.init({
-      width: window.innerWidth,
-      height: window.innerHeight,
-    });
+	async init() {
+		await Textures.initTextures();
 
-    this.app.resizeTo = gameContainer;
+		await this.app.init({
+			width: window.innerWidth,
+			height: window.innerHeight,
+			resizeTo: gameContainer,
+			backgroundColor: "black",
+		});
 
-    document.body.appendChild(this.app.canvas);
+		document.body.appendChild(this.app.canvas);
 
-    window.addEventListener("resize", () => {
-      this.app.resize();
-    });
+		window.addEventListener("resize", () => {
+			this.app.resize();
+		});
 
-    this.app.ticker.add(this.update.bind(this));
+		this.app.stage.addChild(this.world);
 
-    this.room.onStateChange((state) => {
-      this.syncEntities(state);
-    });
+		this.app.ticker.add(this.update.bind(this));
 
-    this.app.start();
-  }
+		this.room.onStateChange((state) => this.sync(state));
+		this.sync(this.room.state);
 
-  private update() {
-    const dt = this.app.ticker.deltaTime;
-  }
+		this.room.onLeave(() => {
+			alert("You have been disconnected");
+		});
 
-  private syncEntities(state: GameState) {
-    for (const e of state.entities) {
-      if (!this.entities.has(e.id)) {
-        this.entities.set(e.id, this.createEntity(e));
-      } else {
-        this.updateEntity(e);
-      }
-    }
-  }
+		this.app.start();
+	}
 
-  private updateEntity(entity: ServerEntity) {
-    const e = this.entities.get(entity.id);
-    if (!e) {
-      return;
-    }
+	private update() {
+		const dt = this.app.ticker.deltaTime;
 
-    e.pos = new Vec2(entity.pos.x, entity.pos.y);
-    e.rotation = entity.rotation;
-    e.velocity = new Vec2(entity.velocity.x, entity.velocity.y);
-    e.type = entity.type;
+		this.world.position.set(
+			this.app.screen.width / 2,
+			this.app.screen.height / 2
+		);
 
-    switch (e.type) {
-      case EntityType.PLAYER:
-        const p = e as Player;
-        const serverPlayer = entity as ServerPlayer;
-        p.drunkiness = serverPlayer.drunkiness;
-        p.canPickup = serverPlayer.canPickup;
-        p.healing = serverPlayer.healing;
-        p.skin = serverPlayer.skin;
-        p.weapon = serverPlayer.weapon;
-        break;
+		for (const e of this.entities.values()) {
+			e.update(dt);
+		}
 
-      case EntityType.HEALING:
-        const h = e as Healing;
-        h.healingType = (entity as ServerHealing).healingType;
-        break;
+		if (this.you) {
+			this.world.pivot.set(this.you.pos.x, this.you.pos.y);
+		}
 
-      case EntityType.WEAPON:
-        const w = e as Weapon;
-        w.weaponType = (entity as ServerWeapon).weaponType;
-        break;
+		const worldSprites = new Set(this.world.children);
+		for (const [id, e] of this.entities) {
+			if (e.sprite && !worldSprites.has(e.sprite)) {
+				this.world.addChild(e.sprite);
+			}
+		}
 
-      case EntityType.PROJECTILE:
-        const pr = e as Projectile;
-        pr.projectileType = (entity as ServerProjectile).projectileType;
-        break;
+		this.handleMovement();
+	}
 
-      default:
-        throw new Error("Unknown entity type");
-    }
-  }
+	private handleMovement() {
+		const moveVec = new Vec2(0, 0);
+		if (isKeyDown("w", "ArrowUp")) {
+			moveVec.y -= 1;
+		}
+		if (isKeyDown("s", "ArrowDown")) {
+			moveVec.y += 1;
+		}
+		if (isKeyDown("a", "ArrowLeft")) {
+			moveVec.x -= 1;
+		}
+		if (isKeyDown("d", "ArrowRight")) {
+			moveVec.x += 1;
+		}
 
-  private createEntity(entity: ServerEntity) {
-    switch (entity.type) {
-      case EntityType.PLAYER:
-        const p = new Player(
-          entity.id,
-          new Vec2(entity.pos.x, entity.pos.y),
-          entity.rotation,
-          new Vec2(entity.velocity.x, entity.velocity.y),
-          entity.type
-        );
+		if (this.you && (moveVec.x !== 0 || moveVec.y !== 0)) {
+			this.room.send(MessageType.MOVE, { x: moveVec.x, y: moveVec.y });
+		}
+	}
 
-        const serverPlayer = entity as ServerPlayer;
-        p.drunkiness = serverPlayer.drunkiness;
-        p.canPickup = serverPlayer.canPickup;
-        p.healing = serverPlayer.healing;
-        p.skin = serverPlayer.skin;
-        p.weapon = serverPlayer.weapon;
+	private sync(state: GameState) {
+		this.syncEntities(state);
 
-        return p;
+		const playerEntityId = state.players.get(this.room.sessionId)!;
+		this.you = (this.entities.get(playerEntityId) as Player) ?? null;
+	}
 
-      case EntityType.HEALING:
-        const h = new Healing(
-          entity.id,
-          new Vec2(entity.pos.x, entity.pos.y),
-          entity.rotation,
-          new Vec2(entity.velocity.x, entity.velocity.y),
-          entity.type
-        );
+	private syncEntities(state: GameState) {
+		const stateEntities = new Map<number, ServerEntity>();
+		for (const [id, e] of state.entities) {
+			stateEntities.set(e.id, e);
+		}
 
-        h.healingType = (entity as ServerHealing).healingType;
+		for (const [id, e] of this.entities) {
+			if (!stateEntities.has(id)) {
+				if (e.sprite) this.world.removeChild(e.sprite);
 
-        return h;
+				this.entities.delete(id);
+			}
+		}
 
-      case EntityType.WEAPON:
-        const w = new Weapon(
-          entity.id,
-          new Vec2(entity.pos.x, entity.pos.y),
-          entity.rotation,
-          new Vec2(entity.velocity.x, entity.velocity.y),
-          entity.type
-        );
+		for (const [id, e] of state.entities) {
+			if (!this.entities.has(e.id)) {
+				this.entities.set(e.id, this.createEntity(e));
+			} else {
+				this.updateEntity(e);
+			}
+		}
+	}
 
-        w.weaponType = (entity as ServerWeapon).weaponType;
+	private updateEntity(entity: ServerEntity) {
+		const e = this.entities.get(entity.id);
+		if (!e) {
+			return;
+		}
 
-        return w;
+		e.pos = new Vec2(entity.pos.x, entity.pos.y);
+		e.rotation = entity.rotation;
+		e.velocity = new Vec2(entity.velocity.x, entity.velocity.y);
+		e.type = entity.type;
 
-      case EntityType.PROJECTILE:
-        const pr = new Projectile(
-          entity.id,
-          new Vec2(entity.pos.x, entity.pos.y),
-          entity.rotation,
-          new Vec2(entity.velocity.x, entity.velocity.y),
-          entity.type
-        );
+		switch (e.type) {
+			case EntityType.PLAYER:
+				const p = e as Player;
+				const serverPlayer = entity as ServerPlayer;
+				p.name = serverPlayer.name;
+				p.drunkiness = serverPlayer.drunkiness;
+				p.canPickup = serverPlayer.canPickup;
+				p.healing = serverPlayer.healing;
+				p.skin = serverPlayer.skin;
+				p.weapon = serverPlayer.weapon;
+				break;
 
-        pr.projectileType = (entity as ServerProjectile).projectileType;
+			case EntityType.HEALING:
+				const h = e as Healing;
+				h.healingType = (entity as ServerHealing).healingType;
+				break;
 
-        return pr;
+			case EntityType.WEAPON:
+				const w = e as Weapon;
+				w.weaponType = (entity as ServerWeapon).weaponType;
+				break;
 
-      default:
-        throw new Error("Unknown entity type");
-    }
-  }
+			case EntityType.PROJECTILE:
+				const pr = e as Projectile;
+				pr.projectileType = (entity as ServerProjectile).projectileType;
+				break;
+
+			default:
+				throw new Error("Unknown entity type");
+		}
+	}
+
+	private createEntity(entity: ServerEntity) {
+		switch (entity.type) {
+			case EntityType.PLAYER:
+				const p = new Player(
+					entity.id,
+					new Vec2(entity.pos.x, entity.pos.y),
+					entity.rotation,
+					new Vec2(entity.velocity.x, entity.velocity.y),
+					entity.type
+				);
+
+				const serverPlayer = entity as ServerPlayer;
+				p.name = serverPlayer.name;
+				p.drunkiness = serverPlayer.drunkiness;
+				p.canPickup = serverPlayer.canPickup;
+				p.healing = serverPlayer.healing;
+				p.skin = serverPlayer.skin;
+				p.weapon = serverPlayer.weapon;
+
+				return p;
+
+			case EntityType.HEALING:
+				const h = new Healing(
+					entity.id,
+					new Vec2(entity.pos.x, entity.pos.y),
+					entity.rotation,
+					new Vec2(entity.velocity.x, entity.velocity.y),
+					entity.type
+				);
+
+				h.healingType = (entity as ServerHealing).healingType;
+
+				return h;
+
+			case EntityType.WEAPON:
+				const w = new Weapon(
+					entity.id,
+					new Vec2(entity.pos.x, entity.pos.y),
+					entity.rotation,
+					new Vec2(entity.velocity.x, entity.velocity.y),
+					entity.type
+				);
+
+				w.weaponType = (entity as ServerWeapon).weaponType;
+
+				return w;
+
+			case EntityType.PROJECTILE:
+				const pr = new Projectile(
+					entity.id,
+					new Vec2(entity.pos.x, entity.pos.y),
+					entity.rotation,
+					new Vec2(entity.velocity.x, entity.velocity.y),
+					entity.type
+				);
+
+				pr.projectileType = (entity as ServerProjectile).projectileType;
+
+				return pr;
+
+			default:
+				throw new Error("Unknown entity type");
+		}
+	}
 }
