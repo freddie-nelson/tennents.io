@@ -14,6 +14,7 @@ import { Entity } from "./schema/Entity";
 import { Vector } from "./schema/Vector";
 
 import { getHealingAmountFromHealingType } from "../rules/healing";
+import { GameConfig } from "./schema/GameConfig";
 
 export class GameRoom extends Room<GameState> {
 	private static PLAYER_RADIUS: number = 1;
@@ -31,6 +32,11 @@ export class GameRoom extends Room<GameState> {
 			this.engine.updateStateEntities(this.state.entities);
 		};
 
+		this.state.config = new GameConfig();
+		this.state.config.maxDrunkiness = 100;
+		this.state.config.maxPlayers = this.maxClients;
+		this.state.config.playerSpeed = 0.25;
+
 		// EVENT HANDLERS
 
 		this.onMessage(MessageType.MOVE, (client, message) => {
@@ -44,6 +50,7 @@ export class GameRoom extends Room<GameState> {
 			 */
 			this.engine.handleMove({
 				id: this.playerClients.get(client.sessionId),
+				speed: this.state.config.playerSpeed,
 				x: message.x,
 				y: message.y,
 			});

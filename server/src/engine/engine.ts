@@ -9,7 +9,7 @@ export class GameEngine {
 	private id: number;
 
 	constructor() {
-		this.engine = Matter.Engine.create();
+		this.engine = Matter.Engine.create({ gravity: { x: 0, y: 0 } });
 		this.entities = new Map<number, Matter.Body>();
 		this.id = 0;
 
@@ -28,6 +28,7 @@ export class GameEngine {
 		this.id++;
 
 		const entity = Matter.Bodies.circle(x, y, radius);
+		entity.frictionAir = 0.1;
 		this.entities.set(this.id, entity);
 		Matter.Composite.add(this.engine.world, entity);
 
@@ -61,16 +62,23 @@ export class GameEngine {
 
 	// EVENT HANDLERS
 
-	handleMove({ id, x, y }: { id: number; x: number; y: number }) {
+	handleMove({
+		id,
+		speed,
+		x,
+		y,
+	}: {
+		id: number;
+		speed: number;
+		x: number;
+		y: number;
+	}) {
 		const entity = this.entities.get(id);
-
-		entity.velocity.x = x;
-		entity.velocity.y = y;
+		Matter.Body.setVelocity(entity, { x: x * speed, y: y * speed });
 	}
 
 	handleRotation({ id, r }: { id: number; r: number }) {
 		const entity = this.entities.get(id);
-
-		entity.angle = r;
+		Matter.Body.setAngle(entity, r);
 	}
 }
