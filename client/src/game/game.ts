@@ -15,8 +15,11 @@ import Projectile from "./Projectile";
 import { GameState } from "../../../server/src/rooms/schema/GameState";
 import Textures from "./Textures";
 import { MessageType } from "../../../server/src/rooms/schema/enums/MessageType";
+import { GameStateType } from "../../../server/src/rooms/schema/enums/GameStateType";
 
 export const gameContainer = document.querySelector(".game") as HTMLElement;
+export const startingContainer = document.querySelector(".starting") as HTMLElement;
+export const startingContainerText = document.querySelector(".starting h1") as HTMLElement;
 
 const key = new Map<string, boolean>();
 window.addEventListener("keydown", (e) => {
@@ -89,6 +92,10 @@ export default class Game {
     });
     this.sync(this.room.state);
 
+    if (this.room.state.state !== GameStateType.STARTED) {
+      startingContainer.style.display = "flex";
+    }
+
     this.room.onLeave(() => {
       alert("You have been disconnected");
     });
@@ -122,6 +129,16 @@ export default class Game {
   }
 
   private update() {
+    if (startingContainer.style.display !== "none") {
+      if (this.room.state.state === GameStateType.STARTED) {
+        startingContainer.style.display = "none";
+      } else if (this.room.state.state === GameStateType.WAITING) {
+        startingContainerText.innerText = `Waiting for players... (${this.room.state.players.size}/${this.room.state.config.playersToStart})`;
+      } else if (this.room.state.state === GameStateType.STARTING) {
+        startingContainerText.innerText = `Game starting in ${this.room.state.timeToStart} seconds (${this.room.state.players.size}/${this.room.state.config.playersToStart})`;
+      }
+    }
+
     const dt = this.app.ticker.deltaTime;
 
     this.world.position.set(

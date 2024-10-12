@@ -16,25 +16,32 @@ import { GameConfig } from "./schema/GameConfig";
 import { Projectile } from "./schema/projectile";
 
 import { getHealingAmountFromHealingType } from "../rules/healing";
+import { GameStateType } from "./schema/enums/GameStateType";
 
 export class GameRoom extends Room<GameState> {
   maxClients = 10;
+  private TIME_TO_START = 10;
+  private timeToStartInterval: NodeJS.Timeout | undefined;
+  private playersToStart = 1;
   private engine: GameEngine = new GameEngine();
   private playerClients: Map<string, number> = new Map(); // client.sessionId -> entity.id
 
   onCreate(options: any) {
     this.setState(new GameState());
-    this.engine.update(this.clock.deltaTime, this.state.entities);
 
     this.setPatchRate(1000 / 30);
     this.onBeforePatch = () => {
-      this.engine.update(this.clock.deltaTime, this.state.entities);
+      if (this.state.state === GameStateType.STARTED) {
+        this.engine.update(this.clock.deltaTime, this.state.entities);
+      }
     };
 
     this.state.config = new GameConfig();
     this.state.config.maxDrunkiness = 100;
     this.state.config.maxPlayers = this.maxClients;
     this.state.config.playerSpeed = GameEngine.PLAYER_SPEED;
+    this.state.config.playersToStart = this.playersToStart;
+    this.state.state = GameStateType.WAITING;
 
     // EVENT HANDLERS
 
@@ -139,6 +146,25 @@ export class GameRoom extends Room<GameState> {
   onJoin(client: Client, options: { name: string }) {
     console.log(client.sessionId, "joined!");
 
+    if (this.state.state !== GameStateType.WAITING && this.state.state !== GameStateType.STARTING) {
+      client.leave();
+      return;
+    }
+
+    if (this.clients.length >= this.playersToStart && this.timeToStartInterval === undefined) {
+      this.state.state = GameStateType.STARTING;
+      this.state.timeToStart = this.TIME_TO_START;
+
+      this.timeToStartInterval = setInterval(() => {
+        this.state.timeToStart -= 1;
+
+        if (this.state.timeToStart <= 0) {
+          clearInterval(this.timeToStartInterval);
+          this.state.state = GameStateType.STARTED;
+        }
+      }, 1000);
+    }
+
     const id = this.engine.addPlayer({
       x: 0,
       y: 0,
@@ -166,6 +192,10 @@ export class GameRoom extends Room<GameState> {
     this.state.players.delete(client.sessionId);
 
     this.playerClients.delete(client.sessionId);
+
+    if (this.clients.length < 2) {
+      this.disconnect();
+    }
   }
 
   onDispose() {
