@@ -1,7 +1,7 @@
 import Vec2 from "./Vec2";
 
 import { EntityType } from "../../../server/src/rooms/schema/enums/EntityType";
-import { Sprite } from "pixi.js";
+import { Container, Sprite } from "pixi.js";
 import Textures from "./Textures";
 import Player from "./Player";
 import Weapon from "./Weapon";
@@ -11,7 +11,7 @@ import { HealingType } from "../../../server/src/rooms/schema/enums/HealingType"
 import Projectile from "./Projectile";
 
 export default class Entity {
-  public sprite: Sprite | null = null;
+  public sprite: Container | null = null;
   private spriteType: EntityType | null = null;
 
   constructor(
@@ -24,6 +24,7 @@ export default class Entity {
 
   update(dt: number) {
     if (!this.sprite || this.spriteType !== this.type) {
+      this.sprite?.removeFromParent();
       this.createSprite();
     }
 
@@ -31,14 +32,23 @@ export default class Entity {
     // this.pos.y += this.velocity.y * dt;
 
     this.sprite!.position.set(this.pos.x, this.pos.y);
-    this.sprite!.rotation = this.rotation - Math.PI / 2;
+
+    if (this.type === EntityType.PROJECTILE) {
+      this.sprite!.rotation += Math.PI / 8;
+    } else {
+      this.sprite!.rotation = this.rotation - Math.PI / 2;
+    }
   }
 
   createSprite() {
-    this.sprite = new Sprite();
-    this.sprite.anchor.set(0.5);
+    this.sprite = new Container();
     this.sprite.position.set(this.pos.x, this.pos.y);
     this.sprite.rotation = this.rotation;
+
+    const sprite = new Sprite();
+    sprite.anchor.set(0.5);
+
+    this.sprite.addChild(sprite);
 
     let subType: any;
     if (this.type === EntityType.WEAPON) {
@@ -50,24 +60,24 @@ export default class Entity {
     }
 
     const size = Entity.getSize(this.type, subType);
-    this.sprite.width = size.x;
-    this.sprite.height = size.y;
+    sprite.width = size.x;
+    sprite.height = size.y;
 
     this.spriteType = this.type;
 
     switch (this.type) {
       case EntityType.PLAYER:
-        this.sprite.texture = Textures.getPlayerTexture((this as any as Player).skin);
+        sprite.texture = Textures.getPlayerTexture((this as any as Player).skin);
         break;
       case EntityType.HEALING:
-        this.sprite.texture = Textures.getHealingTexture((this as any as Healing).healingType);
+        sprite.texture = Textures.getHealingTexture((this as any as Healing).healingType);
         break;
       case EntityType.WEAPON:
-        this.sprite.texture = Textures.getWeaponTexture((this as any as Weapon).weaponType);
+        sprite.texture = Textures.getWeaponTexture((this as any as Weapon).weaponType);
         break;
 
       case EntityType.PROJECTILE:
-        this.sprite.texture = Textures.getWeaponTexture((this as any as Projectile).projectileType);
+        sprite.texture = Textures.getWeaponTexture((this as any as Projectile).projectileType);
         break;
 
       default:
@@ -80,11 +90,11 @@ export default class Entity {
       if (p.weapon !== undefined) {
         const weaponSprite = new Sprite();
         weaponSprite.anchor.set(0.5);
-        weaponSprite.position.set(this.sprite.width * 1.5, this.sprite.height * 1.5);
+        weaponSprite.position.set(-sprite.width * 0.35, sprite.height * 0.5);
         weaponSprite.texture = Textures.getWeaponTexture(p.weapon);
         weaponSprite.rotation = Math.PI * 1.2;
 
-        const size = Entity.getSize(EntityType.WEAPON, p.weapon).mul(4);
+        const size = Entity.getSize(EntityType.WEAPON, p.weapon);
         weaponSprite.width = size.x;
         weaponSprite.height = size.y;
 
@@ -94,10 +104,11 @@ export default class Entity {
       if (p.healing !== undefined) {
         const healingSprite = new Sprite();
         healingSprite.anchor.set(0.5);
-        healingSprite.position.set(-this.sprite.width * 1.5, this.sprite.height * 1.5);
+        healingSprite.position.set(sprite.width * 0.35, sprite.height * 0.5);
         healingSprite.texture = Textures.getHealingTexture(p.healing);
+        healingSprite.rotation = -Math.PI * 1.2;
 
-        const size = Entity.getSize(EntityType.HEALING, p.healing).mul(4);
+        const size = Entity.getSize(EntityType.HEALING, p.healing);
         healingSprite.width = size.x;
         healingSprite.height = size.y;
 
@@ -109,22 +120,22 @@ export default class Entity {
   static getSize(type: EntityType, subType?: any): Vec2 {
     switch (type) {
       case EntityType.PLAYER:
-        return new Vec2(100, 80);
+        return new Vec2(2, 1.6);
 
       case EntityType.WEAPON:
         subType = subType as WeaponType;
 
         switch (subType) {
           case WeaponType.TENNENTS_LIGHT:
-            return new Vec2(30, 40);
+            return new Vec2(0.6, 0.8);
           case WeaponType.TENNENTS_PINT:
-            return new Vec2(30, 40);
+            return new Vec2(0.6, 0.8);
           case WeaponType.TENNENTS_ORIGINAL:
-            return new Vec2(30, 40);
+            return new Vec2(0.6, 0.8);
           case WeaponType.TENNENTS_SUPER:
-            return new Vec2(30, 40);
+            return new Vec2(0.6, 0.8);
           case WeaponType.TENNENTS_KEG:
-            return new Vec2(30, 40);
+            return new Vec2(0.6, 0.8);
 
           default:
             throw new Error("Unknown weapon type");
@@ -134,15 +145,15 @@ export default class Entity {
 
         switch (subType) {
           case WeaponType.TENNENTS_LIGHT:
-            return new Vec2(10, 10);
+            return new Vec2(0.6, 0.8);
           case WeaponType.TENNENTS_PINT:
-            return new Vec2(10, 10);
+            return new Vec2(0.6, 0.8);
           case WeaponType.TENNENTS_ORIGINAL:
-            return new Vec2(10, 10);
+            return new Vec2(0.6, 0.8);
           case WeaponType.TENNENTS_SUPER:
-            return new Vec2(10, 10);
+            return new Vec2(0.6, 0.8);
           case WeaponType.TENNENTS_KEG:
-            return new Vec2(10, 10);
+            return new Vec2(0.6, 0.8);
 
           default:
             throw new Error("Unknown weapon type");
@@ -153,15 +164,15 @@ export default class Entity {
 
         switch (subType) {
           case HealingType.TENNENTS_ZERO:
-            return new Vec2(30, 30);
+            return new Vec2(0.6, 0.8);
           case HealingType.WATER:
-            return new Vec2(30, 30);
+            return new Vec2(0.6, 0.8);
           case HealingType.COFFEE:
-            return new Vec2(30, 30);
+            return new Vec2(0.6, 0.8);
           case HealingType.ORANGE_JUICE:
-            return new Vec2(30, 30);
+            return new Vec2(0.6, 0.8);
           case HealingType.DONER_KEBAB:
-            return new Vec2(30, 30);
+            return new Vec2(0.6, 0.8);
 
           default:
             throw new Error("Unknown healing type");

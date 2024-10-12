@@ -1,4 +1,5 @@
-import { GameTile } from './tile'; 
+import { GameTile } from "./tile";
+import { TileType } from "./enums/TileType";
 
 export class GameMap {
   tiles: GameTile[];
@@ -17,42 +18,77 @@ export class GameMap {
 
   private processTiles(tilemapData: any): GameTile[] {
     const tiles: GameTile[] = [];
-    const layer = tilemapData.layers[0]; 
+    const layer = tilemapData.layers[0];
 
     for (let i = 0; i < layer.data.length; i++) {
       const tileId = layer.data[i];
-      if (tileId > 0) { // Ignore empty tiles (ID 0)
-        const x = (i % this.width) * this.tileWidth;
-        const y = Math.floor(i / this.width) * this.tileHeight;
+      if (tileId > 0) {
+        // Ignore empty tiles (ID 0)
+        const x = i % this.width;
+        const y = Math.floor(i / this.width);
 
-        
-        const isCollidable = this.isCollidableTile(tileId);
-        const isPlayerSpawn = this.isPlayerSpawnTile(tileId);
-        const isCrate = this.isCrateTile(tileId);
-        const isPickupSpawn = this.isPickupSpawnTile(tileId);
+        const type = tileId as TileType;
 
-        
-        tiles.push(new GameTile(x, y, tileId, isCollidable, isPlayerSpawn, isCrate, isPickupSpawn));
+        const isCollidable = this.isCollidableTile(type);
+        const isPlayerSpawn = this.isPlayerSpawnTile(type);
+        const isCrate = this.isCrateTile(type);
+        const isPickupSpawn = this.isPickupSpawnTile(type);
+
+        tiles.push(new GameTile(x, y, type, isCollidable, isPlayerSpawn, isCrate, isPickupSpawn));
       }
     }
     return tiles;
   }
 
-  private isCollidableTile(tileId: number): boolean {
-    return tileId === 2; 
+  private isCollidableTile(type: TileType): boolean {
+    if (
+      type === TileType.WOODEN_FLOOR ||
+      type === TileType.STONE_TILE ||
+      type === TileType.SINK ||
+      type === TileType.ELEVATOR_LEFT ||
+      type === TileType.ELEVATOR_RIGHT ||
+      type === TileType.COBBLESTONE
+    ) {
+      return false;
+    }
+
+    return true;
   }
 
-  private isPlayerSpawnTile(tileId: number): boolean {
-    return tileId === 3;
+  private isPlayerSpawnTile(type: TileType): boolean {
+    if (type === TileType.COBBLESTONE || type === TileType.WOODEN_FLOOR || type === TileType.SINK) {
+      return Math.random() < 0.5;
+    }
+
+    return false;
   }
 
-  private isCrateTile(tileId: number): boolean {
-    return tileId === 4; 
+  private isCrateTile(type: TileType): boolean {
+    return false;
   }
 
-  private isPickupSpawnTile(tileId: number): boolean {
-    
-    return tileId === 5; 
+  private isPickupSpawnTile(type: TileType): boolean {
+    if (
+      type === TileType.POOL_BOTTOM_LEFT ||
+      type === TileType.POOL_BOTTOM_RIGHT ||
+      type === TileType.POOL_LEFT ||
+      type === TileType.POOL_RIGHT ||
+      type === TileType.POOL_TOP_LEFT ||
+      type === TileType.POOL_TOP_RIGHT ||
+      type === TileType.TABLE_SIDE ||
+      type === TileType.TABLE_UP ||
+      type === TileType.TOILET ||
+      type === TileType.BAR_DOWN ||
+      type === TileType.BAR_LEFT ||
+      type === TileType.BAR_LEFT_DRAUGHT ||
+      type === TileType.BAR_RIGHT ||
+      type === TileType.BAR_RIGHT_DRAGHT ||
+      type === TileType.BAR_UP
+    ) {
+      return Math.random() < 0.3;
+    }
+
+    return false;
   }
 }
 
@@ -66,11 +102,10 @@ export async function loadTilemap(url: string): Promise<GameMap> {
   return new GameMap(tilemapData);
 }
 
-
-loadTilemap('shared/map/mapproject.json')
+loadTilemap("shared/map/mapproject.json")
   .then((gameMap) => {
-    console.log('Parsed GameMap:', gameMap.tiles);
+    console.log("Parsed GameMap:", gameMap.tiles);
   })
   .catch((error) => {
-    console.error('Error loading tilemap:', error);
+    console.error("Error loading tilemap:", error);
   });
