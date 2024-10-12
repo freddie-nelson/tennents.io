@@ -1,4 +1,4 @@
-import { Application, BackgroundLoader } from "pixi.js";
+import { Application } from "pixi.js";
 import Entity from "./Entity";
 import { Room } from "../api/colyseus";
 import { Entity as ServerEntity } from "../../../server/src/rooms/schema/Entity";
@@ -19,6 +19,7 @@ export const gameContainer = document.querySelector(".game") as HTMLElement;
 export default class Game {
   public readonly app: Application;
   public readonly entities: Map<number, Entity> = new Map();
+  public readonly you: layer | null = null;
   public readonly room: Room;
 
   constructor(room: Room) {
@@ -51,9 +52,24 @@ export default class Game {
 
   private update() {
     const dt = this.app.ticker.deltaTime;
+
+    for (const e of this.entities.values()) {
+      e.update(dt);
+    }
   }
 
   private syncEntities(state: GameState) {
+    const stateEntities = new Map<number, ServerEntity>();
+    for (const e of state.entities) {
+      stateEntities.set(e.id, e);
+    }
+
+    for (const [id, e] of this.entities) {
+      if (!stateEntities.has(id)) {
+        this.entities.delete(id);
+      }
+    }
+
     for (const e of state.entities) {
       if (!this.entities.has(e.id)) {
         this.entities.set(e.id, this.createEntity(e));
