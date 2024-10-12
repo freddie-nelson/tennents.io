@@ -4,6 +4,7 @@ import { MapSchema } from "@colyseus/schema";
 import { Entity } from "../rooms/schema/Entity";
 import { EntityType } from "../rooms/schema/enums/EntityType";
 import { Player } from "../rooms/schema/Player";
+import { TileType } from "../../../shared/map/enums/TileType";
 
 export class GameEngine {
 	private static DRUNKINESS_LOSS: number = 0.1;
