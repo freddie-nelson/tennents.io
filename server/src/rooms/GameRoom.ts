@@ -39,11 +39,11 @@ export class GameRoom extends Room<GameState> {
 			 * message
 			 * {x: number, y: number}
 			 */
-			this.engine.handleMove(
-				this.playerClients.get(client.sessionId),
-				message.x,
-				message.y
-			);
+			this.engine.handleMove({
+				id: this.playerClients.get(client.sessionId),
+				x: message.x,
+				y: message.y,
+			});
 		});
 
 		this.onMessage(MessageType.ROTATE, (client, message) => {
@@ -55,7 +55,10 @@ export class GameRoom extends Room<GameState> {
 			 * message
 			 * {r: number}
 			 */
-			this.engine.handleRotation();
+			this.engine.handleRotation({
+				id: this.playerClients.get(client.sessionId),
+				r: message.r,
+			});
 		});
 
 		this.onMessage(MessageType.HEAL, (client, message) => {
