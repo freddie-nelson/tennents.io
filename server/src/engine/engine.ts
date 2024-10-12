@@ -24,6 +24,10 @@ export class GameEngine {
 
 	// GENERAL
 
+	update(delta: number) {
+		Matter.Engine.update(this.engine, delta);
+	}
+
 	addEntity(x: number, y: number, radius: number): number {
 		this.id++;
 
@@ -50,13 +54,36 @@ export class GameEngine {
 		for (const [id, entity] of stateEntities) {
 			const gameEntity = this.entities.get(parseInt(id));
 
-			entity.pos.x = gameEntity.position.x;
-			entity.pos.y = gameEntity.position.y;
+			let changed = false;
+			if (
+				entity.pos.x !== gameEntity.position.x ||
+				entity.pos.y !== gameEntity.position.y
+			) {
+				entity.pos.x = gameEntity.position.x;
+				entity.pos.y = gameEntity.position.y;
 
-			entity.velocity.x = gameEntity.velocity.x;
-			entity.velocity.y = gameEntity.velocity.y;
+				changed = true;
+			}
 
-			entity.rotation = gameEntity.angle;
+			if (
+				entity.velocity.x !== gameEntity.velocity.x ||
+				entity.velocity.y !== gameEntity.velocity.y
+			) {
+				entity.velocity.x = gameEntity.velocity.x;
+				entity.velocity.y = gameEntity.velocity.y;
+
+				changed = true;
+			}
+
+			if (entity.rotation !== gameEntity.angle) {
+				entity.rotation = gameEntity.angle;
+
+				changed = true;
+			}
+
+			if (changed) {
+				stateEntities.set(id, entity);
+			}
 		}
 	}
 
