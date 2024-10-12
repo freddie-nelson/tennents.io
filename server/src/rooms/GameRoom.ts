@@ -7,6 +7,7 @@ import { HealingType } from "./schema/enums/HealingType";
 import { PlayerSkinType } from "./schema/enums/PlayerSkinType";
 import { EntityType } from "./schema/enums/EntityType";
 import { MessageType } from "./schema/enums/MessageType";
+import { GameStateType } from "./schema/enums/GameStateType";
 
 import { GameState } from "./schema/GameState";
 import { Player } from "./schema/Player";
@@ -16,25 +17,24 @@ import { GameConfig } from "./schema/GameConfig";
 import { Projectile } from "./schema/projectile";
 
 import { getHealingAmountFromHealingType } from "../rules/healing";
-import { GameStateType } from "./schema/enums/GameStateType";
+import { getDrunkinessAmountFromWeaponType } from "../rules/weapon";
 
 export class GameRoom extends Room<GameState> {
   maxClients = 10;
   private TIME_TO_START = 3;
   private timeToStartInterval: NodeJS.Timeout | undefined;
   private playersToStart = 1;
-  private engine: GameEngine = new GameEngine(this.onCollisionStart);
+  private engine: GameEngine = new GameEngine(this.onCollisionStart.bind(this));
   private playerClients: Map<string, number> = new Map(); // client.sessionId -> entity.id
 
-  async onCreate(options: any) {
-    await this.engine.initMap();
-
+  onCreate(options: any) {
     this.setState(new GameState());
 
     this.setPatchRate(1000 / 30);
     this.onBeforePatch = () => {
       if (this.state.state === GameStateType.STARTED) {
         this.engine.update(this.clock.deltaTime, this.state.entities);
+        this.updateClosestPickups();
       }
     };
 
@@ -112,6 +112,7 @@ export class GameRoom extends Room<GameState> {
         x: player.pos.x,
         y: player.pos.y,
         r: player.rotation,
+        ownerId: player.id,
       });
 
       const projectile = new Projectile();
@@ -134,12 +135,18 @@ export class GameRoom extends Room<GameState> {
     });
 
     this.onMessage(MessageType.PICKUP, (client, message) => {
-      // console.log(
-      //   `received MessageType.PICKUP | client.sessionId - ${client.sessionId} | message - ${message}`
-      // );
+      console.log(
+        `received MessageType.PICKUP | client.sessionId - ${client.sessionId} | message - ${message}`
+      );
+
       /**
        * message
+       * null
        */
+      const player = <Player>this.state.entities.get(`${this.playerClients.get(client.sessionId)}`);
+
+      // destroy the entity of the floor
+      // set the player's weapon to the weapon of the floor entity
       // TODO
     });
   }
@@ -201,6 +208,22 @@ export class GameRoom extends Room<GameState> {
     this.engine.dispose();
   }
 
+  updateClosestPickups() {
+    const playerIds = Array.from(this.playerClients.values());
+
+    for (const playerId of playerIds) {
+      const player = <Player>this.state.entities.get(`${playerId}`);
+      const closestPickupId = this.engine.findClosestPickupEntity(playerId);
+
+      if (closestPickupId === null) {
+        player.canPickup = undefined;
+        continue;
+      }
+
+      player.canPickup = closestPickupId;
+    }
+  }
+
   // COLLISIONS
 
   private onCollisionStart(event: Matter.IEventCollision<Matter.Engine>) {
@@ -210,9 +233,43 @@ export class GameRoom extends Room<GameState> {
       const bodyA = pair.bodyA;
       const bodyB = pair.bodyB;
 
-      // broadcast collision event to room
-      // using bodyA.plugin.id and bodyB.plugin.id
+      // bodyA is player
+      // bodyB is projectile
+      if (bodyA.plugin.type === EntityType.PLAYER && bodyB.plugin.type === EntityType.PROJECTILE) {
+        if (bodyA.plugin.id === bodyB.plugin.ownerId) continue;
+        this.handlePlayerProjectileCollision(bodyA.plugin.id, bodyB.plugin.id);
+        continue;
+      }
+
+      // bodyA is projectile
+      // bodyB is player
+      if (bodyB.plugin.type === EntityType.PLAYER && bodyA.plugin.type === EntityType.PROJECTILE) {
+        if (bodyB.plugin.id === bodyA.plugin.ownerId) continue;
+        this.handlePlayerProjectileCollision(bodyB.plugin.id, bodyA.plugin.id);
+        continue;
+      }
+
+      // TODO
     }
+  }
+
+  // HELPERS - RULES
+
+  handlePlayerProjectileCollision(playerId: number, projectileId: number) {
+    const player = <Player>this.state.entities.get(`${playerId}`);
+    const projectile = <Projectile>this.state.entities.get(`${projectileId}`);
+
+    // remove player health
+    const drunkinessAmount = getDrunkinessAmountFromWeaponType(projectile.projectileType);
+    player.drunkiness += drunkinessAmount;
+    if (player.drunkiness >= this.state.config.maxDrunkiness) {
+      this.engine.removeEntity(playerId);
+      this.state.entities.delete(`${playerId}`);
+    }
+
+    // remove projectile
+    this.engine.removeEntity(projectileId);
+    this.state.entities.delete(`${projectileId}`);
   }
 
   // HELPERS - UPDATE

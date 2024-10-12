@@ -15,6 +15,7 @@ export class GameEngine {
   static readonly PROJECTILE_RADIUS: number = 0.5;
   static readonly PROJECTILE_LIFETIME: number = 100;
   static readonly PROJECTILE_SPEED: number = 0.2;
+  static readonly PICKUP_RADIUS: number = 1.5;
   static readonly TILE_SIZE: number = 2;
 
   private engine: Matter.Engine;
@@ -65,8 +66,6 @@ export class GameEngine {
     Matter.Events.on(this.engine, "collisionStart", this.collisionCallback);
   }
 
-  // HELPERS - ENTITIES
-
   private addEntity({
     x,
     y,
@@ -74,6 +73,7 @@ export class GameEngine {
     r,
     velX,
     velY,
+    type,
   }: {
     x: number;
     y: number;
@@ -81,6 +81,7 @@ export class GameEngine {
     r: number;
     velX: number;
     velY: number;
+    type: EntityType;
   }): Matter.Body {
     this.id++;
 
@@ -89,6 +90,7 @@ export class GameEngine {
       velocity: { x: velX, y: velY },
     });
     entity.plugin.id = this.id;
+    entity.plugin.type = type;
     Matter.Body.setVelocity(entity, {
       x: velX,
       y: velY,
@@ -137,8 +139,6 @@ export class GameEngine {
     }
   }
 
-  // METHODS - ENTITIES
-
   addPlayer({ x, y, r }: { x: number; y: number; r: number }): number {
     const entity = this.addEntity({
       x,
@@ -147,13 +147,14 @@ export class GameEngine {
       velX: 0,
       velY: 0,
       radius: GameEngine.PLAYER_RADIUS,
+      type: EntityType.PLAYER,
     });
     entity.frictionAir = 0.1;
 
-    return this.id;
+    return entity.id;
   }
 
-  addProjectile({ x, y, r }: { x: number; y: number; r: number }): number {
+  addProjectile({ x, y, r, ownerId }: { x: number; y: number; r: number; ownerId: number }): number {
     const dx = Math.cos(r);
     const dy = Math.sin(r);
 
@@ -164,11 +165,52 @@ export class GameEngine {
       velX: dx * GameEngine.PROJECTILE_SPEED,
       velY: dy * GameEngine.PROJECTILE_SPEED,
       radius: GameEngine.PROJECTILE_RADIUS,
+      type: EntityType.PROJECTILE,
     });
     entity.frictionAir = 0;
+    entity.plugin.ownerId = ownerId;
     entity.plugin.lifetime = GameEngine.PROJECTILE_LIFETIME;
 
     return this.id;
+  }
+
+  addPickup({ x, y, type }: { x: number; y: number; type: EntityType.WEAPON | EntityType.HEALING }): number {
+    const entity = this.addEntity({
+      x,
+      y,
+      r: 0,
+      velX: 0,
+      velY: 0,
+      radius: GameEngine.PLAYER_RADIUS,
+      type,
+    });
+    entity.isStatic = true;
+    entity.isSensor = true;
+
+    return this.id;
+  }
+
+  findClosestPickupEntity(entityId: number): number | null {
+    const entity = this.entities.get(entityId);
+
+    if (!entity) return null;
+
+    let closestPickupId = -1;
+    let closestPickupDistance = Infinity;
+
+    for (const [id, otherEntity] of this.entities) {
+      if (otherEntity.plugin.type !== EntityType.WEAPON || otherEntity.plugin.type !== EntityType.HEALING)
+        continue;
+
+      const distance = Matter.Vector.magnitude(Matter.Vector.sub(entity.position, otherEntity.position));
+
+      if (distance < closestPickupDistance && distance <= GameEngine.PICKUP_RADIUS) {
+        closestPickupId = id;
+        closestPickupDistance = distance;
+      }
+    }
+
+    return closestPickupId === -1 ? null : closestPickupId;
   }
 
   removeEntity(id: number) {
