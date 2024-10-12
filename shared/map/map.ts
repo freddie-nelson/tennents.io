@@ -1,4 +1,5 @@
 import { GameTile } from './tile'; 
+import { TileType } from "./enums/TileType";
 
 export class GameMap {
   tiles: GameTile[];
@@ -38,21 +39,37 @@ export class GameMap {
     return tiles;
   }
 
-  private isCollidableTile(tileId: number): boolean {
-    return tileId === 2; 
+  private mapTileIdToTileType(tileId: number): TileType {
+    switch (tileId) {
+      case 1:
+        return TileType.Floor;
+      case 2:
+        return TileType.Wall;
+      case 3:
+        return TileType.PlayerSpawn;
+      case 4:
+        return TileType.Crate;
+      case 5:
+        return TileType.PickupSpawn;
+      default:
+        return TileType.Floor; 
+    }
   }
-
-  private isPlayerSpawnTile(tileId: number): boolean {
-    return tileId === 3;
-  }
-
-  private isCrateTile(tileId: number): boolean {
-    return tileId === 4; 
-  }
-
-  private isPickupSpawnTile(tileId: number): boolean {
     
-    return tileId === 5; 
+  private isCollidableTile(type: TileType): boolean {
+    return type === TileType.Wall; // Walls are collidable
+  }
+
+  private isPlayerSpawnTile(type: TileType): boolean {
+    return type === TileType.PlayerSpawn; // Player spawn points
+  }
+
+  private isCrateTile(type: TileType): boolean {
+    return type === TileType.Crate; // Crates - maybe redundant?
+  }
+
+  private isPickupSpawnTile(type: TileType): boolean {
+    return type === TileType.PickupSpawn; // Pickup spawn points
   }
 }
 
