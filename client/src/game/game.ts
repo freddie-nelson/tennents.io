@@ -193,6 +193,10 @@ export default class Game {
         moveVec.mul(Math.random() * 0.7);
       }
 
+      if (this.room.state.state !== GameStateType.STARTED) {
+        return;
+      }
+
       this.room.send(MessageType.MOVE, { x: moveVec.x, y: moveVec.y });
     }
   }
@@ -201,6 +205,10 @@ export default class Game {
     if (this.you) {
       const dir = mousePos.sub(new Vec2(this.app.screen.width / 2, this.app.screen.height / 2)).normalize();
       const rotation = dir.angle();
+
+      if (rotation === this.you.rotation || this.room.state.state !== GameStateType.STARTED) {
+        return;
+      }
 
       this.room.send(MessageType.ROTATE, { r: rotation });
     }

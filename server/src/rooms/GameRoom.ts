@@ -19,253 +19,249 @@ import { getHealingAmountFromHealingType } from "../rules/healing";
 import { GameStateType } from "./schema/enums/GameStateType";
 
 export class GameRoom extends Room<GameState> {
-	maxClients = 10;
-	private TIME_TO_START = 10;
-	private timeToStartInterval: NodeJS.Timeout | undefined;
-	private playersToStart = 1;
-	private engine: GameEngine = new GameEngine(this.onCollisionStart);
-	private playerClients: Map<string, number> = new Map(); // client.sessionId -> entity.id
+  maxClients = 10;
+  private TIME_TO_START = 3;
+  private timeToStartInterval: NodeJS.Timeout | undefined;
+  private playersToStart = 1;
+  private engine: GameEngine = new GameEngine(this.onCollisionStart);
+  private playerClients: Map<string, number> = new Map(); // client.sessionId -> entity.id
 
-	onCreate(options: any) {
-		this.setState(new GameState());
+  onCreate(options: any) {
+    this.setState(new GameState());
 
-		this.setPatchRate(1000 / 30);
-		this.onBeforePatch = () => {
-			if (this.state.state === GameStateType.STARTED) {
-				this.engine.update(this.clock.deltaTime, this.state.entities);
-			}
-		};
+    this.setPatchRate(1000 / 30);
+    this.onBeforePatch = () => {
+      if (this.state.state === GameStateType.STARTED) {
+        this.engine.update(this.clock.deltaTime, this.state.entities);
+      }
+    };
 
-		this.state.config = new GameConfig();
-		this.state.config.maxDrunkiness = 100;
-		this.state.config.maxPlayers = this.maxClients;
-		this.state.config.playerSpeed = GameEngine.PLAYER_SPEED;
-		this.state.config.playersToStart = this.playersToStart;
-		this.state.state = GameStateType.WAITING;
+    this.state.config = new GameConfig();
+    this.state.config.maxDrunkiness = 100;
+    this.state.config.maxPlayers = this.maxClients;
+    this.state.config.playerSpeed = GameEngine.PLAYER_SPEED;
+    this.state.config.playersToStart = this.playersToStart;
+    this.state.state = GameStateType.WAITING;
 
-		// EVENT HANDLERS
+    // EVENT HANDLERS
 
-		this.onMessage(MessageType.MOVE, (client, message) => {
-			console.log(
-				`received MessageType.MOVE | client.sessionId - ${client.sessionId} | message - ${message}`
-			);
+    this.onMessage(MessageType.MOVE, (client, message) => {
+      console.log(
+        `received MessageType.MOVE | client.sessionId - ${client.sessionId} | message - ${message}`
+      );
 
-			/**
-			 * message
-			 * {x: number, y: number}
-			 */
-			this.engine.handleMove({
-				id: this.playerClients.get(client.sessionId),
-				speed: this.state.config.playerSpeed,
-				x: message.x,
-				y: message.y,
-			});
-		});
+      /**
+       * message
+       * {x: number, y: number}
+       */
+      this.engine.handleMove({
+        id: this.playerClients.get(client.sessionId),
+        speed: this.state.config.playerSpeed,
+        x: message.x,
+        y: message.y,
+      });
+    });
 
-		this.onMessage(MessageType.ROTATE, (client, message) => {
-			console.log(
-				`received MessageType.ROTATE | client.sessionId - ${client.sessionId} | message - ${message}`
-			);
+    this.onMessage(MessageType.ROTATE, (client, message) => {
+      console.log(
+        `received MessageType.ROTATE | client.sessionId - ${client.sessionId} | message - ${message}`
+      );
 
-			/**
-			 * message
-			 * {r: number}
-			 */
-			this.engine.handleRotation({
-				id: this.playerClients.get(client.sessionId),
-				r: message.r,
-			});
-		});
+      /**
+       * message
+       * {r: number}
+       */
+      this.engine.handleRotation({
+        id: this.playerClients.get(client.sessionId),
+        r: message.r,
+      });
+    });
 
-		this.onMessage(MessageType.HEAL, (client, message) => {
-			console.log(
-				`received MessageType.HEAL | client.sessionId - ${client.sessionId} | message - ${message}`
-			);
+    this.onMessage(MessageType.HEAL, (client, message) => {
+      console.log(
+        `received MessageType.HEAL | client.sessionId - ${client.sessionId} | message - ${message}`
+      );
 
-			/**
-			 * message
-			 * null
-			 */
-			const entity = <Player>(
-				this.state.entities.get(
-					`${this.playerClients.get(client.sessionId)}`
-				)
-			);
-			if (entity.healing === undefined) {
-				return;
-			}
+      /**
+       * message
+       * null
+       */
+      const entity = <Player>this.state.entities.get(`${this.playerClients.get(client.sessionId)}`);
+      if (entity.healing === undefined) {
+        return;
+      }
 
-			entity.drunkiness = Math.max(
-				0,
-				entity.drunkiness -
-					getHealingAmountFromHealingType(entity.healing)
-			);
-			entity.healing = undefined;
-		});
+      entity.drunkiness = Math.max(0, entity.drunkiness - getHealingAmountFromHealingType(entity.healing));
+      entity.healing = undefined;
+    });
 
-		this.onMessage(MessageType.SHOOT, (client, message) => {
-			console.log(
-				`received MessageType.SHOOT | client.sessionId - ${client.sessionId} | message - ${message}`
-			);
+    this.onMessage(MessageType.SHOOT, (client, message) => {
+      console.log(
+        `received MessageType.SHOOT | client.sessionId - ${client.sessionId} | message - ${message}`
+      );
 
-			/**
-			 * message
-			 * null
-			 */
-			const player = <Player>(
-				this.state.entities.get(
-					`${this.playerClients.get(client.sessionId)}`
-				)
-			);
+      /**
+       * message
+       * null
+       */
+      const player = <Player>this.state.entities.get(`${this.playerClients.get(client.sessionId)}`);
 
-			const projectileId = this.engine.addProjectile({
-				x: player.pos.x,
-				y: player.pos.y,
-				r: player.rotation,
-			});
+      const projectileId = this.engine.addProjectile({
+        x: player.pos.x,
+        y: player.pos.y,
+        r: player.rotation,
+      });
 
-			const projectile = new Projectile();
-			const projectilePos = new Vector();
-			GameRoom.updateVector(projectilePos, player.pos.x, player.pos.y);
-			GameRoom.updateEntity(
-				projectile,
-				projectileId,
-				EntityType.PROJECTILE,
-				projectilePos,
-				new Vector(),
-				player.rotation
-			);
-			GameRoom.updateProjectile({
-				projectile,
-				projectileType: player.weapon,
-			});
+      const projectile = new Projectile();
+      const projectilePos = new Vector();
+      GameRoom.updateVector(projectilePos, player.pos.x, player.pos.y);
+      GameRoom.updateEntity(
+        projectile,
+        projectileId,
+        EntityType.PROJECTILE,
+        projectilePos,
+        new Vector(),
+        player.rotation
+      );
+      GameRoom.updateProjectile({
+        projectile,
+        projectileType: player.weapon,
+      });
 
-			this.state.entities.set(`${projectile.id}`, projectile);
-		});
+      this.state.entities.set(`${projectile.id}`, projectile);
+    });
 
-		this.onMessage(MessageType.PICKUP, (client, message) => {
-			console.log(
-				`received MessageType.PICKUP | client.sessionId - ${client.sessionId} | message - ${message}`
-			);
+    this.onMessage(MessageType.PICKUP, (client, message) => {
+      console.log(
+        `received MessageType.PICKUP | client.sessionId - ${client.sessionId} | message - ${message}`
+      );
 
-			/**
-			 * message
-			 */
-			// TODO
-		});
-	}
+      /**
+       * message
+       */
+      // TODO
+    });
+  }
 
-	onJoin(client: Client, options: { name: string }) {
-		console.log(client.sessionId, "joined!");
+  onJoin(client: Client, options: { name: string }) {
+    console.log(client.sessionId, "joined!");
 
-		const id = this.engine.addPlayer({
-			x: 0,
-			y: 0,
-			r: 0,
-		});
+    if (this.state.state === GameStateType.STARTED || this.state.state === GameStateType.ENDED) {
+      client.leave();
+    }
 
-		const player = new Player();
-		GameRoom.updateEntity(
-			player,
-			id,
-			EntityType.PLAYER,
-			new Vector(),
-			new Vector(),
-			0
-		);
-		GameRoom.updatePlayer(
-			player,
-			options.name,
-			WeaponType.TENNENTS_LIGHT,
-			0,
-			PlayerSkinType.RED
-		);
+    if (this.clients.length >= this.playersToStart && this.timeToStartInterval === undefined) {
+      this.state.timeToStart = this.TIME_TO_START;
+      this.state.state = GameStateType.STARTING;
+      this.timeToStartInterval = setInterval(() => {
+        this.state.timeToStart--;
+        if (this.state.timeToStart === 0) {
+          clearInterval(this.timeToStartInterval);
+          this.timeToStartInterval = undefined;
+          this.state.state = GameStateType.STARTED;
+        }
+      }, 1000);
+    }
 
-		this.state.entities.set(`${player.id}`, player);
-		this.state.players.set(client.sessionId, player.id);
+    const id = this.engine.addPlayer({
+      x: 0,
+      y: 0,
+      r: 0,
+    });
 
-		this.playerClients.set(client.sessionId, player.id);
-	}
+    const player = new Player();
+    GameRoom.updateEntity(player, id, EntityType.PLAYER, new Vector(), new Vector(), 0);
+    GameRoom.updatePlayer(player, options.name, WeaponType.TENNENTS_LIGHT, 0, PlayerSkinType.RED);
 
-	onLeave(client: Client, consented: boolean) {
-		console.log(client.sessionId, "left!");
+    this.state.entities.set(`${player.id}`, player);
+    this.state.players.set(client.sessionId, player.id);
 
-		const id = this.playerClients.get(client.sessionId);
+    this.playerClients.set(client.sessionId, player.id);
+  }
 
-		this.engine.removeEntity(id);
+  onLeave(client: Client, consented: boolean) {
+    console.log(client.sessionId, "left!");
 
-		this.state.entities.delete(`${id}`);
-		this.state.players.delete(client.sessionId);
+    const id = this.playerClients.get(client.sessionId);
 
-		this.playerClients.delete(client.sessionId);
-	}
+    this.engine.removeEntity(id);
 
-	onDispose() {
-		console.log("room", this.roomId, "disposing...");
+    this.state.entities.delete(`${id}`);
+    this.state.players.delete(client.sessionId);
 
-		this.engine.dispose();
-	}
+    this.playerClients.delete(client.sessionId);
 
-	// COLLISIONS
+    if (this.clients.length < 2) {
+      this.disconnect();
+    }
+  }
 
-	private onCollisionStart(event: Matter.IEventCollision<Matter.Engine>) {
-		const pairs = event.pairs;
+  onDispose() {
+    console.log("room", this.roomId, "disposing...");
 
-		for (const pair of pairs) {
-			const bodyA = pair.bodyA;
-			const bodyB = pair.bodyB;
+    this.engine.dispose();
+  }
 
-			// broadcast collision event to room
-			// using bodyA.plugin.id and bodyB.plugin.id
-		}
-	}
+  // COLLISIONS
 
-	// HELPERS - UPDATE
+  private onCollisionStart(event: Matter.IEventCollision<Matter.Engine>) {
+    const pairs = event.pairs;
 
-	static updateVector(vector: Vector, x: number, y: number) {
-		vector.x = x;
-		vector.y = y;
-	}
+    for (const pair of pairs) {
+      const bodyA = pair.bodyA;
+      const bodyB = pair.bodyB;
 
-	static updateEntity(
-		entity: Entity,
-		id: number,
-		type: EntityType,
-		pos: Vector,
-		velocity: Vector,
-		rotation: number
-	) {
-		entity.id = id;
-		entity.type = type;
-		entity.pos = pos;
-		entity.velocity = velocity;
-		entity.rotation = rotation;
-	}
+      // broadcast collision event to room
+      // using bodyA.plugin.id and bodyB.plugin.id
+    }
+  }
 
-	static updatePlayer(
-		player: Player,
-		name: string,
-		weapon: WeaponType,
-		drunkiness: number,
-		skin: PlayerSkinType,
-		healing?: HealingType,
-		canPickup?: number
-	) {
-		player.name = name;
-		player.weapon = weapon;
-		player.drunkiness = drunkiness;
-		player.skin = skin;
-		player.healing = healing;
-		player.canPickup = canPickup;
-	}
+  // HELPERS - UPDATE
 
-	static updateProjectile({
-		projectile,
-		projectileType,
-	}: {
-		projectile: Projectile;
-		projectileType: WeaponType;
-	}) {
-		projectile.projectileType = projectileType;
-	}
+  static updateVector(vector: Vector, x: number, y: number) {
+    vector.x = x;
+    vector.y = y;
+  }
+
+  static updateEntity(
+    entity: Entity,
+    id: number,
+    type: EntityType,
+    pos: Vector,
+    velocity: Vector,
+    rotation: number
+  ) {
+    entity.id = id;
+    entity.type = type;
+    entity.pos = pos;
+    entity.velocity = velocity;
+    entity.rotation = rotation;
+  }
+
+  static updatePlayer(
+    player: Player,
+    name: string,
+    weapon: WeaponType,
+    drunkiness: number,
+    skin: PlayerSkinType,
+    healing?: HealingType,
+    canPickup?: number
+  ) {
+    player.name = name;
+    player.weapon = weapon;
+    player.drunkiness = drunkiness;
+    player.skin = skin;
+    player.healing = healing;
+    player.canPickup = canPickup;
+  }
+
+  static updateProjectile({
+    projectile,
+    projectileType,
+  }: {
+    projectile: Projectile;
+    projectileType: WeaponType;
+  }) {
+    projectile.projectileType = projectileType;
+  }
 }
