@@ -4,8 +4,7 @@ import Game, { gameContainer } from "./game/Game";
 const api = new API();
 
 let room: Room | null = null;
-
-const game = new Game();
+let game: Game | null = null;
 
 const joinForm = document.getElementById("join-form") as HTMLFormElement;
 const nameInput = document.getElementById("name") as HTMLInputElement;
@@ -27,5 +26,7 @@ joinForm.addEventListener("submit", async (event) => {
 
   joinForm.style.display = "none";
   gameContainer.style.display = "block";
+
+  game = new Game(room);
   game.init();
 });
