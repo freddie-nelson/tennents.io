@@ -13,6 +13,7 @@ export class GameEngine {
 	static readonly PROJECTILE_RADIUS: number = 0.5;
 	static readonly PROJECTILE_LIFETIME: number = 100;
 	static readonly PROJECTILE_SPEED: number = 0.2;
+	static readonly PICKUP_RADIUS: number = 1.5;
 
 	private engine: Matter.Engine;
 	private collisionCallback: (
@@ -174,6 +175,37 @@ export class GameEngine {
 		entity.plugin.lifetime = GameEngine.PROJECTILE_LIFETIME;
 
 		return this.id;
+	}
+
+	findClosestPickupEntity(entityId: number): number | null {
+		const entity = this.entities.get(entityId);
+
+		if (!entity) return null;
+
+		let closestPickupId = -1;
+		let closestPickupDistance = Infinity;
+
+		for (const [id, otherEntity] of this.entities) {
+			if (
+				otherEntity.plugin.type !== EntityType.WEAPON ||
+				otherEntity.plugin.type !== EntityType.HEALING
+			)
+				continue;
+
+			const distance = Matter.Vector.magnitude(
+				Matter.Vector.sub(entity.position, otherEntity.position)
+			);
+
+			if (
+				distance < closestPickupDistance &&
+				distance <= GameEngine.PICKUP_RADIUS
+			) {
+				closestPickupId = id;
+				closestPickupDistance = distance;
+			}
+		}
+
+		return closestPickupId === -1 ? null : closestPickupId;
 	}
 
 	removeEntity(id: number) {

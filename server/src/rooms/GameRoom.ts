@@ -36,6 +36,7 @@ export class GameRoom extends Room<GameState> {
 		this.onBeforePatch = () => {
 			if (this.state.state === GameStateType.STARTED) {
 				this.engine.update(this.clock.deltaTime, this.state.entities);
+				this.updateClosestPickups();
 			}
 		};
 
@@ -154,7 +155,16 @@ export class GameRoom extends Room<GameState> {
 
 			/**
 			 * message
+			 * null
 			 */
+			const player = <Player>(
+				this.state.entities.get(
+					`${this.playerClients.get(client.sessionId)}`
+				)
+			);
+
+			// destroy the entity of the floor
+			// set the player's weapon to the weapon of the floor entity
 			// TODO
 		});
 	}
@@ -232,6 +242,23 @@ export class GameRoom extends Room<GameState> {
 		console.log("room", this.roomId, "disposing...");
 
 		this.engine.dispose();
+	}
+
+	updateClosestPickups() {
+		const playerIds = Array.from(this.playerClients.values());
+
+		for (const playerId of playerIds) {
+			const player = <Player>this.state.entities.get(`${playerId}`);
+			const closestPickupId =
+				this.engine.findClosestPickupEntity(playerId);
+
+			if (closestPickupId === null) {
+				player.canPickup = undefined;
+				continue;
+			}
+
+			player.canPickup = closestPickupId;
+		}
 	}
 
 	// COLLISIONS
