@@ -1,11 +1,17 @@
 import { API, Room } from "./api/colyseus";
 import Game, { gameContainer } from "./game/game";
 import loseScreen from "./game/loseScreen";
+import { SoundManager } from './game/soundManager';  
 
 const api = new API();
 
 let room: Room | null = null;
 let game: Game | null = null;
+
+const soundManager = SoundManager.getInstance();
+
+// Preload background music
+soundManager.loadSound('backgroundMusic', 'client/public/music/tennents.mp3');
 
 const joinForm = document.getElementById("join-form") as HTMLFormElement;
 const nameInput = document.getElementById("name") as HTMLInputElement;
@@ -31,5 +37,7 @@ joinForm.addEventListener("submit", async (event) => {
   game = new Game(room);
   game.init();
 
-  // loseScreen(6)
+  soundManager.playSound('backgroundMusic', true, 0.5);
+
+  // loseScreen(6)  // Uncomment if needed
 });
