@@ -46,6 +46,8 @@ const isKeyDown = (...k: string[]) =>
   typeof k === "string" ? key.get(k) ?? false : k.some((k) => key.get(k) ?? false);
 
 export default class Game {
+  public static readonly SCALE = 60;
+
   public readonly app: Application;
   public readonly world: Container = new Container();
   public readonly entities: Map<number, Entity> = new Map();
@@ -53,6 +55,7 @@ export default class Game {
   public readonly room: Room;
 
   public onStageChanges: ((game: Game) => void)[] = [];
+  public shootTimer: number = 0;
 
   constructor(room: Room) {
     this.app = new Application();
@@ -76,6 +79,7 @@ export default class Game {
     });
 
     this.app.stage.addChild(this.world);
+    this.app.stage.scale = Game.SCALE;
 
     this.app.ticker.add(() => this.update());
 
@@ -89,6 +93,15 @@ export default class Game {
       alert("You have been disconnected");
     });
 
+    this.app.canvas.addEventListener("click", () => {
+      if (!this.you || this.shootTimer > 0) {
+        return;
+      }
+
+      this.shootTimer = 10;
+      this.room.send(MessageType.SHOOT);
+    });
+
     this.app.start();
   }
 
@@ -99,7 +112,10 @@ export default class Game {
   private update() {
     const dt = this.app.ticker.deltaTime;
 
-    this.world.position.set(this.app.screen.width / 2, this.app.screen.height / 2);
+    this.world.position.set(
+      this.app.screen.width / 2 / this.app.stage.scale.x,
+      this.app.screen.height / 2 / this.app.stage.scale.y
+    );
 
     for (const e of this.entities.values()) {
       e.update(dt);
@@ -116,9 +132,10 @@ export default class Game {
       }
     }
 
+    this.shootTimer = Math.max(0, this.shootTimer - 1);
+
     this.handleMovement();
     this.handleRotation();
-    this.handleShoot();
   }
 
   private handleMovement() {
@@ -157,12 +174,6 @@ export default class Game {
       const rotation = dir.angle();
 
       this.room.send(MessageType.ROTATE, { r: rotation });
-    }
-  }
-
-  private handleShoot() {
-    if (this.you && isMousePressed) {
-      this.room.send(MessageType.SHOOT);
     }
   }
 

@@ -10,7 +10,7 @@ export class GameEngine {
   private static PLAYER_RADIUS: number = 1;
   private static PROJECTILE_RADIUS: number = 0.5;
 
-  private static PROJECTILE_SPEED: number = 5;
+  private static PROJECTILE_SPEED: number = 0.1;
 
   private engine: Matter.Engine;
   private entities: Map<number, Matter.Body>;
@@ -82,8 +82,8 @@ export class GameEngine {
     const dy = Math.sin(r);
 
     const entity = this.addEntity({
-      x: x + dx * GameEngine.PLAYER_RADIUS * 2,
-      y: y + dy * GameEngine.PLAYER_RADIUS * 2,
+      x: x + dx * GameEngine.PLAYER_RADIUS,
+      y: y + dy * GameEngine.PLAYER_RADIUS,
       r,
       velX: dx * GameEngine.PROJECTILE_SPEED,
       velY: dy * GameEngine.PROJECTILE_SPEED,
