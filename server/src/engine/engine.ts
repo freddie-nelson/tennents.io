@@ -1,4 +1,7 @@
 import Matter from "matter-js";
+import { MapSchema } from "@colyseus/schema";
+import { Entity } from "../rooms/schema/Entity";
+import { GameRoom } from "../rooms/GameRoom";
 
 export class GameEngine {
 	private static PLAYER_RADIUS: number = 1;
@@ -25,11 +28,26 @@ export class GameEngine {
 		Matter.Engine.clear(this.engine);
 	}
 
-	// Methods
-
 	initMap() {}
 
 	addPlayer(): number {
 		return this.addEntity(0, 0, GameEngine.PLAYER_RADIUS);
+	}
+
+	updateEntities(stateEntities: MapSchema<Entity, string>) {
+		for (const [id, entity] of stateEntities) {
+			const gameEntity = this.entities.get(parseInt(id));
+			GameRoom.updateVector(
+				entity.pos,
+				gameEntity.position.x,
+				gameEntity.position.y
+			);
+			GameRoom.updateVector(
+				entity.velocity,
+				gameEntity.velocity.x,
+				gameEntity.velocity.y
+			);
+			entity.rotation = gameEntity.angle;
+		}
 	}
 }

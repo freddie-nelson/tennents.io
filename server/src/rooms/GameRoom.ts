@@ -14,12 +14,19 @@ export class GameRoom extends Room<GameState> {
 	maxClients = 10;
 
 	private engine: GameEngine = new GameEngine();
-	private playerClients: Map<Client, number> = new Map();
+	// client.sessionId -> entity.id
+	private playerClients: Map<string, number> = new Map();
 
-	onCreate(options: { name: string }) {
+	onCreate(options: any) {
 		this.engine.initMap();
 
 		this.setState(new GameState());
+		this.engine.updateEntities(this.state.entities);
+
+		this.setPatchRate(1000 / 30);
+		this.onBeforePatch = () => {
+			this.engine.updateEntities(this.state.entities);
+		};
 
 		this.onMessage(MessageType.MOVE, (client, message) => {});
 		this.onMessage(MessageType.ROTATE, (client, message) => {});
@@ -34,14 +41,17 @@ export class GameRoom extends Room<GameState> {
 		// add to game engine entities
 		const id = this.engine.addPlayer();
 
+		// map client to room entities player entity index
+		this.playerClients.set(client.sessionId, id);
+
 		// create room state entity
 		const pos = new Vector();
-		this.updateVector(pos, 0, 0);
+		GameRoom.updateVector(pos, 0, 0);
 		const velocity = new Vector();
-		this.updateVector(velocity, 0, 0);
+		GameRoom.updateVector(velocity, 0, 0);
 		const player = new Player();
-		this.updateEntity(player, id, EntityType.PLAYER, pos, velocity, 0);
-		this.updatePlayer(
+		GameRoom.updateEntity(player, id, EntityType.PLAYER, pos, velocity, 0);
+		GameRoom.updatePlayer(
 			player,
 			options.name,
 			WeaponType.TENNENTS_LIGHT,
@@ -50,25 +60,22 @@ export class GameRoom extends Room<GameState> {
 		);
 
 		// add to room state entities
-		this.state.entities.push(player);
-
-		// map client to room entities player entity index
-		this.playerClients.set(client, this.state.entities.length);
+		this.state.entities.set(`${player.id}`, player);
 	}
 
 	onLeave(client: Client, consented: boolean) {
 		console.log(client.sessionId, "left!");
 
-		const index = this.playerClients.get(client);
-		const player = this.state.entities[index];
-
-		// remove entity from room state entities
-		this.state.entities.deleteAt(index);
-
-		// update playerClients mapping
+		const id = this.playerClients.get(client.sessionId);
 
 		// remove entity from game state entities
-		this.engine.removeEntity(player.id);
+		this.engine.removeEntity(id);
+
+		// remove entity from room state entities
+		this.state.entities.delete(`${id}`);
+
+		// update playerClients mapping
+		this.playerClients.delete(client.sessionId);
 	}
 
 	onDispose() {
@@ -79,12 +86,12 @@ export class GameRoom extends Room<GameState> {
 
 	// Update Entities
 
-	private updateVector(vector: Vector, x: number, y: number) {
+	static updateVector(vector: Vector, x: number, y: number) {
 		vector.x = x;
 		vector.y = y;
 	}
 
-	private updateEntity(
+	static updateEntity(
 		entity: Entity,
 		id: number,
 		type: EntityType,
@@ -99,7 +106,7 @@ export class GameRoom extends Room<GameState> {
 		entity.rotation = rotation;
 	}
 
-	private updatePlayer(
+	static updatePlayer(
 		player: Player,
 		name: string,
 		weapon: WeaponType,
