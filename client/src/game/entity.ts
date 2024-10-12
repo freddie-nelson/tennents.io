@@ -27,8 +27,8 @@ export default class Entity {
       this.createSprite();
     }
 
-    this.pos.x += this.velocity.x * dt;
-    this.pos.y += this.velocity.y * dt;
+    // this.pos.x += this.velocity.x * dt;
+    // this.pos.y += this.velocity.y * dt;
 
     this.sprite!.position.set(this.pos.x, this.pos.y);
     this.sprite!.rotation = this.rotation;

@@ -14,6 +14,7 @@ import Weapon from "./Weapon";
 import Projectile from "./Projectile";
 import { GameState } from "../../../server/src/rooms/schema/GameState";
 import Textures from "./Textures";
+import { MessageType } from "../../../server/src/rooms/schema/enums/MessageType";
 
 export const gameContainer = document.querySelector(".game") as HTMLElement;
 
@@ -60,7 +61,7 @@ export default class Game {
 
     this.app.ticker.add(this.update.bind(this));
 
-    this.room.onStateChange(this.sync.bind(this));
+    this.room.onStateChange((state) => this.sync(state));
     this.sync(this.room.state);
 
     this.room.onLeave(() => {
@@ -80,7 +81,8 @@ export default class Game {
     }
 
     if (this.you) {
-      this.world.pivot.set(this.you.pos.x, this.you.pos.y);
+      console.log(this.you.pos.x, this.you.pos.y);
+      // this.world.pivot.set(this.you.pos.x, this.you.pos.y);
     }
 
     const worldSprites = new Set(this.world.children);
@@ -108,8 +110,8 @@ export default class Game {
       moveVec.x += 1;
     }
 
-    if (this.you) {
-      this.room.send("move", { x: moveVec.x, y: moveVec.y });
+    if (this.you && (moveVec.x !== 0 || moveVec.y !== 0)) {
+      this.room.send(MessageType.MOVE, { x: moveVec.x, y: moveVec.y });
     }
   }
 
