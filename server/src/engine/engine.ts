@@ -2,8 +2,11 @@ import Matter from "matter-js";
 import { MapSchema } from "@colyseus/schema";
 
 import { Entity } from "../rooms/schema/Entity";
+import { EntityType } from "../rooms/schema/enums/EntityType";
+import { Player } from "../rooms/schema/Player";
 
 export class GameEngine {
+	private static DRUNKINESS_GAIN: number = 0.1;
 	private static PLAYER_RADIUS: number = 1;
 	private static PROJECTILE_RADIUS: number = 0.5;
 
@@ -131,6 +134,12 @@ export class GameEngine {
 			if (entity.rotation !== gameEntity.angle) {
 				entity.rotation = gameEntity.angle;
 
+				changed = true;
+			}
+
+			if (entity.type === EntityType.PLAYER) {
+				const player = entity as Player;
+				player.drunkiness += GameEngine.DRUNKINESS_GAIN;
 				changed = true;
 			}
 

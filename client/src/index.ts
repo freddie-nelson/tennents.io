@@ -21,11 +21,9 @@ joinForm.addEventListener("submit", async (event) => {
     return;
   }
 
-
   joinButton.innerText = "Joining...";
 
   room = await api.joinOrCreate(name);
-
 
   joinForm.style.display = "none";
   gameContainer.style.display = "block";
