@@ -31,6 +31,7 @@ export default abstract class Textures {
   }
 
   static getWeaponTexture(weaponType: WeaponType): Texture {
+    console.log(weaponType);
     const key = WeaponType[weaponType];
     if (!this.textures.has(key)) {
       throw new Error(`Texture for ${weaponType} not found`);

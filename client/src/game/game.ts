@@ -118,6 +118,7 @@ export default class Game {
 
     this.handleMovement();
     this.handleRotation();
+    this.handleShoot();
   }
 
   private handleMovement() {
@@ -156,6 +157,12 @@ export default class Game {
       const rotation = dir.angle() - Math.PI / 2;
 
       this.room.send(MessageType.ROTATE, { r: rotation });
+    }
+  }
+
+  private handleShoot() {
+    if (this.you && isMousePressed) {
+      this.room.send(MessageType.SHOOT);
     }
   }
 

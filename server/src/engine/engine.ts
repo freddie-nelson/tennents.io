@@ -16,10 +16,6 @@ export class GameEngine {
   private entities: Map<number, Matter.Body>;
   private id: number;
 
-  private engine: Matter.Engine;
-  private entities: Map<number, Matter.Body>;
-  private id: number;
-
   constructor() {
     this.engine = Matter.Engine.create({ gravity: { x: 0, y: 0 } });
     this.entities = new Map<number, Matter.Body>();
@@ -29,6 +25,10 @@ export class GameEngine {
   }
 
   // HELPERS
+
+  private initMap() {
+    // TODO
+  }
 
   private addEntity({
     x,
@@ -88,12 +88,8 @@ export class GameEngine {
 
   // GENERAL
 
-  // GENERAL
-
-  removeEntity(id: number) {
-    const entity = this.entities.get(id);
-    this.entities.delete(id);
-    Matter.Composite.remove(this.engine.world, entity);
+  update(delta: number) {
+    Matter.Engine.update(this.engine, delta);
   }
 
   removeEntity(id: number) {
