@@ -93,14 +93,26 @@ export default class Game {
       alert("You have been disconnected");
     });
 
-    this.app.canvas.addEventListener("click", () => {
-      if (!this.you || this.shootTimer > 0) {
+    this.app.canvas.addEventListener("mousedown", (e) => {
+      if (!this.you) {
         return;
       }
 
-      this.shootTimer = 5;
-      this.room.send(MessageType.SHOOT);
+      if (e.button === 0) {
+        // left click
+        if (this.shootTimer > 0) {
+          return;
+        }
+
+        this.shootTimer = 5;
+        this.room.send(MessageType.SHOOT);
+      } else if (e.button === 2) {
+        // right click
+        this.room.send(MessageType.HEAL);
+      }
     });
+
+    this.app.canvas.oncontextmenu = (e) => e.preventDefault();
 
     this.app.start();
   }
