@@ -19,7 +19,8 @@ body {
 }
 
 h1 {
-  color: black;
+  color: red;
   font-size: 8rem;
   font-weight: bold;
+  -webkit-text-stroke: white 4px;
 }
