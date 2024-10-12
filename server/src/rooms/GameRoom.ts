@@ -16,25 +16,32 @@ import { GameConfig } from "./schema/GameConfig";
 import { Projectile } from "./schema/projectile";
 
 import { getHealingAmountFromHealingType } from "../rules/healing";
+import { GameStateType } from "./schema/enums/GameStateType";
 
 export class GameRoom extends Room<GameState> {
 	maxClients = 10;
-	private engine: GameEngine = new GameEngine();
+	private TIME_TO_START = 10;
+	private timeToStartInterval: NodeJS.Timeout | undefined;
+	private playersToStart = 1;
+	private engine: GameEngine = new GameEngine(this.onCollisionStart);
 	private playerClients: Map<string, number> = new Map(); // client.sessionId -> entity.id
 
 	onCreate(options: any) {
 		this.setState(new GameState());
-		this.engine.update(this.clock.deltaTime, this.state.entities);
 
 		this.setPatchRate(1000 / 30);
 		this.onBeforePatch = () => {
-			this.engine.update(this.clock.deltaTime, this.state.entities);
+			if (this.state.state === GameStateType.STARTED) {
+				this.engine.update(this.clock.deltaTime, this.state.entities);
+			}
 		};
 
 		this.state.config = new GameConfig();
 		this.state.config.maxDrunkiness = 100;
 		this.state.config.maxPlayers = this.maxClients;
-		this.state.config.playerSpeed = 5;
+		this.state.config.playerSpeed = GameEngine.PLAYER_SPEED;
+		this.state.config.playersToStart = this.playersToStart;
+		this.state.state = GameStateType.WAITING;
 
 		// EVENT HANDLERS
 
@@ -84,12 +91,16 @@ export class GameRoom extends Room<GameState> {
 					`${this.playerClients.get(client.sessionId)}`
 				)
 			);
+			if (entity.healing === undefined) {
+				return;
+			}
+
 			entity.drunkiness = Math.max(
 				0,
 				entity.drunkiness -
 					getHealingAmountFromHealingType(entity.healing)
 			);
-			entity.healing = null;
+			entity.healing = undefined;
 		});
 
 		this.onMessage(MessageType.SHOOT, (client, message) => {
@@ -195,7 +206,21 @@ export class GameRoom extends Room<GameState> {
 		this.engine.dispose();
 	}
 
-	// Update Entities
+	// COLLISIONS
+
+	private onCollisionStart(event: Matter.IEventCollision<Matter.Engine>) {
+		const pairs = event.pairs;
+
+		for (const pair of pairs) {
+			const bodyA = pair.bodyA;
+			const bodyB = pair.bodyB;
+
+			// broadcast collision event to room
+			// using bodyA.plugin.id and bodyB.plugin.id
+		}
+	}
+
+	// HELPERS - UPDATE
 
 	static updateVector(vector: Vector, x: number, y: number) {
 		vector.x = x;

@@ -15,8 +15,11 @@ import Projectile from "./Projectile";
 import { GameState } from "../../../server/src/rooms/schema/GameState";
 import Textures from "./Textures";
 import { MessageType } from "../../../server/src/rooms/schema/enums/MessageType";
+import { GameStateType } from "../../../server/src/rooms/schema/enums/GameStateType";
 
 export const gameContainer = document.querySelector(".game") as HTMLElement;
+export const startingContainer = document.querySelector(".starting") as HTMLElement;
+export const startingContainerText = document.querySelector(".starting h1") as HTMLElement;
 
 const key = new Map<string, boolean>();
 window.addEventListener("keydown", (e) => {
@@ -46,6 +49,8 @@ const isKeyDown = (...k: string[]) =>
   typeof k === "string" ? key.get(k) ?? false : k.some((k) => key.get(k) ?? false);
 
 export default class Game {
+  public static readonly SCALE = 60;
+
   public readonly app: Application;
   public readonly world: Container = new Container();
   public readonly entities: Map<number, Entity> = new Map();
@@ -53,6 +58,7 @@ export default class Game {
   public readonly room: Room;
 
   public onStageChanges: ((game: Game) => void)[] = [];
+  public shootTimer: number = 0;
 
   constructor(room: Room) {
     this.app = new Application();
@@ -76,6 +82,7 @@ export default class Game {
     });
 
     this.app.stage.addChild(this.world);
+    this.app.stage.scale = Game.SCALE;
 
     this.app.ticker.add(() => this.update());
 
@@ -85,9 +92,34 @@ export default class Game {
     });
     this.sync(this.room.state);
 
+    if (this.room.state.state !== GameStateType.STARTED) {
+      startingContainer.style.display = "flex";
+    }
+
     this.room.onLeave(() => {
       alert("You have been disconnected");
     });
+
+    this.app.canvas.addEventListener("mousedown", (e) => {
+      if (!this.you) {
+        return;
+      }
+
+      if (e.button === 0) {
+        // left click
+        if (this.shootTimer > 0) {
+          return;
+        }
+
+        this.shootTimer = 5;
+        this.room.send(MessageType.SHOOT);
+      } else if (e.button === 2) {
+        // right click
+        this.room.send(MessageType.HEAL);
+      }
+    });
+
+    this.app.canvas.oncontextmenu = (e) => e.preventDefault();
 
     this.app.start();
   }
@@ -97,9 +129,22 @@ export default class Game {
   }
 
   private update() {
+    if (startingContainer.style.display !== "none") {
+      if (this.room.state.state === GameStateType.STARTED) {
+        startingContainer.style.display = "none";
+      } else if (this.room.state.state === GameStateType.WAITING) {
+        startingContainerText.innerText = `Waiting for players... (${this.room.state.players.size}/${this.room.state.config.playersToStart})`;
+      } else if (this.room.state.state === GameStateType.STARTING) {
+        startingContainerText.innerText = `Game starting in ${this.room.state.timeToStart} seconds (${this.room.state.players.size}/${this.room.state.config.playersToStart})`;
+      }
+    }
+
     const dt = this.app.ticker.deltaTime;
 
-    this.world.position.set(this.app.screen.width / 2, this.app.screen.height / 2);
+    this.world.position.set(
+      this.app.screen.width / 2 / this.app.stage.scale.x,
+      this.app.screen.height / 2 / this.app.stage.scale.y
+    );
 
     for (const e of this.entities.values()) {
       e.update(dt);
@@ -116,9 +161,10 @@ export default class Game {
       }
     }
 
+    this.shootTimer = Math.max(0, this.shootTimer - 1);
+
     this.handleMovement();
     this.handleRotation();
-    this.handleShoot();
   }
 
   private handleMovement() {
@@ -157,12 +203,6 @@ export default class Game {
       const rotation = dir.angle();
 
       this.room.send(MessageType.ROTATE, { r: rotation });
-    }
-  }
-
-  private handleShoot() {
-    if (this.you && isMousePressed) {
-      this.room.send(MessageType.SHOOT);
     }
   }
 
