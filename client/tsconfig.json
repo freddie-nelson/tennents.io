@@ -19,7 +19,8 @@
     "noUnusedParameters": false,
     "noFallthroughCasesInSwitch": true,
     "strictNullChecks": false,
-    "experimentalDecorators": true
+    "experimentalDecorators": true,
+    "forceConsistentCasingInFileNames": false
   },
-  "include": ["src"]
+  "include": ["src", "../server"]
 }
