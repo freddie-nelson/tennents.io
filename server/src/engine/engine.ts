@@ -34,7 +34,7 @@ export class GameEngine {
 		return this.addEntity(0, 0, GameEngine.PLAYER_RADIUS);
 	}
 
-	updateEntities(stateEntities: MapSchema<Entity, string>) {
+	updateStateEntities(stateEntities: MapSchema<Entity, string>) {
 		for (const [id, entity] of stateEntities) {
 			const gameEntity = this.entities.get(parseInt(id));
 			GameRoom.updateVector(
@@ -49,5 +49,13 @@ export class GameEngine {
 			);
 			entity.rotation = gameEntity.angle;
 		}
+	}
+
+	// EVENT HANDLERS
+
+	handleMove(id: number, xVel: number, yVel: number) {
+		const entity = this.entities.get(id);
+		entity.velocity.x = xVel;
+		entity.velocity.y = yVel;
 	}
 }
