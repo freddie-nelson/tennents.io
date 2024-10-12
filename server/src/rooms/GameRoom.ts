@@ -31,6 +31,10 @@ export class GameRoom extends Room<GameState> {
 		// EVENT HANDLERS
 
 		this.onMessage(MessageType.MOVE, (client, message) => {
+			console.log(
+				`Received MessageType.MOVE | client.sessionId - ${client.sessionId} | message - ${message}`
+			);
+
 			/**
 			 * message
 			 * velocity vector
@@ -43,10 +47,29 @@ export class GameRoom extends Room<GameState> {
 			);
 		});
 
-		this.onMessage(MessageType.ROTATE, (client, message) => {});
-		this.onMessage(MessageType.HEAL, (client, message) => {});
-		this.onMessage(MessageType.SHOOT, (client, message) => {});
-		this.onMessage(MessageType.PICKUP, (client, message) => {});
+		this.onMessage(MessageType.ROTATE, (client, message) => {
+			console.log(
+				`Received MessageType.ROTATE | client.sessionId - ${client.sessionId} | message - ${message}`
+			);
+		});
+
+		this.onMessage(MessageType.HEAL, (client, message) => {
+			console.log(
+				`Received MessageType.HEAL | client.sessionId - ${client.sessionId} | message - ${message}`
+			);
+		});
+
+		this.onMessage(MessageType.SHOOT, (client, message) => {
+			console.log(
+				`Received MessageType.SHOOT | client.sessionId - ${client.sessionId} | message - ${message}`
+			);
+		});
+
+		this.onMessage(MessageType.PICKUP, (client, message) => {
+			console.log(
+				`Received MessageType.PICKUP | client.sessionId - ${client.sessionId} | message - ${message}`
+			);
+		});
 	}
 
 	onJoin(client: Client, options: { name: string }) {
