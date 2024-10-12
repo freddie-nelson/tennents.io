@@ -13,6 +13,7 @@ import Healing from "./Healing";
 import Weapon from "./Weapon";
 import Projectile from "./Projectile";
 import { GameState } from "../../../server/src/rooms/schema/GameState";
+import Textures from "./Textures";
 
 export const gameContainer = document.querySelector(".game") as HTMLElement;
 
@@ -29,12 +30,14 @@ export default class Game {
   }
 
   async init() {
+    await Textures.initTextures();
+
     await this.app.init({
       width: window.innerWidth,
       height: window.innerHeight,
+      resizeTo: gameContainer,
+      backgroundColor: "black",
     });
-
-    this.app.resizeTo = gameContainer;
 
     document.body.appendChild(this.app.canvas);
 
@@ -46,11 +49,11 @@ export default class Game {
 
     this.app.ticker.add(this.update.bind(this));
 
-    this.room.onStateChange((state) => {
-      this.syncEntities(state);
+    this.room.onStateChange(this.sync.bind(this));
+    this.sync(this.room.state);
 
-      const playerEntityId = state.players[this.room.sessionId];
-      this.you = (this.entities.get(playerEntityId) as Player) ?? null;
+    this.room.onLeave(() => {
+      alert("You have been disconnected");
     });
 
     this.app.start();
@@ -68,11 +71,25 @@ export default class Game {
     if (this.you) {
       this.world.pivot.set(this.you.pos.x, this.you.pos.y);
     }
+
+    const worldSprites = new Set(this.world.children);
+    for (const [id, e] of this.entities) {
+      if (e.sprite && !worldSprites.has(e.sprite)) {
+        this.world.addChild(e.sprite);
+      }
+    }
+  }
+
+  private sync(state: GameState) {
+    this.syncEntities(state);
+
+    const playerEntityId = state.players.get(this.room.sessionId)!;
+    this.you = (this.entities.get(playerEntityId) as Player) ?? null;
   }
 
   private syncEntities(state: GameState) {
     const stateEntities = new Map<number, ServerEntity>();
-    for (const e of state.entities) {
+    for (const [id, e] of state.entities) {
       stateEntities.set(e.id, e);
     }
 
@@ -84,18 +101,11 @@ export default class Game {
       }
     }
 
-    const worldSprites = new Set(this.world.children);
-
-    for (const e of state.entities) {
+    for (const [id, e] of state.entities) {
       if (!this.entities.has(e.id)) {
-        this.createEntity(e);
+        this.entities.set(e.id, this.createEntity(e));
       } else {
         this.updateEntity(e);
-      }
-
-      const entity = this.entities.get(e.id)!;
-      if (entity.sprite && !worldSprites.has(entity.sprite)) {
-        this.world.addChild(entity.sprite);
       }
     }
   }
@@ -115,6 +125,7 @@ export default class Game {
       case EntityType.PLAYER:
         const p = e as Player;
         const serverPlayer = entity as ServerPlayer;
+        p.name = serverPlayer.name;
         p.drunkiness = serverPlayer.drunkiness;
         p.canPickup = serverPlayer.canPickup;
         p.healing = serverPlayer.healing;
@@ -154,6 +165,7 @@ export default class Game {
         );
 
         const serverPlayer = entity as ServerPlayer;
+        p.name = serverPlayer.name;
         p.drunkiness = serverPlayer.drunkiness;
         p.canPickup = serverPlayer.canPickup;
         p.healing = serverPlayer.healing;

@@ -5,12 +5,18 @@ settings:
   excludeLinksFromLockfile: false
 
 dependencies:
+  '@colyseus/core':
+    specifier: ^0.15.52
+    version: 0.15.52
   '@colyseus/monitor':
     specifier: ^0.15.0
     version: 0.15.8
   '@colyseus/playground':
     specifier: ^0.15.3
     version: 0.15.14(express@4.21.1)
+  '@colyseus/schema':
+    specifier: ^2.0.35
+    version: 2.0.35
   '@colyseus/tools':
     specifier: ^0.15.0
     version: 0.15.42(@colyseus/schema@2.0.35)
