@@ -1,4 +1,4 @@
-import { Application } from "pixi.js";
+import { Application, Container } from "pixi.js";
 import Entity from "./Entity";
 import { Room } from "../api/colyseus";
 import { Entity as ServerEntity } from "../../../server/src/rooms/schema/Entity";
@@ -18,8 +18,9 @@ export const gameContainer = document.querySelector(".game") as HTMLElement;
 
 export default class Game {
   public readonly app: Application;
+  public readonly world: Container = new Container();
   public readonly entities: Map<number, Entity> = new Map();
-  public readonly you: layer | null = null;
+  public you: Player | null = null;
   public readonly room: Room;
 
   constructor(room: Room) {
@@ -41,10 +42,15 @@ export default class Game {
       this.app.resize();
     });
 
+    this.app.stage.addChild(this.world);
+
     this.app.ticker.add(this.update.bind(this));
 
     this.room.onStateChange((state) => {
       this.syncEntities(state);
+
+      const playerEntityId = state.players[this.room.sessionId];
+      this.you = (this.entities.get(playerEntityId) as Player) ?? null;
     });
 
     this.app.start();
@@ -53,8 +59,14 @@ export default class Game {
   private update() {
     const dt = this.app.ticker.deltaTime;
 
+    this.world.position.set(this.app.screen.width / 2, this.app.screen.height / 2);
+
     for (const e of this.entities.values()) {
       e.update(dt);
+    }
+
+    if (this.you) {
+      this.world.pivot.set(this.you.pos.x, this.you.pos.y);
     }
   }
 
@@ -66,15 +78,24 @@ export default class Game {
 
     for (const [id, e] of this.entities) {
       if (!stateEntities.has(id)) {
+        if (e.sprite) this.world.removeChild(e.sprite);
+
         this.entities.delete(id);
       }
     }
 
+    const worldSprites = new Set(this.world.children);
+
     for (const e of state.entities) {
       if (!this.entities.has(e.id)) {
-        this.entities.set(e.id, this.createEntity(e));
+        this.createEntity(e);
       } else {
         this.updateEntity(e);
+      }
+
+      const entity = this.entities.get(e.id)!;
+      if (entity.sprite && !worldSprites.has(entity.sprite)) {
+        this.world.addChild(entity.sprite);
       }
     }
   }

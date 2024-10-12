@@ -41,9 +41,6 @@ export class GameRoom extends Room<GameState> {
 		// add to game engine entities
 		const id = this.engine.addPlayer();
 
-		// map client to room entities player entity index
-		this.playerClients.set(client.sessionId, id);
-
 		// create room state entity
 		const pos = new Vector();
 		GameRoom.updateVector(pos, 0, 0);

@@ -4,9 +4,11 @@ import { EntityType } from "../../../server/src/rooms/schema/enums/EntityType";
 import { Sprite } from "pixi.js";
 import Textures from "./Textures";
 import Player from "./Player";
+import Weapon from "./Weapon";
+import Healing from "./Healing";
 
 export default class Entity {
-  private sprite: Sprite | null = null;
+  public sprite: Sprite | null = null;
   private spriteType: EntityType | null = null;
 
   constructor(
@@ -37,10 +39,20 @@ export default class Entity {
 
     this.spriteType = this.type;
 
-    if (this.type === EntityType.PLAYER) {
-      this.sprite.texture = Textures.getPlayerTexture((this as any as Player).skin);
-    } else {
-      this.sprite.texture = Textures.getTexture(this.type);
+    switch (this.type) {
+      case EntityType.PLAYER:
+        this.sprite.texture = Textures.getPlayerTexture((this as any as Player).skin);
+        break;
+      case EntityType.HEALING:
+        this.sprite.texture = Textures.getHealingTexture((this as any as Healing).healingType);
+        break;
+      case EntityType.WEAPON:
+      case EntityType.PROJECTILE:
+        this.sprite.texture = Textures.getWeaponTexture((this as any as Weapon).weaponType);
+        break;
+
+      default:
+        throw new Error("Unknown entity type");
     }
   }
 }
