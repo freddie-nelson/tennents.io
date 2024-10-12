@@ -32,12 +32,11 @@ export class GameRoom extends Room<GameState> {
 
 		this.onMessage(MessageType.MOVE, (client, message) => {
 			console.log(
-				`Received MessageType.MOVE | client.sessionId - ${client.sessionId} | message - ${message}`
+				`received MessageType.MOVE | client.sessionId - ${client.sessionId} | message - ${message}`
 			);
 
 			/**
 			 * message
-			 * velocity vector
 			 * {x: number, y: number}
 			 */
 			this.engine.handleMove(
@@ -49,25 +48,31 @@ export class GameRoom extends Room<GameState> {
 
 		this.onMessage(MessageType.ROTATE, (client, message) => {
 			console.log(
-				`Received MessageType.ROTATE | client.sessionId - ${client.sessionId} | message - ${message}`
+				`received MessageType.ROTATE | client.sessionId - ${client.sessionId} | message - ${message}`
 			);
+
+			/**
+			 * message
+			 * {r: number}
+			 */
+			this.engine.handleRotation();
 		});
 
 		this.onMessage(MessageType.HEAL, (client, message) => {
 			console.log(
-				`Received MessageType.HEAL | client.sessionId - ${client.sessionId} | message - ${message}`
+				`received MessageType.HEAL | client.sessionId - ${client.sessionId} | message - ${message}`
 			);
 		});
 
 		this.onMessage(MessageType.SHOOT, (client, message) => {
 			console.log(
-				`Received MessageType.SHOOT | client.sessionId - ${client.sessionId} | message - ${message}`
+				`received MessageType.SHOOT | client.sessionId - ${client.sessionId} | message - ${message}`
 			);
 		});
 
 		this.onMessage(MessageType.PICKUP, (client, message) => {
 			console.log(
-				`Received MessageType.PICKUP | client.sessionId - ${client.sessionId} | message - ${message}`
+				`received MessageType.PICKUP | client.sessionId - ${client.sessionId} | message - ${message}`
 			);
 		});
 	}
@@ -75,10 +80,8 @@ export class GameRoom extends Room<GameState> {
 	onJoin(client: Client, options: { name: string }) {
 		console.log(client.sessionId, "joined!");
 
-		// add to game engine entities
 		const id = this.engine.addPlayer();
 
-		// create room state entity
 		const pos = new Vector();
 		GameRoom.updateVector(pos, 0, 0);
 		const velocity = new Vector();
@@ -93,9 +96,10 @@ export class GameRoom extends Room<GameState> {
 			PlayerSkinType.RED
 		);
 
-		// add to room state entities
 		this.state.entities.set(`${player.id}`, player);
 		this.state.players.set(client.sessionId, player.id);
+
+		this.playerClients.set(client.sessionId, player.id);
 	}
 
 	onLeave(client: Client, consented: boolean) {
@@ -103,14 +107,11 @@ export class GameRoom extends Room<GameState> {
 
 		const id = this.playerClients.get(client.sessionId);
 
-		// remove entity from game state entities
 		this.engine.removeEntity(id);
 
-		// remove entity from room state entities
 		this.state.entities.delete(`${id}`);
 		this.state.players.delete(client.sessionId);
 
-		// update playerClients mapping
 		this.playerClients.delete(client.sessionId);
 	}
 
