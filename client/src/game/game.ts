@@ -17,7 +17,8 @@ import Textures from "./Textures";
 import { MessageType } from "../../../server/src/rooms/schema/enums/MessageType";
 import { GameStateType } from "../../../server/src/rooms/schema/enums/GameStateType";
 import { SoundManager } from './soundManager';
-
+import { WeaponType } from "../../../server/src/rooms/schema/enums/WeaponType";
+import { HealingType } from "../../../server/src/rooms/schema/enums/HealingType";
 
 export const gameContainer = document.querySelector(".game") as HTMLElement;
 export const startingContainer = document.querySelector(".starting") as HTMLElement;
@@ -135,12 +136,57 @@ export default class Game {
 
         this.shootTimer = 5;
         this.room.send(MessageType.SHOOT);
-      } else if (e.button === 2) {
-        // right click
-        this.room.send(MessageType.HEAL);
-      }
-    });
 
+
+    // Play weapon sound based on the player's weapon
+    const soundManager = SoundManager.getInstance();
+    switch (this.you.weapon) {
+      case WeaponType.TENNENTS_KEG:
+        soundManager.playSound("keg");
+        break;
+      case WeaponType.TENNENTS_SUPER:
+        soundManager.playSound("tennentsSuper");
+        break;
+      case WeaponType.TENNENTS_ORIGINAL:
+        soundManager.playSound("tennentsClassic");
+        break;
+      case WeaponType.TENNENTS_PINT:
+        soundManager.playSound("tennents");
+        break;
+      case WeaponType.TENNENTS_LIGHT:
+        soundManager.playSound("tennentsLite");
+        break;
+      default:
+        console.warn('Unknown weapon type');
+    }
+
+  } else if (e.button === 2) {
+    // right click
+    this.room.send(MessageType.HEAL);
+      // Play healing sound based on the healing type
+      switch (this.you.healing) {
+        case HealingType.TENNENTS_ZERO:
+          soundManager.playSound("tennentsZero");
+          break;
+        case HealingType.WATER:
+          soundManager.playSound("water");
+          break;
+        case HealingType.COFFEE:
+          soundManager.playSound("coffee");
+          break;
+        case HealingType.ORANGE_JUICE:
+          soundManager.playSound("oj");
+          break;
+        case HealingType.DONER_KEBAB:
+          soundManager.playSound("kebab");
+          break;
+        default:
+          console.warn('Unknown healing type');
+      }
+  }
+}); 
+
+    
     this.app.canvas.oncontextmenu = (e) => e.preventDefault();
 
     this.app.start();
