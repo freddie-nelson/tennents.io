@@ -9,8 +9,8 @@ export class GameEngine {
 	private static DRUNKINESS_LOSS: number = 0.1;
 	private static PLAYER_RADIUS: number = 1;
 	private static PROJECTILE_RADIUS: number = 0.5;
-	private static PROJECTILE_SPEED: number = 5;
 	private static PROJECTILE_LIFETIME: number = 100;
+	private static PROJECTILE_SPEED: number = 0.1;
 
 	private engine: Matter.Engine;
 	private entities: Map<number, Matter.Body>;
