@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
-    "setup": "pnpm i && cd ../server && pnpm i && cd ../client",
+    "setup": "pnpm i && cd ../server && pnpm i && cd ../client && pnpm build",
     "preview": "vite preview"
   },
   "devDependencies": {
