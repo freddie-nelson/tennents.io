@@ -88,6 +88,10 @@ export class GameMap {
       return Math.random() < 0.3;
     }
 
+    if (type === TileType.WOODEN_FLOOR || type === TileType.COBBLESTONE) {
+      return Math.random() < 0.001;
+    }
+
     return false;
   }
 }

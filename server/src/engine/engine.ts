@@ -23,7 +23,7 @@ export class GameEngine {
   private entities: Map<number, Matter.Body>;
   private id: number;
   private spawnableTiles: { x: number; y: number }[] = [];
-  private pickupSpawnableTiles: { x: number; y: number }[] = [];
+  pickupSpawnableTiles: { x: number; y: number }[] = [];
 
   constructor(collisionCallback: (event: Matter.IEventCollision<Matter.Engine>) => void) {
     this.engine = Matter.Engine.create({ gravity: { x: 0, y: 0 } });
@@ -41,10 +41,16 @@ export class GameEngine {
     const map = new GameMap(mapJson);
     map.tiles.forEach((tile) => {
       if (tile.isPlayerSpawn) {
-        this.spawnableTiles.push({ x: tile.x, y: tile.y });
+        this.spawnableTiles.push({
+          x: tile.x + GameEngine.TILE_SIZE / 2,
+          y: tile.y + GameEngine.TILE_SIZE / 2,
+        });
       }
       if (tile.isPickupSpawn) {
-        this.pickupSpawnableTiles.push({ x: tile.x, y: tile.y });
+        this.pickupSpawnableTiles.push({
+          x: tile.x + GameEngine.TILE_SIZE / 2,
+          y: tile.y + GameEngine.TILE_SIZE / 2,
+        });
       }
       if (!tile.isCollidable) {
         return;
@@ -179,10 +185,10 @@ export class GameEngine {
     const entity = this.addEntity({
       x,
       y,
-      r: 0,
+      r: Math.random() * Math.PI * 2,
       velX: 0,
       velY: 0,
-      radius: GameEngine.PLAYER_RADIUS,
+      radius: GameEngine.PLAYER_RADIUS / 2,
       type,
     });
     entity.isStatic = true;

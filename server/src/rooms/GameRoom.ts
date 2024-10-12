@@ -47,6 +47,8 @@ export class GameRoom extends Room<GameState> {
     this.state.config.playersToStart = this.playersToStart;
     this.state.state = GameStateType.WAITING;
 
+    this.createPickups();
+
     // EVENT HANDLERS
 
     this.onMessage(MessageType.MOVE, (client, message) => {
@@ -302,6 +304,34 @@ export class GameRoom extends Room<GameState> {
   }
 
   // HELPERS - UPDATE
+
+  createPickups() {
+    this.engine.pickupSpawnableTiles.forEach((tile) => {
+      const type = Math.random() > 0.5 ? EntityType.WEAPON : EntityType.HEALING;
+      const entity = this.engine.addPickup({
+        x: tile.x,
+        y: tile.y,
+        type,
+      });
+
+      if (type === EntityType.HEALING) {
+        const healing = new Healing();
+        GameRoom.updateEntity(healing, entity, type, new Vector(), new Vector(), 0);
+        healing.healingType = this.randomEnum(HealingType);
+        this.state.entities.set(`${healing.id}`, healing);
+      } else if (type === EntityType.WEAPON) {
+        const weapon = new Weapon();
+        GameRoom.updateEntity(weapon, entity, type, new Vector(), new Vector(), 0);
+        weapon.weaponType = this.randomEnum(WeaponType);
+        this.state.entities.set(`${weapon.id}`, weapon);
+      }
+    });
+  }
+
+  randomEnum<T>(anEnum: T): T[keyof T] {
+    const values = Object.values(anEnum).filter((v) => typeof v === "number");
+    return values[Math.floor(Math.random() * values.length)] as any;
+  }
 
   static updateVector(vector: Vector, x: number, y: number) {
     vector.x = x;

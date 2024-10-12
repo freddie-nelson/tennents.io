@@ -94,7 +94,7 @@ export default class Entity {
         weaponSprite.texture = Textures.getWeaponTexture(p.weapon);
         weaponSprite.rotation = Math.PI * 1.2;
 
-        const size = Entity.getSize(EntityType.WEAPON, p.weapon);
+        const size = Entity.getSize(EntityType.WEAPON, p.weapon).mul(0.6);
         weaponSprite.width = size.x;
         weaponSprite.height = size.y;
 
@@ -108,7 +108,7 @@ export default class Entity {
         healingSprite.texture = Textures.getHealingTexture(p.healing);
         healingSprite.rotation = -Math.PI * 1.2;
 
-        const size = Entity.getSize(EntityType.HEALING, p.healing);
+        const size = Entity.getSize(EntityType.HEALING, p.healing).mul(0.6);
         healingSprite.width = size.x;
         healingSprite.height = size.y;
 
@@ -127,15 +127,15 @@ export default class Entity {
 
         switch (subType) {
           case WeaponType.TENNENTS_LIGHT:
-            return new Vec2(0.6, 0.8);
+            return new Vec2(1, 1.2);
           case WeaponType.TENNENTS_PINT:
-            return new Vec2(0.6, 0.8);
+            return new Vec2(1, 1.2);
           case WeaponType.TENNENTS_ORIGINAL:
-            return new Vec2(0.6, 0.8);
+            return new Vec2(1, 1.2);
           case WeaponType.TENNENTS_SUPER:
-            return new Vec2(0.6, 0.8);
+            return new Vec2(1, 1.2);
           case WeaponType.TENNENTS_KEG:
-            return new Vec2(0.6, 0.8);
+            return new Vec2(1, 1.2);
 
           default:
             throw new Error("Unknown weapon type");
@@ -164,15 +164,15 @@ export default class Entity {
 
         switch (subType) {
           case HealingType.TENNENTS_ZERO:
-            return new Vec2(0.6, 0.8);
+            return new Vec2(1, 1.2);
           case HealingType.WATER:
-            return new Vec2(0.6, 0.8);
+            return new Vec2(1, 1.2);
           case HealingType.COFFEE:
-            return new Vec2(0.6, 0.8);
+            return new Vec2(1, 1.2);
           case HealingType.ORANGE_JUICE:
-            return new Vec2(0.6, 0.8);
+            return new Vec2(1, 1.2);
           case HealingType.DONER_KEBAB:
-            return new Vec2(0.6, 0.8);
+            return new Vec2(1, 1.2);
 
           default:
             throw new Error("Unknown healing type");
