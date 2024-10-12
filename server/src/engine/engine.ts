@@ -6,7 +6,7 @@ import { EntityType } from "../rooms/schema/enums/EntityType";
 import { Player } from "../rooms/schema/Player";
 
 export class GameEngine {
-	private static DRUNKINESS_GAIN: number = 0.1;
+	private static DRUNKINESS_LOSS: number = 0.1;
 	private static PLAYER_RADIUS: number = 1;
 	private static PROJECTILE_RADIUS: number = 0.5;
 	private static PROJECTILE_SPEED: number = 5;
@@ -92,9 +92,12 @@ export class GameEngine {
 				changed = true;
 			}
 
-			if (entity.type === EntityType.PLAYER) {
+			if (
+				entity.type === EntityType.PLAYER &&
+				(entity as Player).drunkiness > 0
+			) {
 				const player = entity as Player;
-				player.drunkiness += GameEngine.DRUNKINESS_GAIN;
+				player.drunkiness -= GameEngine.DRUNKINESS_LOSS;
 				changed = true;
 			}
 
@@ -145,6 +148,7 @@ export class GameEngine {
 
 		for (const entity of this.entities.values()) {
 			if (!entity.plugin.lifetime) continue;
+
 			entity.plugin.lifetime--;
 			if (entity.plugin.lifetime <= 0) {
 				Matter.Composite.remove(this.engine.world, entity);
