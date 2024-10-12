@@ -6,10 +6,10 @@ import { EntityType } from "../rooms/schema/enums/EntityType";
 import { Player } from "../rooms/schema/Player";
 
 export class GameEngine {
-  private static DRUNKINESS_GAIN: number = 0.1;
+  private static DRUNKINESS_LOSS: number = 0.1;
   private static PLAYER_RADIUS: number = 1;
   private static PROJECTILE_RADIUS: number = 0.5;
-
+  private static PROJECTILE_LIFETIME: number = 100;
   private static PROJECTILE_SPEED: number = 0.1;
 
   private engine: Matter.Engine;
@@ -61,57 +61,7 @@ export class GameEngine {
     return entity;
   }
 
-  // CREATION
-
-  addPlayer({ x, y, r }: { x: number; y: number; r: number }): number {
-    const entity = this.addEntity({
-      x,
-      y,
-      r,
-      velX: 0,
-      velY: 0,
-      radius: GameEngine.PLAYER_RADIUS,
-    });
-    entity.frictionAir = 0.1;
-
-    return this.id;
-  }
-
-  addProjectile({ x, y, r }: { x: number; y: number; r: number }): number {
-    const dx = Math.cos(r);
-    const dy = Math.sin(r);
-
-    const entity = this.addEntity({
-      x: x + dx * GameEngine.PLAYER_RADIUS,
-      y: y + dy * GameEngine.PLAYER_RADIUS,
-      r,
-      velX: dx * GameEngine.PROJECTILE_SPEED,
-      velY: dy * GameEngine.PROJECTILE_SPEED,
-      radius: GameEngine.PROJECTILE_RADIUS,
-    });
-    entity.frictionAir = 0;
-
-    return this.id;
-  }
-
-  // GENERAL
-
-  update(delta: number) {
-    Matter.Engine.update(this.engine, delta);
-  }
-
-  removeEntity(id: number) {
-    const entity = this.entities.get(id);
-    this.entities.delete(id);
-    Matter.Composite.remove(this.engine.world, entity);
-  }
-
-  dispose() {
-    Matter.World.clear(this.engine.world, false);
-    Matter.Engine.clear(this.engine);
-  }
-
-  updateStateEntities(stateEntities: MapSchema<Entity, string>) {
+  private updateStateEntities(stateEntities: MapSchema<Entity, string>) {
     for (const [id, entity] of stateEntities) {
       const gameEntity = this.entities.get(parseInt(id));
 
@@ -136,9 +86,9 @@ export class GameEngine {
         changed = true;
       }
 
-      if (entity.type === EntityType.PLAYER) {
+      if (entity.type === EntityType.PLAYER && (entity as Player).drunkiness > 0) {
         const player = entity as Player;
-        player.drunkiness += GameEngine.DRUNKINESS_GAIN;
+        player.drunkiness -= GameEngine.DRUNKINESS_LOSS;
         changed = true;
       }
 
@@ -146,6 +96,69 @@ export class GameEngine {
         stateEntities.set(id, entity);
       }
     }
+  }
+
+  // CREATION
+
+  addPlayer({ x, y, r }: { x: number; y: number; r: number }): number {
+    const entity = this.addEntity({
+      x,
+      y,
+      r,
+      velX: 0,
+      velY: 0,
+      radius: GameEngine.PLAYER_RADIUS,
+    });
+    entity.frictionAir = 0.1;
+
+    return this.id;
+  }
+
+  addProjectile({ x, y, r }: { x: number; y: number; r: number }): number {
+    const dx = Math.cos(r);
+    const dy = Math.sin(r);
+
+    const entity = this.addEntity({
+      x: x + dx * GameEngine.PLAYER_RADIUS * 2,
+      y: y + dy * GameEngine.PLAYER_RADIUS * 2,
+      r,
+      velX: dx * GameEngine.PROJECTILE_SPEED,
+      velY: dy * GameEngine.PROJECTILE_SPEED,
+      radius: GameEngine.PROJECTILE_RADIUS,
+    });
+    entity.frictionAir = 0;
+    entity.plugin.lifetime = GameEngine.PROJECTILE_LIFETIME;
+
+    return this.id;
+  }
+
+  // GENERAL
+
+  update(delta: number, stateEntities: MapSchema<Entity, string>) {
+    Matter.Engine.update(this.engine, delta);
+
+    for (const entity of this.entities.values()) {
+      if (!entity.plugin.lifetime) continue;
+
+      entity.plugin.lifetime--;
+      if (entity.plugin.lifetime <= 0) {
+        Matter.Composite.remove(this.engine.world, entity);
+        stateEntities.delete(`${entity.id}`);
+      }
+    }
+
+    this.updateStateEntities(stateEntities);
+  }
+
+  removeEntity(id: number) {
+    const entity = this.entities.get(id);
+    this.entities.delete(id);
+    Matter.Composite.remove(this.engine.world, entity);
+  }
+
+  dispose() {
+    Matter.World.clear(this.engine.world, false);
+    Matter.Engine.clear(this.engine);
   }
 
   // EVENT HANDLERS

@@ -24,12 +24,11 @@ export class GameRoom extends Room<GameState> {
 
   onCreate(options: any) {
     this.setState(new GameState());
-    this.engine.updateStateEntities(this.state.entities);
+    this.engine.update(this.clock.deltaTime, this.state.entities);
 
     this.setPatchRate(1000 / 30);
     this.onBeforePatch = () => {
-      this.engine.update(this.clock.deltaTime);
-      this.engine.updateStateEntities(this.state.entities);
+      this.engine.update(this.clock.deltaTime, this.state.entities);
     };
 
     this.state.config = new GameConfig();
@@ -81,7 +80,7 @@ export class GameRoom extends Room<GameState> {
        * null
        */
       const entity = <Player>this.state.entities.get(`${this.playerClients.get(client.sessionId)}`);
-      entity.drunkiness -= getHealingAmountFromHealingType(entity.healing);
+      entity.drunkiness = Math.max(0, entity.drunkiness - getHealingAmountFromHealingType(entity.healing));
       entity.healing = null;
     });
 
