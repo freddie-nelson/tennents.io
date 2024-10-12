@@ -1,5 +1,7 @@
 import { Application } from "pixi.js";
 
+export const gameContainer = document.querySelector(".game") as HTMLElement;
+
 export default class Game {
   public readonly app: Application;
 
@@ -13,7 +15,7 @@ export default class Game {
       height: window.innerHeight,
     });
 
-    this.app.resizeTo = window;
+    this.app.resizeTo = gameContainer;
 
     document.body.appendChild(this.app.canvas);
 
