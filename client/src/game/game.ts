@@ -20,240 +20,270 @@ export const gameContainer = document.querySelector(".game") as HTMLElement;
 
 const key = new Map<string, boolean>();
 window.addEventListener("keydown", (e) => {
-	key.set(e.key, true);
+  key.set(e.key, true);
 });
 window.addEventListener("keyup", (e) => {
-	key.set(e.key, false);
+  key.set(e.key, false);
+});
+
+const mousePos = new Vec2(0, 0);
+let isMousePressed = false;
+
+window.addEventListener("mousemove", (e) => {
+  mousePos.x = e.clientX;
+  mousePos.y = e.clientY;
+});
+
+window.addEventListener("mousedown", () => {
+  isMousePressed = true;
+});
+
+window.addEventListener("mouseup", () => {
+  isMousePressed = false;
 });
 
 const isKeyDown = (...k: string[]) =>
-	typeof k === "string"
-		? key.get(k) ?? false
-		: k.some((k) => key.get(k) ?? false);
+  typeof k === "string" ? key.get(k) ?? false : k.some((k) => key.get(k) ?? false);
 
 export default class Game {
-	public readonly app: Application;
-	public readonly world: Container = new Container();
-	public readonly entities: Map<number, Entity> = new Map();
-	public you: Player | null = null;
-	public readonly room: Room;
+  public readonly app: Application;
+  public readonly world: Container = new Container();
+  public readonly entities: Map<number, Entity> = new Map();
+  public you: Player | null = null;
+  public readonly room: Room;
 
-	constructor(room: Room) {
-		this.app = new Application();
-		this.room = room;
-	}
+  public onStageChanges: ((game: Game) => void)[] = [];
 
-	async init() {
-		await Textures.initTextures();
+  constructor(room: Room) {
+    this.app = new Application();
+    this.room = room;
+  }
 
-		await this.app.init({
-			width: window.innerWidth,
-			height: window.innerHeight,
-			resizeTo: gameContainer,
-			backgroundColor: "black",
-		});
+  async init() {
+    await Textures.initTextures();
 
-		document.body.appendChild(this.app.canvas);
+    await this.app.init({
+      width: window.innerWidth,
+      height: window.innerHeight,
+      resizeTo: gameContainer,
+      backgroundColor: "black",
+    });
 
-		window.addEventListener("resize", () => {
-			this.app.resize();
-		});
+    document.body.appendChild(this.app.canvas);
 
-		this.app.stage.addChild(this.world);
+    window.addEventListener("resize", () => {
+      this.app.resize();
+    });
 
-		this.app.ticker.add(this.update.bind(this));
+    this.app.stage.addChild(this.world);
 
-		this.room.onStateChange((state) => this.sync(state));
-		this.sync(this.room.state);
+    this.app.ticker.add(() => this.update());
 
-		this.room.onLeave(() => {
-			alert("You have been disconnected");
-		});
+    this.room.onStateChange((state) => {
+      this.sync(state);
+      this.onStageChanges.forEach((cb) => cb(this));
+    });
+    this.sync(this.room.state);
 
-		this.app.start();
-	}
+    this.room.onLeave(() => {
+      alert("You have been disconnected");
+    });
 
-	private update() {
-		const dt = this.app.ticker.deltaTime;
+    this.app.start();
+  }
 
-		this.world.position.set(
-			this.app.screen.width / 2,
-			this.app.screen.height / 2
-		);
+  onStageChange(cb: (game: Game) => void) {
+    this.onStageChanges.push(cb);
+  }
 
-		for (const e of this.entities.values()) {
-			e.update(dt);
-		}
+  private update() {
+    const dt = this.app.ticker.deltaTime;
 
-		if (this.you) {
-			this.world.pivot.set(this.you.pos.x, this.you.pos.y);
-		}
+    this.world.position.set(this.app.screen.width / 2, this.app.screen.height / 2);
 
-		const worldSprites = new Set(this.world.children);
-		for (const [id, e] of this.entities) {
-			if (e.sprite && !worldSprites.has(e.sprite)) {
-				this.world.addChild(e.sprite);
-			}
-		}
+    for (const e of this.entities.values()) {
+      e.update(dt);
+    }
 
-		this.handleMovement();
-	}
+    if (this.you) {
+      this.world.pivot.set(this.you.pos.x, this.you.pos.y);
+    }
 
-	private handleMovement() {
-		const moveVec = new Vec2(0, 0);
-		if (isKeyDown("w", "ArrowUp")) {
-			moveVec.y -= 1;
-		}
-		if (isKeyDown("s", "ArrowDown")) {
-			moveVec.y += 1;
-		}
-		if (isKeyDown("a", "ArrowLeft")) {
-			moveVec.x -= 1;
-		}
-		if (isKeyDown("d", "ArrowRight")) {
-			moveVec.x += 1;
-		}
+    const worldSprites = new Set(this.world.children);
+    for (const [id, e] of this.entities) {
+      if (e.sprite && !worldSprites.has(e.sprite)) {
+        this.world.addChild(e.sprite);
+      }
+    }
 
-		if (this.you && (moveVec.x !== 0 || moveVec.y !== 0)) {
-			this.room.send(MessageType.MOVE, { x: moveVec.x, y: moveVec.y });
-		}
-	}
+    this.handleMovement();
+    this.handleRotation();
+  }
 
-	private sync(state: GameState) {
-		this.syncEntities(state);
+  private handleMovement() {
+    const moveVec = new Vec2(0, 0);
+    if (isKeyDown("w", "ArrowUp")) {
+      moveVec.y -= 1;
+    }
+    if (isKeyDown("s", "ArrowDown")) {
+      moveVec.y += 1;
+    }
+    if (isKeyDown("a", "ArrowLeft")) {
+      moveVec.x -= 1;
+    }
+    if (isKeyDown("d", "ArrowRight")) {
+      moveVec.x += 1;
+    }
 
-		const playerEntityId = state.players.get(this.room.sessionId)!;
-		this.you = (this.entities.get(playerEntityId) as Player) ?? null;
-	}
+    if (this.you && (moveVec.x !== 0 || moveVec.y !== 0)) {
+      this.room.send(MessageType.MOVE, { x: moveVec.x, y: moveVec.y });
+    }
+  }
 
-	private syncEntities(state: GameState) {
-		const stateEntities = new Map<number, ServerEntity>();
-		for (const [id, e] of state.entities) {
-			stateEntities.set(e.id, e);
-		}
+  private handleRotation() {
+    if (this.you) {
+      const dir = mousePos.sub(new Vec2(this.app.screen.width / 2, this.app.screen.height / 2)).normalize();
+      const rotation = dir.angle() - Math.PI / 2;
 
-		for (const [id, e] of this.entities) {
-			if (!stateEntities.has(id)) {
-				if (e.sprite) this.world.removeChild(e.sprite);
+      this.room.send(MessageType.ROTATE, { r: rotation });
+    }
+  }
 
-				this.entities.delete(id);
-			}
-		}
+  private sync(state: GameState) {
+    this.syncEntities(state);
 
-		for (const [id, e] of state.entities) {
-			if (!this.entities.has(e.id)) {
-				this.entities.set(e.id, this.createEntity(e));
-			} else {
-				this.updateEntity(e);
-			}
-		}
-	}
+    const playerEntityId = state.players.get(this.room.sessionId)!;
+    this.you = (this.entities.get(playerEntityId) as Player) ?? null;
+  }
 
-	private updateEntity(entity: ServerEntity) {
-		const e = this.entities.get(entity.id);
-		if (!e) {
-			return;
-		}
+  private syncEntities(state: GameState) {
+    const stateEntities = new Map<number, ServerEntity>();
+    for (const [id, e] of state.entities) {
+      stateEntities.set(e.id, e);
+    }
 
-		e.pos = new Vec2(entity.pos.x, entity.pos.y);
-		e.rotation = entity.rotation;
-		e.velocity = new Vec2(entity.velocity.x, entity.velocity.y);
-		e.type = entity.type;
+    for (const [id, e] of this.entities) {
+      if (!stateEntities.has(id)) {
+        if (e.sprite) this.world.removeChild(e.sprite);
 
-		switch (e.type) {
-			case EntityType.PLAYER:
-				const p = e as Player;
-				const serverPlayer = entity as ServerPlayer;
-				p.name = serverPlayer.name;
-				p.drunkiness = serverPlayer.drunkiness;
-				p.canPickup = serverPlayer.canPickup;
-				p.healing = serverPlayer.healing;
-				p.skin = serverPlayer.skin;
-				p.weapon = serverPlayer.weapon;
-				break;
+        this.entities.delete(id);
+      }
+    }
 
-			case EntityType.HEALING:
-				const h = e as Healing;
-				h.healingType = (entity as ServerHealing).healingType;
-				break;
+    for (const [id, e] of state.entities) {
+      if (!this.entities.has(e.id)) {
+        this.entities.set(e.id, this.createEntity(e));
+      } else {
+        this.updateEntity(e);
+      }
+    }
+  }
 
-			case EntityType.WEAPON:
-				const w = e as Weapon;
-				w.weaponType = (entity as ServerWeapon).weaponType;
-				break;
+  private updateEntity(entity: ServerEntity) {
+    const e = this.entities.get(entity.id);
+    if (!e) {
+      return;
+    }
 
-			case EntityType.PROJECTILE:
-				const pr = e as Projectile;
-				pr.projectileType = (entity as ServerProjectile).projectileType;
-				break;
+    e.pos = new Vec2(entity.pos.x, entity.pos.y);
+    e.rotation = entity.rotation;
+    e.velocity = new Vec2(entity.velocity.x, entity.velocity.y);
+    e.type = entity.type;
 
-			default:
-				throw new Error("Unknown entity type");
-		}
-	}
+    switch (e.type) {
+      case EntityType.PLAYER:
+        const p = e as Player;
+        const serverPlayer = entity as ServerPlayer;
+        p.name = serverPlayer.name;
+        p.drunkiness = serverPlayer.drunkiness;
+        p.canPickup = serverPlayer.canPickup;
+        p.healing = serverPlayer.healing;
+        p.skin = serverPlayer.skin;
+        p.weapon = serverPlayer.weapon;
+        break;
 
-	private createEntity(entity: ServerEntity) {
-		switch (entity.type) {
-			case EntityType.PLAYER:
-				const p = new Player(
-					entity.id,
-					new Vec2(entity.pos.x, entity.pos.y),
-					entity.rotation,
-					new Vec2(entity.velocity.x, entity.velocity.y),
-					entity.type
-				);
+      case EntityType.HEALING:
+        const h = e as Healing;
+        h.healingType = (entity as ServerHealing).healingType;
+        break;
 
-				const serverPlayer = entity as ServerPlayer;
-				p.name = serverPlayer.name;
-				p.drunkiness = serverPlayer.drunkiness;
-				p.canPickup = serverPlayer.canPickup;
-				p.healing = serverPlayer.healing;
-				p.skin = serverPlayer.skin;
-				p.weapon = serverPlayer.weapon;
+      case EntityType.WEAPON:
+        const w = e as Weapon;
+        w.weaponType = (entity as ServerWeapon).weaponType;
+        break;
 
-				return p;
+      case EntityType.PROJECTILE:
+        const pr = e as Projectile;
+        pr.projectileType = (entity as ServerProjectile).projectileType;
+        break;
 
-			case EntityType.HEALING:
-				const h = new Healing(
-					entity.id,
-					new Vec2(entity.pos.x, entity.pos.y),
-					entity.rotation,
-					new Vec2(entity.velocity.x, entity.velocity.y),
-					entity.type
-				);
+      default:
+        throw new Error("Unknown entity type");
+    }
+  }
 
-				h.healingType = (entity as ServerHealing).healingType;
+  private createEntity(entity: ServerEntity) {
+    switch (entity.type) {
+      case EntityType.PLAYER:
+        const p = new Player(
+          entity.id,
+          new Vec2(entity.pos.x, entity.pos.y),
+          entity.rotation,
+          new Vec2(entity.velocity.x, entity.velocity.y),
+          entity.type
+        );
 
-				return h;
+        const serverPlayer = entity as ServerPlayer;
+        p.name = serverPlayer.name;
+        p.drunkiness = serverPlayer.drunkiness;
+        p.canPickup = serverPlayer.canPickup;
+        p.healing = serverPlayer.healing;
+        p.skin = serverPlayer.skin;
+        p.weapon = serverPlayer.weapon;
 
-			case EntityType.WEAPON:
-				const w = new Weapon(
-					entity.id,
-					new Vec2(entity.pos.x, entity.pos.y),
-					entity.rotation,
-					new Vec2(entity.velocity.x, entity.velocity.y),
-					entity.type
-				);
+        return p;
 
-				w.weaponType = (entity as ServerWeapon).weaponType;
+      case EntityType.HEALING:
+        const h = new Healing(
+          entity.id,
+          new Vec2(entity.pos.x, entity.pos.y),
+          entity.rotation,
+          new Vec2(entity.velocity.x, entity.velocity.y),
+          entity.type
+        );
 
-				return w;
+        h.healingType = (entity as ServerHealing).healingType;
 
-			case EntityType.PROJECTILE:
-				const pr = new Projectile(
-					entity.id,
-					new Vec2(entity.pos.x, entity.pos.y),
-					entity.rotation,
-					new Vec2(entity.velocity.x, entity.velocity.y),
-					entity.type
-				);
+        return h;
 
-				pr.projectileType = (entity as ServerProjectile).projectileType;
+      case EntityType.WEAPON:
+        const w = new Weapon(
+          entity.id,
+          new Vec2(entity.pos.x, entity.pos.y),
+          entity.rotation,
+          new Vec2(entity.velocity.x, entity.velocity.y),
+          entity.type
+        );
 
-				return pr;
+        w.weaponType = (entity as ServerWeapon).weaponType;
 
-			default:
-				throw new Error("Unknown entity type");
-		}
-	}
+        return w;
+
+      case EntityType.PROJECTILE:
+        const pr = new Projectile(
+          entity.id,
+          new Vec2(entity.pos.x, entity.pos.y),
+          entity.rotation,
+          new Vec2(entity.velocity.x, entity.velocity.y),
+          entity.type
+        );
+
+        pr.projectileType = (entity as ServerProjectile).projectileType;
+
+        return pr;
+
+      default:
+        throw new Error("Unknown entity type");
+    }
+  }
 }
