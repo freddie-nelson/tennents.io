@@ -17,6 +17,17 @@ import Textures from "./Textures";
 
 export const gameContainer = document.querySelector(".game") as HTMLElement;
 
+const key = new Map<string, boolean>();
+window.addEventListener("keydown", (e) => {
+  key.set(e.key, true);
+});
+window.addEventListener("keyup", (e) => {
+  key.set(e.key, false);
+});
+
+const isKeyDown = (...k: string[]) =>
+  typeof k === "string" ? key.get(k) ?? false : k.some((k) => key.get(k) ?? false);
+
 export default class Game {
   public readonly app: Application;
   public readonly world: Container = new Container();
@@ -77,6 +88,28 @@ export default class Game {
       if (e.sprite && !worldSprites.has(e.sprite)) {
         this.world.addChild(e.sprite);
       }
+    }
+
+    this.handleMovement();
+  }
+
+  private handleMovement() {
+    const moveVec = new Vec2(0, 0);
+    if (isKeyDown("w", "ArrowUp")) {
+      moveVec.y -= 1;
+    }
+    if (isKeyDown("s", "ArrowDown")) {
+      moveVec.y += 1;
+    }
+    if (isKeyDown("a", "ArrowLeft")) {
+      moveVec.x -= 1;
+    }
+    if (isKeyDown("d", "ArrowRight")) {
+      moveVec.x += 1;
+    }
+
+    if (this.you) {
+      this.room.send("move", { x: moveVec.x, y: moveVec.y });
     }
   }
 

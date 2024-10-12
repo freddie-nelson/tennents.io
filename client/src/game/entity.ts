@@ -34,7 +34,7 @@ export default class Entity {
     this.sprite!.rotation = this.rotation;
   }
 
-  private createSprite() {
+  createSprite() {
     this.sprite = new Sprite();
     this.sprite.anchor.set(0.5);
     this.sprite.position.set(this.pos.x, this.pos.y);
@@ -69,6 +69,37 @@ export default class Entity {
 
       default:
         throw new Error("Unknown entity type");
+    }
+
+    if (this.type === EntityType.PLAYER) {
+      const p = this as any as Player;
+
+      if (p.weapon !== undefined) {
+        const weaponSprite = new Sprite();
+        weaponSprite.anchor.set(0.5);
+        weaponSprite.position.set(this.sprite.width * 1.5, this.sprite.height * 1.5);
+        weaponSprite.texture = Textures.getWeaponTexture(p.weapon);
+        weaponSprite.rotation = Math.PI * 1.2;
+
+        const size = Entity.getSize(EntityType.WEAPON, p.weapon).mul(4);
+        weaponSprite.width = size.x;
+        weaponSprite.height = size.y;
+
+        this.sprite.addChild(weaponSprite);
+      }
+
+      if (p.healing !== undefined) {
+        const healingSprite = new Sprite();
+        healingSprite.anchor.set(0.5);
+        healingSprite.position.set(-this.sprite.width * 1.5, this.sprite.height * 1.5);
+        healingSprite.texture = Textures.getHealingTexture(p.healing);
+
+        const size = Entity.getSize(EntityType.HEALING, p.healing).mul(4);
+        healingSprite.width = size.x;
+        healingSprite.height = size.y;
+
+        this.sprite.addChild(healingSprite);
+      }
     }
   }
 
