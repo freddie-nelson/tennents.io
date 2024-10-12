@@ -20,7 +20,7 @@
     "noFallthroughCasesInSwitch": true,
     "strictNullChecks": false,
     "experimentalDecorators": true,
-    "forceConsistentCasingInFileNames": false
+    "forceConsistentCasingInFileNames": true
   },
   "include": ["src", "../server"]
 }
