@@ -13,6 +13,7 @@ import Projectile from "./Projectile";
 export default class Entity {
   public sprite: Container | null = null;
   private spriteType: EntityType | null = null;
+  private spriteKey: string | null = null;
 
   constructor(
     public readonly id: number,
@@ -23,7 +24,7 @@ export default class Entity {
   ) {}
 
   update(dt: number) {
-    if (!this.sprite || this.spriteType !== this.type) {
+    if (!this.sprite || this.spriteType !== this.type || this.spriteKey !== this.getSpriteKey()) {
       this.sprite?.removeFromParent();
       this.createSprite();
     }
@@ -64,6 +65,7 @@ export default class Entity {
     sprite.height = size.y;
 
     this.spriteType = this.type;
+    this.spriteKey = this.getSpriteKey();
 
     switch (this.type) {
       case EntityType.PLAYER:
@@ -115,6 +117,21 @@ export default class Entity {
         this.sprite.addChild(healingSprite);
       }
     }
+  }
+
+  getSpriteKey() {
+    if (this.type === EntityType.PLAYER) {
+      const p = this as any as Player;
+      return `${p.weapon}-${p.healing}-${p.skin}`;
+    } else if (this.type === EntityType.WEAPON) {
+      return (this as any as Weapon).weaponType.toString();
+    } else if (this.type === EntityType.HEALING) {
+      return (this as any as Healing).healingType.toString();
+    } else if (this.type === EntityType.PROJECTILE) {
+      return (this as any as Projectile).projectileType.toString();
+    }
+
+    return "";
   }
 
   static getSize(type: EntityType, subType?: any): Vec2 {

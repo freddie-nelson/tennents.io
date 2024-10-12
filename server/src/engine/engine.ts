@@ -15,7 +15,7 @@ export class GameEngine {
   static readonly PROJECTILE_RADIUS: number = 0.5;
   static readonly PROJECTILE_LIFETIME: number = 100;
   static readonly PROJECTILE_SPEED: number = 0.2;
-  static readonly PICKUP_RADIUS: number = 1.5;
+  static readonly PICKUP_RADIUS: number = 2.5;
   static readonly TILE_SIZE: number = 2;
 
   private engine: Matter.Engine;
@@ -206,7 +206,7 @@ export class GameEngine {
     let closestPickupDistance = Infinity;
 
     for (const [id, otherEntity] of this.entities) {
-      if (otherEntity.plugin.type !== EntityType.WEAPON || otherEntity.plugin.type !== EntityType.HEALING)
+      if (otherEntity.plugin.type !== EntityType.WEAPON && otherEntity.plugin.type !== EntityType.HEALING)
         continue;
 
       const distance = Matter.Vector.magnitude(Matter.Vector.sub(entity.position, otherEntity.position));
