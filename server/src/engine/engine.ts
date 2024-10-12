@@ -152,7 +152,7 @@ export class GameEngine {
     });
     entity.frictionAir = 0.1;
 
-    return entity.id;
+    return this.id;
   }
 
   addProjectile({ x, y, r, ownerId }: { x: number; y: number; r: number; ownerId: number }): number {
