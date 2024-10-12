@@ -154,7 +154,7 @@ export default class Game {
   private handleRotation() {
     if (this.you) {
       const dir = mousePos.sub(new Vec2(this.app.screen.width / 2, this.app.screen.height / 2)).normalize();
-      const rotation = dir.angle() - Math.PI / 2;
+      const rotation = dir.angle();
 
       this.room.send(MessageType.ROTATE, { r: rotation });
     }
