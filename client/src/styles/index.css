@@ -80,6 +80,7 @@ h1 {
   left: 0;
   position: absolute;
   z-index: 1000;
+  pointer-events: none;
 }
 
 .video-style {

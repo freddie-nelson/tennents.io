@@ -1,7 +1,7 @@
 import { API, Room } from "./api/colyseus";
 import Game, { gameContainer } from "./game/game";
-import loseScreen from "./game/loseScreen";
-import { SoundManager } from './game/soundManager';  
+import HUD from "./game/hud";
+import { SoundManager } from './game/soundManager'; 
 
 const api = new API();
 
@@ -36,8 +36,6 @@ joinForm.addEventListener("submit", async (event) => {
 
   game = new Game(room);
   game.init();
-
   soundManager.playSound('backgroundMusic', true, 0.5);
-
-  // loseScreen(6)  // Uncomment if needed
+  const hud = new HUD(game, 1) // Good Values -> 0.8 - 1.3
 });
