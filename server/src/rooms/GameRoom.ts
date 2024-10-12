@@ -80,8 +80,12 @@ export class GameRoom extends Room<GameState> {
        * null
        */
       const entity = <Player>this.state.entities.get(`${this.playerClients.get(client.sessionId)}`);
+      if (entity.healing === undefined) {
+        return;
+      }
+
       entity.drunkiness = Math.max(0, entity.drunkiness - getHealingAmountFromHealingType(entity.healing));
-      entity.healing = null;
+      entity.healing = undefined;
     });
 
     this.onMessage(MessageType.SHOOT, (client, message) => {
