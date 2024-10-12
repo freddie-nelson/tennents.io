@@ -9,7 +9,7 @@ body {
   height: 100vh;
   overflow: hidden;
   background: url("/images/bg.webp");
-  font-family: "Arial", sans-serif;
+  font-family: "Stag", "Arial", sans-serif;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -19,7 +19,8 @@ body {
 }
 
 h1 {
-  color: black;
+  color: red;
   font-size: 8rem;
   font-weight: bold;
+  -webkit-text-stroke: white 4px;
 }
