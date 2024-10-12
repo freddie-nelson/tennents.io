@@ -6,7 +6,15 @@ import { EntityType } from "../rooms/schema/enums/EntityType";
 import { Player } from "../rooms/schema/Player";
 
 export class GameEngine {
-  static drunkinessGain = 0.1;
+  private static DRUNKINESS_GAIN: number = 0.1;
+  private static PLAYER_RADIUS: number = 1;
+  private static PROJECTILE_RADIUS: number = 0.5;
+
+  private static PROJECTILE_SPEED: number = 5;
+
+  private engine: Matter.Engine;
+  private entities: Map<number, Matter.Body>;
+  private id: number;
 
   private engine: Matter.Engine;
   private entities: Map<number, Matter.Body>;
@@ -22,25 +30,70 @@ export class GameEngine {
 
   // HELPERS
 
-  private initMap() {
-    // TODO
+  private addEntity({
+    x,
+    y,
+    radius,
+    r,
+    velX,
+    velY,
+  }: {
+    x: number;
+    y: number;
+    radius: number;
+    r: number;
+    velX: number;
+    velY: number;
+  }): Matter.Body {
+    this.id++;
+
+    const entity = Matter.Bodies.circle(x, y, radius, {
+      angle: r,
+      velocity: { x: velX, y: velY },
+    });
+    this.entities.set(this.id, entity);
+    Matter.Composite.add(this.engine.world, entity);
+
+    return entity;
+  }
+
+  // CREATION
+
+  addPlayer({ x, y, r }: { x: number; y: number; r: number }): number {
+    const entity = this.addEntity({
+      x,
+      y,
+      r,
+      velX: 0,
+      velY: 0,
+      radius: GameEngine.PLAYER_RADIUS,
+    });
+    entity.frictionAir = 0.1;
+
+    return this.id;
+  }
+
+  addProjectile({ x, y, r }: { x: number; y: number; r: number }): number {
+    const entity = this.addEntity({
+      x,
+      y,
+      r,
+      velX: Math.cos(r) * GameEngine.PROJECTILE_SPEED,
+      velY: Math.sin(r) * GameEngine.PROJECTILE_SPEED,
+      radius: GameEngine.PROJECTILE_RADIUS,
+    });
+
+    return this.id;
   }
 
   // GENERAL
 
-  update(delta: number) {
-    Matter.Engine.update(this.engine, delta);
-  }
+  // GENERAL
 
-  addEntity(x: number, y: number, radius: number): number {
-    this.id++;
-
-    const entity = Matter.Bodies.circle(x, y, radius);
-    entity.frictionAir = 0.1;
-    this.entities.set(this.id, entity);
-    Matter.Composite.add(this.engine.world, entity);
-
-    return this.id;
+  removeEntity(id: number) {
+    const entity = this.entities.get(id);
+    this.entities.delete(id);
+    Matter.Composite.remove(this.engine.world, entity);
   }
 
   removeEntity(id: number) {
@@ -81,7 +134,7 @@ export class GameEngine {
 
       if (entity.type === EntityType.PLAYER) {
         const player = entity as Player;
-        player.drunkiness += GameEngine.drunkinessGain;
+        player.drunkiness += GameEngine.DRUNKINESS_GAIN;
         changed = true;
       }
 

@@ -15,10 +15,10 @@ import { Vector } from "./schema/Vector";
 
 import { getHealingAmountFromHealingType } from "../rules/healing";
 import { GameConfig } from "./schema/GameConfig";
+import { Weapon } from "./schema/Weapon";
+import { Projectile } from "./schema/projectile";
 
 export class GameRoom extends Room<GameState> {
-	private static PLAYER_RADIUS: number = 1;
-
 	maxClients = 10;
 	private engine: GameEngine = new GameEngine();
 	private playerClients: Map<string, number> = new Map(); // client.sessionId -> entity.id
@@ -101,7 +101,35 @@ export class GameRoom extends Room<GameState> {
 			 * message
 			 * null
 			 */
-			// TODO
+			const player = <Player>(
+				this.state.entities.get(
+					`${this.playerClients.get(client.sessionId)}`
+				)
+			);
+
+			const projectileId = this.engine.addProjectile({
+				x: player.pos.x,
+				y: player.pos.y,
+				r: player.rotation,
+			});
+
+			const projectile = new Projectile();
+			const projectilePos = new Vector();
+			GameRoom.updateVector(projectilePos, player.pos.x, player.pos.y);
+			GameRoom.updateEntity(
+				projectile,
+				projectileId,
+				EntityType.PROJECTILE,
+				projectilePos,
+				new Vector(),
+				player.rotation
+			);
+			GameRoom.updateProjectile({
+				projectile,
+				projectileType: player.weapon,
+			});
+
+			this.state.entities.set(`${projectile.id}`, projectile);
 		});
 
 		this.onMessage(MessageType.PICKUP, (client, message) => {
@@ -119,14 +147,21 @@ export class GameRoom extends Room<GameState> {
 	onJoin(client: Client, options: { name: string }) {
 		console.log(client.sessionId, "joined!");
 
-		const id = this.engine.addEntity(0, 0, GameRoom.PLAYER_RADIUS);
+		const id = this.engine.addPlayer({
+			x: 0,
+			y: 0,
+			r: 0,
+		});
 
-		const pos = new Vector();
-		GameRoom.updateVector(pos, 0, 0);
-		const velocity = new Vector();
-		GameRoom.updateVector(velocity, 0, 0);
 		const player = new Player();
-		GameRoom.updateEntity(player, id, EntityType.PLAYER, pos, velocity, 0);
+		GameRoom.updateEntity(
+			player,
+			id,
+			EntityType.PLAYER,
+			new Vector(),
+			new Vector(),
+			0
+		);
 		GameRoom.updatePlayer(
 			player,
 			options.name,
@@ -197,5 +232,15 @@ export class GameRoom extends Room<GameState> {
 		player.skin = skin;
 		player.healing = healing;
 		player.canPickup = canPickup;
+	}
+
+	static updateProjectile({
+		projectile,
+		projectileType,
+	}: {
+		projectile: Projectile;
+		projectileType: WeaponType;
+	}) {
+		projectile.projectileType = projectileType;
 	}
 }
