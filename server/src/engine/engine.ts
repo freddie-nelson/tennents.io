@@ -148,10 +148,13 @@ export class GameEngine {
 
   removeEntity(id: number) {
     const entity = this.entities.get(id);
-    this.entities.delete(id);
+    if (!entity) return;
+
     if (Matter.Composite.get(this.engine.world, entity.id, entity.type) !== null) {
       Matter.Composite.remove(this.engine.world, entity);
     }
+
+    this.entities.delete(id);
   }
 
   update(delta: number, stateEntities: MapSchema<Entity, string>) {
