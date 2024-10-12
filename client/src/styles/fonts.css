@@ -1,0 +1,16 @@
+@font-face {
+  font-family: "Stag";
+  src: url("/fonts/Stag Bold.woff") format("woff");
+  font-weight: 700;
+}
+
+@font-face {
+  font-family: "Stag";
+  src: url("/fonts/Stag Regular.woff") format("woff");
+}
+
+@font-face {
+  font-family: "Stag";
+  src: url("/fonts/Stag SemiBold.woff") format("woff");
+  font-weight: 600;
+}
