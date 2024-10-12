@@ -1,25 +1,28 @@
 import { Room, Client } from "@colyseus/core";
-import { GameState } from "./schema/GameState";
-import { Player } from "./schema/Player";
-import { MessageType } from "./schema/enums/MessageType";
+
 import { GameEngine } from "../engine/engine";
-import { EntityType } from "./schema/enums/EntityType";
-import { Entity } from "./schema/Entity";
-import { Vector } from "./schema/Vector";
+
 import { WeaponType } from "./schema/enums/WeaponType";
 import { HealingType } from "./schema/enums/HealingType";
 import { PlayerSkinType } from "./schema/enums/PlayerSkinType";
+import { EntityType } from "./schema/enums/EntityType";
+import { MessageType } from "./schema/enums/MessageType";
+
+import { GameState } from "./schema/GameState";
+import { Player } from "./schema/Player";
+import { Entity } from "./schema/Entity";
+import { Vector } from "./schema/Vector";
+
+import { getHealingAmountFromHealingType } from "../rules/healing";
 
 export class GameRoom extends Room<GameState> {
-	maxClients = 10;
+	private static PLAYER_RADIUS: number = 1;
 
+	maxClients = 10;
 	private engine: GameEngine = new GameEngine();
-	// client.sessionId -> entity.id
-	private playerClients: Map<string, number> = new Map();
+	private playerClients: Map<string, number> = new Map(); // client.sessionId -> entity.id
 
 	onCreate(options: any) {
-		this.engine.initMap();
-
 		this.setState(new GameState());
 		this.engine.updateStateEntities(this.state.entities);
 
@@ -65,25 +68,50 @@ export class GameRoom extends Room<GameState> {
 			console.log(
 				`received MessageType.HEAL | client.sessionId - ${client.sessionId} | message - ${message}`
 			);
+
+			/**
+			 * message
+			 * null
+			 */
+			const entity = <Player>(
+				this.state.entities.get(
+					`${this.playerClients.get(client.sessionId)}`
+				)
+			);
+			entity.drunkiness -= getHealingAmountFromHealingType(
+				entity.healing
+			);
+			entity.healing = null;
 		});
 
 		this.onMessage(MessageType.SHOOT, (client, message) => {
 			console.log(
 				`received MessageType.SHOOT | client.sessionId - ${client.sessionId} | message - ${message}`
 			);
+
+			/**
+			 * message
+			 * null
+			 */
+			// TODO
 		});
 
 		this.onMessage(MessageType.PICKUP, (client, message) => {
 			console.log(
 				`received MessageType.PICKUP | client.sessionId - ${client.sessionId} | message - ${message}`
 			);
+
+			/**
+			 * message
+			 */
+			// TODO
 		});
 	}
 
 	onJoin(client: Client, options: { name: string }) {
 		console.log(client.sessionId, "joined!");
 
-		const id = this.engine.addPlayer();
+		const id = this.engine.addEntity(0, 0, GameRoom.PLAYER_RADIUS);
 
 		const pos = new Vector();
 		GameRoom.updateVector(pos, 0, 0);

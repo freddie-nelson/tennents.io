@@ -1,14 +1,26 @@
 import Matter from "matter-js";
 import { MapSchema } from "@colyseus/schema";
+
 import { Entity } from "../rooms/schema/Entity";
-import { GameRoom } from "../rooms/GameRoom";
 
 export class GameEngine {
-	private static PLAYER_RADIUS: number = 1;
+	private engine: Matter.Engine;
+	private entities: Map<number, Matter.Body>;
+	private id: number;
 
-	private engine: Matter.Engine = Matter.Engine.create();
-	private entities: Map<number, Matter.Body> = new Map<number, Matter.Body>();
-	private id: number = 0;
+	constructor() {
+		this.engine = Matter.Engine.create();
+		this.entities = new Map<number, Matter.Body>();
+		this.id = 0;
+
+		this.initMap();
+	}
+
+	// HELPERS
+
+	private initMap() {
+		// TODO
+	}
 
 	// GENERAL
 
@@ -45,14 +57,6 @@ export class GameEngine {
 
 			entity.rotation = gameEntity.angle;
 		}
-	}
-
-	// SPECIFIC
-
-	initMap() {}
-
-	addPlayer(): number {
-		return this.addEntity(0, 0, GameEngine.PLAYER_RADIUS);
 	}
 
 	// EVENT HANDLERS
