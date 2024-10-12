@@ -6,188 +6,222 @@ import { EntityType } from "../rooms/schema/enums/EntityType";
 import { Player } from "../rooms/schema/Player";
 
 export class GameEngine {
-  static readonly DRUNKINESS_LOSS: number = 0.1;
-  static readonly PLAYER_RADIUS: number = 1;
-  static readonly PLAYER_SPEED: number = 0.1;
-  static readonly PROJECTILE_RADIUS: number = 0.5;
-  static readonly PROJECTILE_LIFETIME: number = 100;
-  static readonly PROJECTILE_SPEED: number = 0.2;
+	static readonly DRUNKINESS_LOSS: number = 0.1;
+	static readonly PLAYER_RADIUS: number = 1;
+	static readonly PLAYER_SPEED: number = 0.1;
+	static readonly PROJECTILE_RADIUS: number = 0.5;
+	static readonly PROJECTILE_LIFETIME: number = 100;
+	static readonly PROJECTILE_SPEED: number = 0.2;
 
-  private engine: Matter.Engine;
-  private entities: Map<number, Matter.Body>;
-  private id: number;
+	private engine: Matter.Engine;
+	private entities: Map<number, Matter.Body>;
+	private id: number;
 
-  constructor() {
-    this.engine = Matter.Engine.create({ gravity: { x: 0, y: 0 } });
-    this.entities = new Map<number, Matter.Body>();
-    this.id = 0;
+	constructor() {
+		this.engine = Matter.Engine.create({ gravity: { x: 0, y: 0 } });
+		this.entities = new Map<number, Matter.Body>();
+		this.id = 0;
 
-    this.initMap();
-    this.initCollisions();
-  }
+		this.initMap();
+		this.initCollisions();
+	}
 
-  // HELPERS - INITIALIZATION
+	// HELPERS - INITIALIZATION
 
-  private initMap() {
-    // TODO
-  }
+	private initMap() {
+		// TODO
+	}
 
-  private initCollisions() {
-    Matter.Events.on(this.engine, "collisionStart", this.onCollisionStart);
-  }
+	private initCollisions() {
+		Matter.Events.on(this.engine, "collisionStart", this.onCollisionStart);
+	}
 
-  // HELPERS - COLLISIONS
+	// HELPERS - COLLISIONS
 
-  private onCollisionStart(event: Matter.IEventCollision<Matter.Engine>) {
-    // TODO
-  }
+	private onCollisionStart(event: Matter.IEventCollision<Matter.Engine>) {
+		const pairs = event.pairs;
 
-  // HELPERS - ENTITIES
+		for (const pair of pairs) {
+			const bodyA = pair.bodyA;
+			const bodyB = pair.bodyB;
 
-  private addEntity({
-    x,
-    y,
-    radius,
-    r,
-    velX,
-    velY,
-  }: {
-    x: number;
-    y: number;
-    radius: number;
-    r: number;
-    velX: number;
-    velY: number;
-  }): Matter.Body {
-    this.id++;
+			// broadcast collision event to room
+			// using bodyA.plugin.id and bodyB.plugin.id
+		}
+	}
 
-    const entity = Matter.Bodies.circle(x, y, radius, {
-      angle: r,
-      velocity: { x: velX, y: velY },
-    });
-    Matter.Body.setVelocity(entity, {
-      x: velX,
-      y: velY,
-    });
-    this.entities.set(this.id, entity);
-    Matter.Composite.add(this.engine.world, entity);
+	// HELPERS - ENTITIES
 
-    return entity;
-  }
+	private addEntity({
+		x,
+		y,
+		radius,
+		r,
+		velX,
+		velY,
+	}: {
+		x: number;
+		y: number;
+		radius: number;
+		r: number;
+		velX: number;
+		velY: number;
+	}): Matter.Body {
+		this.id++;
 
-  private updateStateEntities(stateEntities: MapSchema<Entity, string>) {
-    for (const [id, entity] of stateEntities) {
-      const gameEntity = this.entities.get(parseInt(id));
+		const entity = Matter.Bodies.circle(x, y, radius, {
+			angle: r,
+			velocity: { x: velX, y: velY },
+		});
+		entity.plugin.id = this.id;
+		Matter.Body.setVelocity(entity, {
+			x: velX,
+			y: velY,
+		});
 
-      let changed = false;
-      if (entity.pos.x !== gameEntity.position.x || entity.pos.y !== gameEntity.position.y) {
-        entity.pos.x = gameEntity.position.x;
-        entity.pos.y = gameEntity.position.y;
+		Matter.Composite.add(this.engine.world, entity);
+		this.entities.set(this.id, entity);
 
-        changed = true;
-      }
+		return entity;
+	}
 
-      if (entity.velocity.x !== gameEntity.velocity.x || entity.velocity.y !== gameEntity.velocity.y) {
-        entity.velocity.x = gameEntity.velocity.x;
-        entity.velocity.y = gameEntity.velocity.y;
+	private updateStateEntities(stateEntities: MapSchema<Entity, string>) {
+		for (const [id, entity] of stateEntities) {
+			const gameEntity = this.entities.get(parseInt(id));
 
-        changed = true;
-      }
+			let changed = false;
+			if (
+				entity.pos.x !== gameEntity.position.x ||
+				entity.pos.y !== gameEntity.position.y
+			) {
+				entity.pos.x = gameEntity.position.x;
+				entity.pos.y = gameEntity.position.y;
 
-      if (entity.rotation !== gameEntity.angle) {
-        entity.rotation = gameEntity.angle;
+				changed = true;
+			}
 
-        changed = true;
-      }
+			if (
+				entity.velocity.x !== gameEntity.velocity.x ||
+				entity.velocity.y !== gameEntity.velocity.y
+			) {
+				entity.velocity.x = gameEntity.velocity.x;
+				entity.velocity.y = gameEntity.velocity.y;
 
-      if (entity.type === EntityType.PLAYER && (entity as Player).drunkiness > 0) {
-        const player = entity as Player;
-        player.drunkiness -= GameEngine.DRUNKINESS_LOSS;
-        changed = true;
-      }
+				changed = true;
+			}
 
-      if (changed) {
-        stateEntities.set(id, entity);
-      }
-    }
-  }
+			if (entity.rotation !== gameEntity.angle) {
+				entity.rotation = gameEntity.angle;
 
-  // METHODS - ENTITIES
+				changed = true;
+			}
 
-  addPlayer({ x, y, r }: { x: number; y: number; r: number }): number {
-    const entity = this.addEntity({
-      x,
-      y,
-      r,
-      velX: 0,
-      velY: 0,
-      radius: GameEngine.PLAYER_RADIUS,
-    });
-    entity.frictionAir = 0.1;
+			if (
+				entity.type === EntityType.PLAYER &&
+				(entity as Player).drunkiness > 0
+			) {
+				const player = entity as Player;
+				player.drunkiness -= GameEngine.DRUNKINESS_LOSS;
+				changed = true;
+			}
 
-    return this.id;
-  }
+			if (changed) {
+				stateEntities.set(id, entity);
+			}
+		}
+	}
 
-  addProjectile({ x, y, r }: { x: number; y: number; r: number }): number {
-    const dx = Math.cos(r);
-    const dy = Math.sin(r);
+	// METHODS - ENTITIES
 
-    const entity = this.addEntity({
-      x: x + dx * GameEngine.PLAYER_RADIUS * 0.8,
-      y: y + dy * GameEngine.PLAYER_RADIUS * 0.8,
-      r,
-      velX: dx * GameEngine.PROJECTILE_SPEED,
-      velY: dy * GameEngine.PROJECTILE_SPEED,
-      radius: GameEngine.PROJECTILE_RADIUS,
-    });
-    entity.frictionAir = 0;
-    entity.plugin.lifetime = GameEngine.PROJECTILE_LIFETIME;
+	addPlayer({ x, y, r }: { x: number; y: number; r: number }): number {
+		const entity = this.addEntity({
+			x,
+			y,
+			r,
+			velX: 0,
+			velY: 0,
+			radius: GameEngine.PLAYER_RADIUS,
+		});
+		entity.frictionAir = 0.1;
 
-    return this.id;
-  }
+		return this.id;
+	}
 
-  removeEntity(id: number) {
-    const entity = this.entities.get(id);
-    if (!entity) return;
+	addProjectile({ x, y, r }: { x: number; y: number; r: number }): number {
+		const dx = Math.cos(r);
+		const dy = Math.sin(r);
 
-    if (Matter.Composite.get(this.engine.world, entity.id, entity.type) !== null) {
-      Matter.Composite.remove(this.engine.world, entity);
-    }
+		const entity = this.addEntity({
+			x: x + dx * GameEngine.PLAYER_RADIUS * 0.8,
+			y: y + dy * GameEngine.PLAYER_RADIUS * 0.8,
+			r,
+			velX: dx * GameEngine.PROJECTILE_SPEED,
+			velY: dy * GameEngine.PROJECTILE_SPEED,
+			radius: GameEngine.PROJECTILE_RADIUS,
+		});
+		entity.frictionAir = 0;
+		entity.plugin.lifetime = GameEngine.PROJECTILE_LIFETIME;
 
-    this.entities.delete(id);
-  }
+		return this.id;
+	}
 
-  update(delta: number, stateEntities: MapSchema<Entity, string>) {
-    Matter.Engine.update(this.engine, delta);
+	removeEntity(id: number) {
+		const entity = this.entities.get(id);
+		if (!entity) return;
 
-    for (const entity of this.entities.values()) {
-      // entities with a lifetime
-      if (!entity.plugin.lifetime) continue;
+		if (
+			Matter.Composite.get(this.engine.world, entity.id, entity.type) !==
+			null
+		) {
+			Matter.Composite.remove(this.engine.world, entity);
+		}
 
-      entity.plugin.lifetime--;
-      if (entity.plugin.lifetime <= 0) {
-        this.removeEntity(entity.id);
-        stateEntities.delete(`${entity.id}`);
-      }
-    }
+		this.entities.delete(id);
+	}
 
-    this.updateStateEntities(stateEntities);
-  }
+	// METHODS - LIFE CYCLE
 
-  dispose() {
-    Matter.World.clear(this.engine.world, false);
-    Matter.Engine.clear(this.engine);
-  }
+	update(delta: number, stateEntities: MapSchema<Entity, string>) {
+		Matter.Engine.update(this.engine, delta);
 
-  // METHODS - EVENT HANDLERS
+		for (const entity of this.entities.values()) {
+			// entities with a lifetime
+			if (!entity.plugin.lifetime) continue;
 
-  handleMove({ id, speed, x, y }: { id: number; speed: number; x: number; y: number }) {
-    const entity = this.entities.get(id);
-    Matter.Body.setVelocity(entity, { x: x * speed, y: y * speed });
-  }
+			entity.plugin.lifetime--;
+			if (entity.plugin.lifetime <= 0) {
+				this.removeEntity(entity.id);
+				stateEntities.delete(`${entity.id}`);
+			}
+		}
 
-  handleRotation({ id, r }: { id: number; r: number }) {
-    const entity = this.entities.get(id);
-    Matter.Body.setAngle(entity, r);
-  }
+		this.updateStateEntities(stateEntities);
+	}
+
+	dispose() {
+		Matter.World.clear(this.engine.world, false);
+		Matter.Engine.clear(this.engine);
+	}
+
+	// METHODS - EVENT HANDLERS
+
+	handleMove({
+		id,
+		speed,
+		x,
+		y,
+	}: {
+		id: number;
+		speed: number;
+		x: number;
+		y: number;
+	}) {
+		const entity = this.entities.get(id);
+		Matter.Body.setVelocity(entity, { x: x * speed, y: y * speed });
+	}
+
+	handleRotation({ id, r }: { id: number; r: number }) {
+		const entity = this.entities.get(id);
+		Matter.Body.setAngle(entity, r);
+	}
 }
