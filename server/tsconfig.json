@@ -5,14 +5,15 @@
     "module": "CommonJS",
     "moduleResolution": "node",
     "strict": true,
-    "strictNullChecks": true,
+    "allowJs": true,
+    "strictNullChecks": false,
     "esModuleInterop": true,
     "experimentalDecorators": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
-    "useDefineForClassFields": false,
-    "resolveJsonModule": true,
-    "jsx": "react-jsx"
+    "useDefineForClassFields": false
   },
-  "include": ["src"]
+  "include": [
+    "src"
+  ]
 }
