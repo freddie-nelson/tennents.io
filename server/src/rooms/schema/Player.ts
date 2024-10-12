@@ -10,4 +10,5 @@ export class Player extends Entity {
 	@type("int8") healing?: HealingType;
 	@type("int32") drunkiness: number;
 	@type("int8") skin: PlayerSkinType;
+	@type("int64") canPickup?: number;
 }
