@@ -288,7 +288,10 @@ export class GameRoom extends Room<GameState> {
 			projectile.projectileType
 		);
 		player.drunkiness += drunkinessAmount;
-		// TODO: check if player is dead
+		if (player.drunkiness >= this.state.config.maxDrunkiness) {
+			this.engine.removeEntity(playerId);
+			this.state.entities.delete(`${playerId}`);
+		}
 
 		// remove projectile
 		this.engine.removeEntity(projectileId);
