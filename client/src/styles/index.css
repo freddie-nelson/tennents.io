@@ -20,7 +20,7 @@ body {
 
 h1 {
   color: red;
-  font-size: 8rem;
+  font-size: 6rem;
   font-weight: bold;
   -webkit-text-stroke: white 4px;
 }
@@ -29,4 +29,44 @@ h1 {
   display: block;
   width: 100%;
   height: 100%;
+}
+
+.game,
+.join-container {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.join-container {
+  flex-direction: column;
+  padding: 2rem;
+  gap: 1rem;
+  max-width: 100%;
+  width: 32rem;
+}
+
+.join-container input {
+  width: 100%;
+  padding: 1rem;
+  font-size: 1.5rem;
+  font-weight: bold;
+  border-radius: 0.5rem;
+  border: 1px solid black;
+  outline: none;
+}
+
+.join-container button {
+  cursor: pointer;
+  width: 100%;
+  padding: 1rem;
+  background-color: red;
+  outline: none;
+  border: 2px solid white;
+  color: white;
+  font-weight: bold;
+  font-size: 1.5rem;
+  border-radius: 0.5rem;
 }

@@ -1,6 +1,6 @@
-class Vec2 {
-  public x: number;
-  public y: number;
+export default class Vec2 {
+  x: number;
+  y: number;
 
   constructor(x: number, y: number) {
     this.x = x;
@@ -105,5 +105,3 @@ class Vec2 {
     return `(${this.x}, ${this.y})`;
   }
 }
-
-export default Vec2;
