@@ -1,51 +1,31 @@
-import { Scene, Game, WEBGL, GameObjects } from "phaser";
+import Phaser from "phaser";
 
-const canvas = document.getElementById("game") as HTMLCanvasElement;
-
-class GameScene extends Scene {
-	private textbox: GameObjects.Text | undefined;
-
-	constructor() {
-		super("scene-game");
+// custom scene class
+export class GameScene extends Phaser.Scene {
+	preload() {
+		// preload scene
 	}
 
 	create() {
-		this.textbox = this.add.text(
-			window.innerWidth / 2,
-			window.innerHeight / 2,
-			"Welcome to Phaser x Vite!",
-			{
-				color: "#FFF",
-				fontFamily: "monospace",
-				fontSize: "26px",
-			}
-		);
-
-		this.textbox.setOrigin(0.5, 0.5);
+		// create scene
 	}
 
-	update(time: number, delta: number) {
-		if (!this.textbox) {
-			return;
-		}
-
-		this.textbox.rotation += 0.0005 * delta;
+	update(time: number, delta: number): void {
+		// game loop
 	}
 }
 
-const config = {
-	type: WEBGL,
-	width: window.innerWidth,
-	height: window.innerHeight,
-	canvas,
-	physics: {
-		default: "arcade",
-		arcade: {
-			gravity: { x: 0, y: 0 },
-			// debug: true
-		},
-	},
+// game config
+const config: Phaser.Types.Core.GameConfig = {
+	type: Phaser.AUTO,
+	width: 800,
+	height: 600,
+	backgroundColor: "#b6d53c",
+	parent: "phaser-example",
+	physics: { default: "arcade" },
+	pixelArt: true,
 	scene: [GameScene],
 };
 
-new Game(config);
+// instantiate the game
+const game = new Phaser.Game(config);
