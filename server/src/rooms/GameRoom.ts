@@ -36,6 +36,11 @@ export class GameRoom extends Room<GameState> {
 			 * velocity vector
 			 * {x: number, y: number}
 			 */
+			this.engine.handleMove(
+				this.playerClients.get(client.sessionId),
+				message.x,
+				message.y
+			);
 		});
 
 		this.onMessage(MessageType.ROTATE, (client, message) => {});
