@@ -143,7 +143,7 @@ export class GameEngine {
 
       entity.plugin.lifetime--;
       if (entity.plugin.lifetime <= 0) {
-        Matter.Composite.remove(this.engine.world, entity);
+        this.removeEntity(entity.id);
         stateEntities.delete(`${entity.id}`);
       }
     }
