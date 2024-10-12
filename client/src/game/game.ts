@@ -98,7 +98,7 @@ export default class Game {
         return;
       }
 
-      this.shootTimer = 10;
+      this.shootTimer = 5;
       this.room.send(MessageType.SHOOT);
     });
 
