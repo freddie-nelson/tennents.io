@@ -76,32 +76,26 @@ export default class Game {
 
     // Initialize sounds
     const soundManager = SoundManager.getInstance();
-    soundManager.loadSound("keg", "client/public/SFX/Burp.mp3");
-    soundManager.loadSound("tennentsSuper", "client/public/SFX/RAHHHH - Sound Effect [ ezmp3.cc ].mp3");
-    soundManager.loadSound("tennentsClassic", "client/public/SFX/wine-glass-clink-36036.mp3");
-    soundManager.loadSound("tennents", "client/public/SFX/opening-beer-can-6336.mp3");
-    soundManager.loadSound("tennentsLite", "client/public/SFX/chug.mp3");
+    soundManager.loadSound("keg", "/SFX/Burp.mp3");
+    soundManager.loadSound("tennentsSuper", "/SFX/RAHHHH - Sound Effect [ ezmp3.cc ].mp3");
+    soundManager.loadSound("tennentsClassic", "/SFX/wine-glass-clink-36036.mp3");
+    soundManager.loadSound("tennents", "/SFX/opening-beer-can-6336.mp3");
+    soundManager.loadSound("tennentsLite", "/SFX/chug.mp3");
 
-    soundManager.loadSound("veryHurt", "client/public/SFX/Metal pipe.mp3");
-    soundManager.loadSound("hurtALot", "client/public/SFX/elite death sound.mp3");
-    soundManager.loadSound(
-      "hurtVeryMuch",
-      "client/public/SFX/LEGO YODA DEATH SOUND EFFECT  STAR WARS [ ezmp3.cc ].mp3"
-    );
+    soundManager.loadSound("veryHurt", "/SFX/Metal pipe.mp3");
+    soundManager.loadSound("hurtALot", "/SFX/elite death sound.mp3");
+    soundManager.loadSound("hurtVeryMuch", "/SFX/LEGO YODA DEATH SOUND EFFECT  STAR WARS [ ezmp3.cc ].mp3");
     soundManager.loadSound(
       "hurtRatherBadly",
-      "client/public/SFX/Roblox Death Sound (Oof) - Sound Effect (HD) [ ezmp3.cc ].mp3"
+      "/SFX/Roblox Death Sound (Oof) - Sound Effect (HD) [ ezmp3.cc ].mp3"
     );
-    soundManager.loadSound(
-      "hurt",
-      "client/public/SFX/Minecraft Damage (Oof) - Sound Effect (HD) [ ezmp3.cc ].mp3"
-    );
+    soundManager.loadSound("hurt", "/SFX/Minecraft Damage (Oof) - Sound Effect (HD) [ ezmp3.cc ].mp3");
 
-    soundManager.loadSound("kebab", "client/public/SFX/chewing.mp3");
-    soundManager.loadSound("oj", "client/public/SFX/short-choir-6116.mp3");
-    soundManager.loadSound("coffee", "client/public/SFX/coffee-pouring-243569.mp3");
-    soundManager.loadSound("water", "client/public/SFX/short-choir-6116.mp3");
-    soundManager.loadSound("tennentsZero", "client/public/SFX/tennents-zero.mp3");
+    soundManager.loadSound("kebab", "/SFX/chewing.mp3");
+    soundManager.loadSound("oj", "/SFX/short-choir-6116.mp3");
+    soundManager.loadSound("coffee", "/SFX/coffee-pouring-243569.mp3");
+    soundManager.loadSound("water", "/SFX/short-choir-6116.mp3");
+    soundManager.loadSound("tennentsZero", "/SFX/tennents-zero.mp3");
 
     await this.app.init({
       width: window.innerWidth,

@@ -1,7 +1,7 @@
 import { API, Room } from "./api/colyseus";
 import Game, { gameContainer } from "./game/game";
 import HUD from "./game/hud";
-import { SoundManager } from './game/soundManager'; 
+import { SoundManager } from "./game/soundManager";
 
 const api = new API();
 
@@ -11,7 +11,7 @@ let game: Game | null = null;
 const soundManager = SoundManager.getInstance();
 
 // Preload background music
-soundManager.loadSound('backgroundMusic', 'client/public/music/tennents.mp3');
+soundManager.loadSound("backgroundMusic", "/music/tennents.mp3");
 
 const joinForm = document.getElementById("join-form") as HTMLFormElement;
 const nameInput = document.getElementById("name") as HTMLInputElement;
@@ -36,6 +36,6 @@ joinForm.addEventListener("submit", async (event) => {
 
   game = new Game(room);
   game.init();
-  soundManager.playSound('backgroundMusic', true, 0.5);
-  const hud = new HUD(game, 1) // Good Values -> 0.8 - 1.3
+  soundManager.playSound("backgroundMusic", true, 0.1);
+  const hud = new HUD(game, 1); // Good Values -> 0.8 - 1.3
 });
