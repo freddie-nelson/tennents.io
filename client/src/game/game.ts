@@ -5,7 +5,7 @@ import { Entity as ServerEntity } from "../../../server/src/rooms/schema/Entity"
 import { Player as ServerPlayer } from "../../../server/src/rooms/schema/Player";
 import { Healing as ServerHealing } from "../../../server/src/rooms/schema/Healing";
 import { Weapon as ServerWeapon } from "../../../server/src/rooms/schema/Weapon";
-import { Projectile as ServerProjectile } from "../../../server/src/rooms/schema/Projectile";
+import { Projectile as ServerProjectile } from "../../../server/src/rooms/schema/Projectiles";
 import Vec2 from "./Vec2";
 import { EntityType } from "../../../server/src/rooms/schema/enums/EntityType";
 import Player from "./Player";
@@ -16,7 +16,7 @@ import { GameState } from "../../../server/src/rooms/schema/GameState";
 import Textures from "./Textures";
 import { MessageType } from "../../../server/src/rooms/schema/enums/MessageType";
 import { GameStateType } from "../../../server/src/rooms/schema/enums/GameStateType";
-import { SoundManager } from './soundManager';
+import { SoundManager } from "./soundManager";
 import { WeaponType } from "../../../server/src/rooms/schema/enums/WeaponType";
 import { HealingType } from "../../../server/src/rooms/schema/enums/HealingType";
 import HUD from "./hud";
@@ -74,23 +74,26 @@ export default class Game {
 
     // Initialize sounds
     const soundManager = SoundManager.getInstance();
-    soundManager.loadSound("keg", "client/public/SFX/Burp.mp3");
-    soundManager.loadSound("tennentsSuper", "client/public/SFX/RAHHHH - Sound Effect [ ezmp3.cc ].mp3");
-    soundManager.loadSound("tennentsClassic", "client/public/SFX/wine-glass-clink-36036.mp3");
-    soundManager.loadSound("tennents", "client/public/SFX/opening-beer-can-6336.mp3");
-    soundManager.loadSound("tennentsLite", "client/public/SFX/chug.mp3");
+    soundManager.loadSound("keg", "/SFX/Burp.mp3");
+    soundManager.loadSound("tennentsSuper", "/SFX/RAHHHH - Sound Effect [ ezmp3.cc ].mp3");
+    soundManager.loadSound("tennentsClassic", "/SFX/wine-glass-clink-36036.mp3");
+    soundManager.loadSound("tennents", "/SFX/opening-beer-can-6336.mp3");
+    soundManager.loadSound("tennentsLite", "/SFX/chug.mp3");
 
-    soundManager.loadSound("veryHurt", "client/public/SFX/Metal pipe.mp3");
-    soundManager.loadSound("hurtALot", "client/public/SFX/elite death sound.mp3");
-    soundManager.loadSound("hurtVeryMuch", "client/public/SFX/LEGO YODA DEATH SOUND EFFECT  STAR WARS [ ezmp3.cc ].mp3");
-    soundManager.loadSound("hurtRatherBadly", "client/public/SFX/Roblox Death Sound (Oof) - Sound Effect (HD) [ ezmp3.cc ].mp3");
-    soundManager.loadSound("hurt", "client/public/SFX/Minecraft Damage (Oof) - Sound Effect (HD) [ ezmp3.cc ].mp3");
+    soundManager.loadSound("veryHurt", "/SFX/Metal pipe.mp3");
+    soundManager.loadSound("hurtALot", "/SFX/elite death sound.mp3");
+    soundManager.loadSound("hurtVeryMuch", "/SFX/LEGO YODA DEATH SOUND EFFECT  STAR WARS [ ezmp3.cc ].mp3");
+    soundManager.loadSound(
+      "hurtRatherBadly",
+      "/SFX/Roblox Death Sound (Oof) - Sound Effect (HD) [ ezmp3.cc ].mp3"
+    );
+    soundManager.loadSound("hurt", "/SFX/Minecraft Damage (Oof) - Sound Effect (HD) [ ezmp3.cc ].mp3");
 
-    soundManager.loadSound("kebab", "client/public/SFX/chewing.mp3");
-    soundManager.loadSound("oj", "client/public/SFX/short-choir-6116.mp3");
-    soundManager.loadSound("coffee", "client/public/SFX/coffee-pouring-243569.mp3");
-    soundManager.loadSound("water", "client/public/SFX/short-choir-6116.mp3");
-    soundManager.loadSound("tennentsZero", "client/public/SFX/tennents-zero.mp3");
+    soundManager.loadSound("kebab", "/SFX/chewing.mp3");
+    soundManager.loadSound("oj", "/SFX/short-choir-6116.mp3");
+    soundManager.loadSound("coffee", "/SFX/coffee-pouring-243569.mp3");
+    soundManager.loadSound("water", "/SFX/short-choir-6116.mp3");
+    soundManager.loadSound("tennentsZero", "/SFX/tennents-zero.mp3");
 
     await this.app.init({
       width: window.innerWidth,
@@ -138,57 +141,60 @@ export default class Game {
         this.shootTimer = 5;
         this.room.send(MessageType.SHOOT);
 
-
-    // Play weapon sound based on the player's weapon
-    const soundManager = SoundManager.getInstance();
-    switch (this.you.weapon) {
-      case WeaponType.TENNENTS_KEG:
-        soundManager.playSound("keg");
-        break;
-      case WeaponType.TENNENTS_SUPER:
-        soundManager.playSound("tennentsSuper");
-        break;
-      case WeaponType.TENNENTS_ORIGINAL:
-        soundManager.playSound("tennentsClassic");
-        break;
-      case WeaponType.TENNENTS_PINT:
-        soundManager.playSound("tennents");
-        break;
-      case WeaponType.TENNENTS_LIGHT:
-        soundManager.playSound("tennentsLite");
-        break;
-      default:
-        console.warn('Unknown weapon type');
-    }
-
-  } else if (e.button === 2) {
-    // right click
-    this.room.send(MessageType.HEAL);
-      // Play healing sound based on the healing type
-      switch (this.you.healing) {
-        case HealingType.TENNENTS_ZERO:
-          soundManager.playSound("tennentsZero");
-          break;
-        case HealingType.WATER:
-          soundManager.playSound("water");
-          break;
-        case HealingType.COFFEE:
-          soundManager.playSound("coffee");
-          break;
-        case HealingType.ORANGE_JUICE:
-          soundManager.playSound("oj");
-          break;
-        case HealingType.DONER_KEBAB:
-          soundManager.playSound("kebab");
-          break;
-        default:
-          console.warn('Unknown healing type');
+        // Play weapon sound based on the player's weapon
+        const soundManager = SoundManager.getInstance();
+        switch (this.you.weapon) {
+          case WeaponType.TENNENTS_KEG:
+            soundManager.playSound("keg");
+            break;
+          case WeaponType.TENNENTS_SUPER:
+            soundManager.playSound("tennentsSuper");
+            break;
+          case WeaponType.TENNENTS_ORIGINAL:
+            soundManager.playSound("tennentsClassic");
+            break;
+          case WeaponType.TENNENTS_PINT:
+            soundManager.playSound("tennents");
+            break;
+          case WeaponType.TENNENTS_LIGHT:
+            soundManager.playSound("tennentsLite");
+            break;
+          default:
+            console.warn("Unknown weapon type");
+        }
+      } else if (e.button === 2) {
+        // right click
+        this.room.send(MessageType.HEAL);
+        // Play healing sound based on the healing type
+        switch (this.you.healing) {
+          case HealingType.TENNENTS_ZERO:
+            soundManager.playSound("tennentsZero");
+            break;
+          case HealingType.WATER:
+            soundManager.playSound("water");
+            break;
+          case HealingType.COFFEE:
+            soundManager.playSound("coffee");
+            break;
+          case HealingType.ORANGE_JUICE:
+            soundManager.playSound("oj");
+            break;
+          case HealingType.DONER_KEBAB:
+            soundManager.playSound("kebab");
+            break;
+          default:
+            console.warn("Unknown healing type");
+        }
       }
-  }
-}); 
+    });
 
-    
     this.app.canvas.oncontextmenu = (e) => e.preventDefault();
+
+    window.addEventListener("keydown", (e) => {
+      if (e.key === "e") {
+        this.room.send(MessageType.PICKUP);
+      }
+    });
 
     this.app.start();
   }

@@ -6,15 +6,17 @@ RUN mkdir -p /app/ && chown -R node:node /app
 
 COPY --chown=node:node ./ /app/
 
-WORKDIR /app/
+WORKDIR /app/server
 
 USER node
 
+RUN ls -la /app/
+
 RUN pnpm i
 
-RUN pnpm run setup
-
 RUN pnpm run build
+
+ENV NODE_ENV=production
 
 EXPOSE 3000
 

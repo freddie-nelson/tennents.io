@@ -88,6 +88,10 @@ export class GameMap {
       return Math.random() < 0.3;
     }
 
+    if (type === TileType.WOODEN_FLOOR || type === TileType.COBBLESTONE) {
+      return Math.random() < 0.001;
+    }
+
     return false;
   }
 }
@@ -101,11 +105,3 @@ export async function loadTilemap(url: string): Promise<GameMap> {
   const tilemapData = await response.json();
   return new GameMap(tilemapData);
 }
-
-loadTilemap("shared/map/mapproject.json")
-  .then((gameMap) => {
-    console.log("Parsed GameMap:", gameMap.tiles);
-  })
-  .catch((error) => {
-    console.error("Error loading tilemap:", error);
-  });

@@ -13,6 +13,7 @@ import Projectile from "./Projectile";
 export default class Entity {
   public sprite: Container | null = null;
   private spriteType: EntityType | null = null;
+  private spriteKey: string | null = null;
 
   constructor(
     public readonly id: number,
@@ -23,7 +24,7 @@ export default class Entity {
   ) {}
 
   update(dt: number) {
-    if (!this.sprite || this.spriteType !== this.type) {
+    if (!this.sprite || this.spriteType !== this.type || this.spriteKey !== this.getSpriteKey()) {
       this.sprite?.removeFromParent();
       this.createSprite();
     }
@@ -64,6 +65,7 @@ export default class Entity {
     sprite.height = size.y;
 
     this.spriteType = this.type;
+    this.spriteKey = this.getSpriteKey();
 
     switch (this.type) {
       case EntityType.PLAYER:
@@ -94,7 +96,7 @@ export default class Entity {
         weaponSprite.texture = Textures.getWeaponTexture(p.weapon);
         weaponSprite.rotation = Math.PI * 1.2;
 
-        const size = Entity.getSize(EntityType.WEAPON, p.weapon);
+        const size = Entity.getSize(EntityType.WEAPON, p.weapon).mul(0.6);
         weaponSprite.width = size.x;
         weaponSprite.height = size.y;
 
@@ -108,13 +110,28 @@ export default class Entity {
         healingSprite.texture = Textures.getHealingTexture(p.healing);
         healingSprite.rotation = -Math.PI * 1.2;
 
-        const size = Entity.getSize(EntityType.HEALING, p.healing);
+        const size = Entity.getSize(EntityType.HEALING, p.healing).mul(0.6);
         healingSprite.width = size.x;
         healingSprite.height = size.y;
 
         this.sprite.addChild(healingSprite);
       }
     }
+  }
+
+  getSpriteKey() {
+    if (this.type === EntityType.PLAYER) {
+      const p = this as any as Player;
+      return `${p.weapon}-${p.healing}-${p.skin}`;
+    } else if (this.type === EntityType.WEAPON) {
+      return (this as any as Weapon).weaponType.toString();
+    } else if (this.type === EntityType.HEALING) {
+      return (this as any as Healing).healingType.toString();
+    } else if (this.type === EntityType.PROJECTILE) {
+      return (this as any as Projectile).projectileType.toString();
+    }
+
+    return "";
   }
 
   static getSize(type: EntityType, subType?: any): Vec2 {
@@ -127,15 +144,15 @@ export default class Entity {
 
         switch (subType) {
           case WeaponType.TENNENTS_LIGHT:
-            return new Vec2(0.6, 0.8);
+            return new Vec2(1, 1.2);
           case WeaponType.TENNENTS_PINT:
-            return new Vec2(0.6, 0.8);
+            return new Vec2(1, 1.2);
           case WeaponType.TENNENTS_ORIGINAL:
-            return new Vec2(0.6, 0.8);
+            return new Vec2(1, 1.2);
           case WeaponType.TENNENTS_SUPER:
-            return new Vec2(0.6, 0.8);
+            return new Vec2(1, 1.2);
           case WeaponType.TENNENTS_KEG:
-            return new Vec2(0.6, 0.8);
+            return new Vec2(1, 1.2);
 
           default:
             throw new Error("Unknown weapon type");
@@ -164,15 +181,15 @@ export default class Entity {
 
         switch (subType) {
           case HealingType.TENNENTS_ZERO:
-            return new Vec2(0.6, 0.8);
+            return new Vec2(1, 1.2);
           case HealingType.WATER:
-            return new Vec2(0.6, 0.8);
+            return new Vec2(1, 1.2);
           case HealingType.COFFEE:
-            return new Vec2(0.6, 0.8);
+            return new Vec2(1, 1.2);
           case HealingType.ORANGE_JUICE:
-            return new Vec2(0.6, 0.8);
+            return new Vec2(1, 1.2);
           case HealingType.DONER_KEBAB:
-            return new Vec2(0.6, 0.8);
+            return new Vec2(1, 1.2);
 
           default:
             throw new Error("Unknown healing type");

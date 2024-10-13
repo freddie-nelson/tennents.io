@@ -14,7 +14,7 @@ import { Player } from "./schema/Player";
 import { Entity } from "./schema/Entity";
 import { Vector } from "./schema/Vector";
 import { GameConfig } from "./schema/GameConfig";
-import { Projectile } from "./schema/projectile";
+import { Projectile } from "./schema/Projectiles";
 import { Healing } from "./schema/Healing";
 import { Weapon } from "./schema/Weapon";
 
@@ -23,9 +23,9 @@ import { getDrunkinessAmountFromWeaponType } from "../rules/weapon";
 
 export class GameRoom extends Room<GameState> {
   maxClients = 10;
-  private TIME_TO_START = 3;
+  private TIME_TO_START = process.env.NODE_ENV === "production" ? 20 : 3;
   private timeToStartInterval: NodeJS.Timeout | undefined;
-  private playersToStart = 1;
+  private playersToStart = process.env.NODE_ENV === "production" ? 4 : 1;
   private engine: GameEngine = new GameEngine(this.onCollisionStart.bind(this));
   private playerClients: Map<string, number> = new Map(); // client.sessionId -> entity.id
 
@@ -46,6 +46,8 @@ export class GameRoom extends Room<GameState> {
     this.state.config.playerSpeed = GameEngine.PLAYER_SPEED;
     this.state.config.playersToStart = this.playersToStart;
     this.state.state = GameStateType.WAITING;
+
+    this.createPickups();
 
     // EVENT HANDLERS
 
@@ -266,13 +268,21 @@ export class GameRoom extends Room<GameState> {
         continue;
       }
 
-      if (bodyA.plugin.type === EntityType.PROJECTILE) {
+      if (
+        bodyA.plugin.type === EntityType.PROJECTILE &&
+        bodyB.plugin.type !== EntityType.HEALING &&
+        bodyB.plugin.type !== EntityType.WEAPON
+      ) {
         this.engine.removeEntity(bodyA.plugin.id);
         this.state.entities.delete(`${bodyA.plugin.id}`);
         continue;
       }
 
-      if (bodyB.plugin.type === EntityType.PROJECTILE) {
+      if (
+        bodyB.plugin.type === EntityType.PROJECTILE &&
+        bodyA.plugin.type !== EntityType.HEALING &&
+        bodyA.plugin.type !== EntityType.WEAPON
+      ) {
         this.engine.removeEntity(bodyB.plugin.id);
         this.state.entities.delete(`${bodyB.plugin.id}`);
         continue;
@@ -302,6 +312,34 @@ export class GameRoom extends Room<GameState> {
   }
 
   // HELPERS - UPDATE
+
+  createPickups() {
+    this.engine.pickupSpawnableTiles.forEach((tile) => {
+      const type = Math.random() > 0.5 ? EntityType.WEAPON : EntityType.HEALING;
+      const entity = this.engine.addPickup({
+        x: tile.x,
+        y: tile.y,
+        type,
+      });
+
+      if (type === EntityType.HEALING) {
+        const healing = new Healing();
+        GameRoom.updateEntity(healing, entity, type, new Vector(), new Vector(), 0);
+        healing.healingType = this.randomEnum(HealingType);
+        this.state.entities.set(`${healing.id}`, healing);
+      } else if (type === EntityType.WEAPON) {
+        const weapon = new Weapon();
+        GameRoom.updateEntity(weapon, entity, type, new Vector(), new Vector(), 0);
+        weapon.weaponType = this.randomEnum(WeaponType);
+        this.state.entities.set(`${weapon.id}`, weapon);
+      }
+    });
+  }
+
+  randomEnum<T>(anEnum: T): T[keyof T] {
+    const values = Object.values(anEnum).filter((v) => typeof v === "number");
+    return values[Math.floor(Math.random() * values.length)] as any;
+  }
 
   static updateVector(vector: Vector, x: number, y: number) {
     vector.x = x;

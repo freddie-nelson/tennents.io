@@ -10,7 +10,7 @@ let game: Game | null = null;
 const soundManager = SoundManager.getInstance();
 
 // Preload background music
-soundManager.loadSound('backgroundMusic', 'client/public/music/tennents.mp3');
+soundManager.loadSound("backgroundMusic", "/music/tennents.mp3");
 
 const joinForm = document.getElementById("join-form") as HTMLFormElement;
 const nameInput = document.getElementById("name") as HTMLInputElement;
@@ -35,6 +35,5 @@ joinForm.addEventListener("submit", async (event) => {
 
   game = new Game(room);
   game.init();
-  soundManager.playSound('backgroundMusic', true, 0.5);
-  
+  soundManager.playSound('backgroundMusic', true, 0.1);
 });
