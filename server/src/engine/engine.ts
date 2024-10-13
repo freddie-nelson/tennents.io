@@ -41,14 +41,14 @@ export class GameEngine {
     map.tiles.forEach((tile) => {
       if (tile.isPlayerSpawn) {
         this.spawnableTiles.push({
-          x: tile.x - GameEngine.TILE_SIZE / 2,
-          y: tile.y - GameEngine.TILE_SIZE / 2,
+          x: tile.x * GameEngine.TILE_SIZE - GameEngine.TILE_SIZE / 2,
+          y: tile.y * GameEngine.TILE_SIZE - GameEngine.TILE_SIZE / 2,
         });
       }
       if (tile.isPickupSpawn) {
         this.pickupSpawnableTiles.push({
-          x: tile.x - GameEngine.TILE_SIZE / 2,
-          y: tile.y - GameEngine.TILE_SIZE / 2,
+          x: tile.x * GameEngine.TILE_SIZE - GameEngine.TILE_SIZE / 2,
+          y: tile.y * GameEngine.TILE_SIZE - GameEngine.TILE_SIZE / 2,
         });
       }
       if (!tile.isCollidable) {
