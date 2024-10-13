@@ -23,7 +23,7 @@ import { getDrunkinessAmountFromWeaponType } from "../rules/weapon";
 
 export class GameRoom extends Room<GameState> {
 	maxClients = 10;
-	private TIME_TO_START = process.env.NODE_ENV === "production" ? 20 : 3;
+	private TIME_TO_START = process.env.NODE_ENV === "production" ? 30 : 3;
 	private timeToStartInterval: NodeJS.Timeout | undefined;
 	private playersToStart = process.env.NODE_ENV === "production" ? 4 : 1;
 	private engine: GameEngine = new GameEngine(
@@ -360,6 +360,7 @@ export class GameRoom extends Room<GameState> {
 			this.state.entities.delete(`${playerId}`);
 			for (const [sessionId, pId] of this.playerClients) {
 				if (pId === playerId) {
+					this.state.players.delete(sessionId);
 					this.playerClients.delete(sessionId);
 					break;
 				}
