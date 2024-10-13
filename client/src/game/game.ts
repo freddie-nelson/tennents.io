@@ -105,7 +105,7 @@ export default class Game {
       backgroundColor: "black",
     });
 
-    document.body.appendChild(this.app.canvas);
+    gameContainer.appendChild(this.app.canvas);
 
     window.addEventListener("resize", () => {
       this.app.resize();
@@ -223,7 +223,7 @@ export default class Game {
   private update() {
     if (startingContainer.style.display !== "none") {
       if (this.room.state.state === GameStateType.STARTED) {
-        const hud = new HUD(this, 1) // Good Values -> 0.8 - 1.3
+        const hud = new HUD(this, 1); // Good Values -> 0.8 - 1.3
         startingContainer.style.display = "none";
       } else if (this.room.state.state === GameStateType.WAITING) {
         startingContainerText.innerText = `Waiting for players... (${this.room.state.players.size}/${this.room.state.config.maxPlayers})`;
