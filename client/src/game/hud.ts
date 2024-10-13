@@ -243,7 +243,7 @@ export default class HUD {
       });
     }
 
-    HUDElement.appendChild(pickupHud);
+    document.body.appendChild(pickupHud);
 
     // Mocking Starting Values
     this.game = game;
