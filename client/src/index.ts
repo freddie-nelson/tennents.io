@@ -1,6 +1,7 @@
 import { API, Room } from "./api/colyseus";
 import Game, { gameContainer } from "./game/game";
-import { SoundManager } from './game/soundManager'; 
+import { SoundManager } from "./game/soundManager";
+import Textures from "./game/Textures";
 
 const api = new API();
 
@@ -28,6 +29,9 @@ joinForm.addEventListener("submit", async (event) => {
 
   joinButton.innerText = "Joining...";
 
+  await Textures.initTextures();
+  SoundManager.initSounds();
+
   room = await api.joinOrCreate(name);
 
   joinForm.style.display = "none";
@@ -35,5 +39,5 @@ joinForm.addEventListener("submit", async (event) => {
 
   game = new Game(room);
   game.init();
-  soundManager.playSound('backgroundMusic', true, 0.1);
+  soundManager.playSound("backgroundMusic", true, 0.1);
 });

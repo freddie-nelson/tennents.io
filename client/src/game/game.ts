@@ -73,31 +73,6 @@ export default class Game {
   }
 
   async init() {
-    await Textures.initTextures();
-
-    // Initialize sounds
-    const soundManager = SoundManager.getInstance();
-    soundManager.loadSound("keg", "/SFX/Burp.mp3");
-    soundManager.loadSound("tennentsSuper", "/SFX/RAHHHH - Sound Effect [ ezmp3.cc ].mp3");
-    soundManager.loadSound("tennentsClassic", "/SFX/wine-glass-clink-36036.mp3");
-    soundManager.loadSound("tennents", "/SFX/opening-beer-can-6336.mp3");
-    soundManager.loadSound("tennentsLite", "/SFX/chug.mp3");
-
-    soundManager.loadSound("veryHurt", "/SFX/Metal pipe.mp3");
-    soundManager.loadSound("hurtALot", "/SFX/elite death sound.mp3");
-    soundManager.loadSound("hurtVeryMuch", "/SFX/LEGO YODA DEATH SOUND EFFECT  STAR WARS [ ezmp3.cc ].mp3");
-    soundManager.loadSound(
-      "hurtRatherBadly",
-      "/SFX/Roblox Death Sound (Oof) - Sound Effect (HD) [ ezmp3.cc ].mp3"
-    );
-    soundManager.loadSound("hurt", "/SFX/Minecraft Damage (Oof) - Sound Effect (HD) [ ezmp3.cc ].mp3");
-
-    soundManager.loadSound("kebab", "/SFX/chewing.mp3");
-    soundManager.loadSound("oj", "/SFX/short-choir-6116.mp3");
-    soundManager.loadSound("coffee", "/SFX/coffee-pouring-243569.mp3");
-    soundManager.loadSound("water", "/SFX/short-choir-6116.mp3");
-    soundManager.loadSound("tennentsZero", "/SFX/tennents-zero.mp3");
-
     await this.app.init({
       width: window.innerWidth,
       height: window.innerHeight,
