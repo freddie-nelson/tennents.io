@@ -133,6 +133,7 @@ export class GameRoom extends Room<GameState> {
         y: player.pos.y,
         r: player.rotation,
         ownerId: player.id,
+        factor: getDrunkinessAmountFromWeaponType(player.weapon) / 5,
       });
 
       const projectile = new Projectile();

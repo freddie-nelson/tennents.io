@@ -21,7 +21,7 @@ export default class Entity {
     public pos: Vec2,
     public rotation: number,
     public velocity: Vec2,
-    public type: EntityType
+    public type: EntityType,
   ) {}
 
   update(dt: number) {
@@ -176,13 +176,13 @@ export default class Entity {
           case WeaponType.TENNENTS_LIGHT:
             return new Vec2(1, 1.2);
           case WeaponType.TENNENTS_PINT:
-            return new Vec2(1, 1.2);
+            return new Vec2(1, 1.3);
           case WeaponType.TENNENTS_ORIGINAL:
-            return new Vec2(1, 1.2);
+            return new Vec2(1.2, 1.5);
           case WeaponType.TENNENTS_SUPER:
-            return new Vec2(1, 1.2);
+            return new Vec2(1.3, 1.8);
           case WeaponType.TENNENTS_KEG:
-            return new Vec2(1, 1.2);
+            return new Vec2(1.5, 2.2);
 
           default:
             throw new Error("Unknown weapon type");
@@ -194,13 +194,13 @@ export default class Entity {
           case WeaponType.TENNENTS_LIGHT:
             return new Vec2(0.6, 0.8);
           case WeaponType.TENNENTS_PINT:
-            return new Vec2(0.6, 0.8);
+            return new Vec2(0.6, 0.9);
           case WeaponType.TENNENTS_ORIGINAL:
-            return new Vec2(0.6, 0.8);
+            return new Vec2(0.7, 1.1);
           case WeaponType.TENNENTS_SUPER:
-            return new Vec2(0.6, 0.8);
+            return new Vec2(0.9, 1.4);
           case WeaponType.TENNENTS_KEG:
-            return new Vec2(0.6, 0.8);
+            return new Vec2(1.2, 1.8);
 
           default:
             throw new Error("Unknown weapon type");

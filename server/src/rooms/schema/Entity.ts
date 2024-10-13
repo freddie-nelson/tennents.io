@@ -8,4 +8,5 @@ export class Entity extends Schema {
 	@type(Vector) pos: Vector;
 	@type(Vector) velocity: Vector;
 	@type("float32") rotation: number;
+	@type("float32") radius: number;
 }

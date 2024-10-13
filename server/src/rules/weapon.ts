@@ -3,15 +3,15 @@ import { WeaponType } from "../rooms/schema/enums/WeaponType";
 export const getDrunkinessAmountFromWeaponType = (type: WeaponType): number => {
 	switch (type) {
 		case WeaponType.TENNENTS_LIGHT:
-			return 10;
+			return 5;
 		case WeaponType.TENNENTS_PINT:
-			return 20;
+			return 8;
 		case WeaponType.TENNENTS_ORIGINAL:
-			return 30;
+			return 12;
 		case WeaponType.TENNENTS_SUPER:
-			return 40;
+			return 18;
 		case WeaponType.TENNENTS_KEG:
-			return 50;
+			return 25;
 	}
 
 	throw new Error("Failed to get DrunkinessAmount from WeaponType");

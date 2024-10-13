@@ -56,7 +56,7 @@ const isKeyDown = (...k: string[]) =>
   typeof k === "string" ? key.get(k) ?? false : k.some((k) => key.get(k) ?? false);
 
 export default class Game {
-  public static readonly SCALE = 60;
+  public static readonly SCALE = 45;
 
   public readonly app: Application;
   public readonly world: Container = new Container();
@@ -124,19 +124,19 @@ export default class Game {
         // Play weapon sound based on the player's weapon
         switch (this.you.weapon) {
           case WeaponType.TENNENTS_KEG:
-            soundManager.playSound("keg");
+            soundManager.playSound("throw", false, 1);
             break;
           case WeaponType.TENNENTS_SUPER:
-            soundManager.playSound("tennentsSuper");
+            soundManager.playSound("throw", false, 0.9);
             break;
           case WeaponType.TENNENTS_ORIGINAL:
-            soundManager.playSound("tennentsClassic");
+            soundManager.playSound("throw", false, 0.8);
             break;
           case WeaponType.TENNENTS_PINT:
-            soundManager.playSound("tennents");
+            soundManager.playSound("throw", false, 0.7);
             break;
           case WeaponType.TENNENTS_LIGHT:
-            soundManager.playSound("tennentsLite");
+            soundManager.playSound("throw", false, 0.6);
             break;
           default:
             break;
@@ -146,20 +146,25 @@ export default class Game {
         this.room.send(MessageType.HEAL);
         // Play healing sound based on the healing type
         switch (this.you.healing) {
-          case HealingType.TENNENTS_ZERO:
-            soundManager.playSound("tennentsZero");
-            break;
-          case HealingType.WATER:
-            soundManager.playSound("water");
-            break;
-          case HealingType.COFFEE:
-            soundManager.playSound("coffee");
+          case HealingType.DONER_KEBAB:
+            soundManager.playSound("heal", false, 1);
+            soundManager.playSound("burp", false, 1);
             break;
           case HealingType.ORANGE_JUICE:
-            soundManager.playSound("oj");
+            soundManager.playSound("gulp", false, 0.9);
             break;
-          case HealingType.DONER_KEBAB:
-            soundManager.playSound("kebab");
+          case HealingType.COFFEE:
+            soundManager.playSound("gulp", false, 0.8);
+            break;
+          case HealingType.WATER:
+            soundManager.playSound("gulp", false, 0.7);
+            break;
+          case HealingType.TENNENTS_ZERO:
+            soundManager.playSound("crack", false, 1);
+            setTimeout(() => {
+              soundManager.playSound("gulp", false, 0.6);
+              soundManager.playSound("burp", false, 1);
+            }, 500);
             break;
           default:
             break;

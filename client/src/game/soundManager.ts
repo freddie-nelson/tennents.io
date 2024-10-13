@@ -22,26 +22,24 @@ export class SoundManager {
   public static initSounds() {
     // Initialize sounds
     const soundManager = SoundManager.getInstance();
-    soundManager.loadSound("keg", "/SFX/Burp.mp3");
-    soundManager.loadSound("tennentsSuper", "/SFX/RAHHHH - Sound Effect [ ezmp3.cc ].mp3");
-    soundManager.loadSound("tennentsClassic", "/SFX/wine-glass-clink-36036.mp3");
-    soundManager.loadSound("tennents", "/SFX/opening-beer-can-6336.mp3");
-    soundManager.loadSound("tennentsLite", "/SFX/chug.mp3");
+    
+    // Throwing
+    soundManager.loadSound("throw", "/SFX/throwSFX.mp3");
 
+    // Getting Hit
     soundManager.loadSound("veryHurt", "/SFX/Metal pipe.mp3");
-    soundManager.loadSound("hurtALot", "/SFX/elite death sound.mp3");
-    soundManager.loadSound("hurtVeryMuch", "/SFX/LEGO YODA DEATH SOUND EFFECT  STAR WARS [ ezmp3.cc ].mp3");
-    soundManager.loadSound(
-      "hurtRatherBadly",
-      "/SFX/Roblox Death Sound (Oof) - Sound Effect (HD) [ ezmp3.cc ].mp3"
-    );
     soundManager.loadSound("hurt", "/SFX/Minecraft Damage (Oof) - Sound Effect (HD) [ ezmp3.cc ].mp3");
+    soundManager.loadSound("hit", "/SFX/hitSFX.mp3");
 
-    soundManager.loadSound("kebab", "/SFX/chewing.mp3");
-    soundManager.loadSound("oj", "/SFX/short-choir-6116.mp3");
-    soundManager.loadSound("coffee", "/SFX/coffee-pouring-243569.mp3");
-    soundManager.loadSound("water", "/SFX/short-choir-6116.mp3");
-    soundManager.loadSound("tennentsZero", "/SFX/tennents-zero.mp3");
+    // Healing
+    soundManager.loadSound("heal", "/SFX/short-choir-6116.mp3");
+    soundManager.loadSound("gulp", "/SFX/gulp.mp3");
+    soundManager.loadSound("burp", "/SFX/Burp.mp3");
+    soundManager.loadSound("crack", "/SFX/openBeer.mp3");
+
+    // "Passing Out"
+    soundManager.loadSound("lose", "/SFX/cry.mp3");
+    soundManager.loadSound("passOut", "/SFX/passOutSFX.mp3");
   }
 
   // Load sound file

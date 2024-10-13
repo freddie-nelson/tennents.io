@@ -9,12 +9,12 @@ import mapJson from "../../../shared/assets/map.json";
 
 export class GameEngine {
   static readonly DRUNKINESS_LOSS: number = 0.1;
-  static readonly PLAYER_RADIUS: number = 1;
-  static readonly PLAYER_SPEED: number = 0.175;
+  static readonly PLAYER_RADIUS: number = 0.75;
+  static readonly PLAYER_SPEED: number = 0.25;
   static readonly PROJECTILE_RADIUS: number = 0.5;
-  static readonly PROJECTILE_LIFETIME: number = 100;
-  static readonly PROJECTILE_SPEED: number = 0.35;
-  static readonly PICKUP_RADIUS: number = 2.5;
+  static readonly PROJECTILE_LIFETIME: number = 5;
+  static readonly PROJECTILE_SPEED: number = 0.5;
+  static readonly PICKUP_RADIUS: number = 3.5;
   static readonly TILE_SIZE: number = 2;
 
   private engine: Matter.Engine;
@@ -160,20 +160,20 @@ export class GameEngine {
     return this.id;
   }
 
-  addProjectile({ x, y, r, ownerId }: { x: number; y: number; r: number; ownerId: number }): number {
+  addProjectile({ x, y, r, ownerId, factor}: { x: number; y: number; r: number; ownerId: number; factor: number}): number {
     const dx = Math.cos(r);
     const dy = Math.sin(r);
 
     const entity = this.addEntity({
-      x: x + dx * GameEngine.PLAYER_RADIUS * 0.8,
-      y: y + dy * GameEngine.PLAYER_RADIUS * 0.8,
+      x: x + dx * GameEngine.PLAYER_RADIUS * GameEngine.PROJECTILE_RADIUS * (factor),
+      y: y + dy * GameEngine.PLAYER_RADIUS * GameEngine.PROJECTILE_RADIUS * (factor),
       r,
-      velX: dx * GameEngine.PROJECTILE_SPEED,
-      velY: dy * GameEngine.PROJECTILE_SPEED,
-      radius: GameEngine.PROJECTILE_RADIUS,
+      velX: dx * GameEngine.PROJECTILE_SPEED * (1 - factor / 15),
+      velY: dy * GameEngine.PROJECTILE_SPEED * (1 - factor / 15),
+      radius: GameEngine.PROJECTILE_RADIUS * (factor / 4),
       type: EntityType.PROJECTILE,
     });
-    entity.frictionAir = 0;
+    entity.frictionAir = 0.01;
     entity.plugin.ownerId = ownerId;
     entity.plugin.lifetime = GameEngine.PROJECTILE_LIFETIME;
 

@@ -1,9 +1,13 @@
 import { State } from "pixi.js";
 import Game from "./game";
 import loseScreen from "./loseScreen";
+import winScreen from "./winScreen";
 import { generatePlacement } from "./generatePlacement";
 import { WeaponType } from "../../../server/src/rooms/schema/enums/WeaponType";
 import { HealingType } from "../../../server/src/rooms/schema/enums/HealingType";
+import { SoundManager } from "./soundManager";
+
+
 
 enum RarityColours {
   COMMON = "#989FA4",
@@ -25,6 +29,9 @@ export default class HUD {
   HUDDrunkBarNumber: HTMLDivElement;
   HUDPlacementNumber: HTMLDivElement;
   HUDPlacementSuffix: HTMLDivElement;
+  controlableFade: HTMLDivElement;
+  screenEffects: HTMLDivElement;
+  drunkVignette: HTMLDivElement;
 
   // Variables
   drunkness: number;
@@ -182,6 +189,28 @@ export default class HUD {
 
     HUDElement.appendChild(HUDRightContainer);
 
+    const controlableFade = document.createElement("div")
+    controlableFade.classList.add("fullscreen")
+    controlableFade.style.zIndex = "1005"
+    controlableFade.style.backgroundColor = "#000000"
+    controlableFade.style.opacity = "0"
+
+    const screenEffects = document.createElement("div")
+    screenEffects.classList.add("fullscreen")
+    screenEffects.style.zIndex = "1004"
+
+    const drunkVignette = document.createElement("div")
+    drunkVignette.classList.add("fullscreen")
+    drunkVignette.style.zIndex = "1003"
+    drunkVignette.style.background = "radial-gradient(circle, rgba(255,255,255,0) 0%, rgba(0,0,0,1) 100%)"
+    drunkVignette.style.opacity = "0"
+    
+    const screenEffectsContainer = document.getElementsByClassName("screenEffects")[0];
+
+    screenEffectsContainer.appendChild(drunkVignette)
+    screenEffectsContainer.appendChild(screenEffects)
+    screenEffectsContainer.appendChild(controlableFade)
+
     // Mocking Starting Values
     this.game = game;
     this.drunkness = 0;
@@ -198,6 +227,9 @@ export default class HUD {
     this.HUDDrunkBarNumber = HUDDrunkBarNumber;
     this.HUDPlacementNumber = HUDPlacementNumber;
     this.HUDPlacementSuffix = HUDPlacementSuffix;
+    this.controlableFade = controlableFade;
+    this.screenEffects = screenEffects;
+    this.drunkVignette = drunkVignette;
 
     this.setWeaponRarity(RarityColours.COMMON);
     this.setHealingRarity(RarityColours.COMMON);
@@ -225,11 +257,11 @@ export default class HUD {
   }
 
   public setWeaponRarity(x: RarityColours) {
-    this.HUDWeaponDisplay.style.background = x + "40";
+    this.HUDWeaponDisplay.style.background = x + "90";
   }
 
   public setHealingRarity(x: RarityColours) {
-    this.HUDHealingDisplay.style.background = x + "40";
+    this.HUDHealingDisplay.style.background = x + "90";
   }
 
   public setWeaponIcon(x: string) {
@@ -266,6 +298,20 @@ export default class HUD {
       "%, #00000000 100%)";
   }
 
+  
+  public updateVignette() {
+    if (this.drunkness >= 50) {
+        this.drunkVignette.style.opacity = String((this.drunkness - 50) / 50)
+    }
+  }
+
+  public setScreenFade(anim:string) {
+    this.controlableFade.classList.add(anim)
+    this.controlableFade.onanimationend = (event) => {
+        this.controlableFade.classList.remove(anim)
+    };
+  }
+
   public updatePlacementDisplay() {
     const formattedPlacement = generatePlacement(this.placement);
     this.HUDPlacementNumber.textContent = formattedPlacement.slice(0, -2);
@@ -277,26 +323,32 @@ export default class HUD {
       case WeaponType.TENNENTS_LIGHT:
         this.setWeaponIcon("TENNENTS_LIGHT");
         this.setWeaponRarity(RarityColours.COMMON);
+        this.HUDWeaponName.textContent = "Tennents Light"
         break;
       case WeaponType.TENNENTS_PINT:
         this.setWeaponIcon("TENNENTS_PINT");
         this.setWeaponRarity(RarityColours.UNCOMMON);
+        this.HUDWeaponName.textContent = "Pint of Tennents"
         break;
       case WeaponType.TENNENTS_ORIGINAL:
         this.setWeaponIcon("TENNENTS_ORIGINAL");
         this.setWeaponRarity(RarityColours.RARE);
+        this.HUDWeaponName.textContent = "OG Tennents"
         break;
       case WeaponType.TENNENTS_SUPER:
         this.setWeaponIcon("TENNENTS_SUPER");
         this.setWeaponRarity(RarityColours.EPIC);
+        this.HUDWeaponName.textContent = "Tennents Super"
         break;
       case WeaponType.TENNENTS_KEG:
         this.setWeaponIcon("TENNENTS_KEG");
         this.setWeaponRarity(RarityColours.LEGENDARY);
+        this.HUDWeaponName.textContent = "6L Tennents Keg"
         break;
       default:
         this.setWeaponIcon("TENNENTS_LIGHT");
         this.setWeaponRarity(RarityColours.COMMON);
+        this.HUDWeaponName.textContent = "Tennents Light"
         break;
     }
   }
@@ -324,7 +376,7 @@ export default class HUD {
         this.setHealingRarity(RarityColours.LEGENDARY);
         break;
       default:
-        this.setHealingIcon("TENNENTS_ZERO");
+        this.setHealingIcon("");
         this.setHealingRarity(RarityColours.COMMON);
         break;
     }
@@ -339,7 +391,17 @@ export default class HUD {
   }
 
   private updateGame() {
+    const soundManager = SoundManager.getInstance();
     this.game.onStageChange((state) => {
+
+      if (this.drunkness + 20 < state.you?.drunkiness) {
+        soundManager.playSound("veryHurt")
+      } else if (this.drunkness + 10 < state.you?.drunkiness) {
+        soundManager.playSound("hurt")
+      } else if (this.drunkness < state.you?.drunkiness) {
+        soundManager.playSound("hit")
+      }
+
       this.drunkness = state.you?.drunkiness ?? 0;
       this.placement = state.room.state.players.size;
 
@@ -348,18 +410,31 @@ export default class HUD {
 
       this.updateDrunknessDisplay();
       this.updatePlacementDisplay();
+      this.updateVignette();
 
-      if (weapon != null) {
-        this.updateWeapon(weapon);
-      }
+      this.updateWeapon(weapon);
+      this.updateHeals(heal);
 
-      if (heal != null) {
-        this.updateHeals(heal);
-      }
 
       if (!this.loseShown && (!state.you || this.drunkness >= 100)) {
-        this.removeHUD();
-        loseScreen(this.placement + 1);
+        this.setScreenFade("fadeIO")
+        SoundManager.getInstance().playSound("cry")
+        SoundManager.getInstance().playSound("passOut")
+        setTimeout(() => {
+            this.removeHUD();
+            soundManager.stopSound("backgroundMusic")
+            loseScreen(this.placement + 1);
+        }, 1000);
+        this.loseShown = true;
+      }
+
+      if (!this.loseShown && (this.placement = 1)) {
+        this.setScreenFade("fadeIO")
+        setTimeout(() => {
+          this.removeHUD();
+          soundManager.stopSound("backgroundMusic")
+          winScreen();
+        }, 1000);
         this.loseShown = true;
       }
     });

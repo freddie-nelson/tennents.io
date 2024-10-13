@@ -108,6 +108,12 @@ h1 {
   animation-timing-function: ease-in;
 }
 
+.fadeIO {
+  animation-name: fadeInOut;
+  animation-duration: 2s;
+  animation-timing-function: ease-in-out;
+}
+
 @keyframes fallingTextAnim {
   0% {
     top: -50vh;
@@ -115,6 +121,12 @@ h1 {
   100% {
     top: 0vh;
   }
+}
+
+@keyframes fadeInOut {
+  0% {opacity: 0;}
+  50% {opacity: 1;}
+  100% {opacity: 0;}
 }
 
 .starting {
