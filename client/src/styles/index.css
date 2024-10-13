@@ -323,6 +323,38 @@ h1 {
   border: 2px solid white;
 }
 
+.joystick {
+  width: 45vh;
+  height: 45vh;
+  border-radius: 50%;
+  background-color: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(0.5rem);
+  border: 3px solid black;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1001;
+}
+
+.knob {
+  width: 40%;
+  height: 40%;
+  border-radius: 50%;
+  background-color: black;
+}
+
+.right-joystick {
+  position: absolute;
+  bottom: 7vh;
+  right: 6vw;
+}
+
+.left-joystick {
+  position: absolute;
+  bottom: 7vh;
+  left: 6vw;
+}
+
 @media screen and (max-width: 1000px) {
   h1 {
     font-size: 4rem;
@@ -337,5 +369,9 @@ h1 {
   .chat {
     margin-top: 1rem;
     max-height: 19rem;
+  }
+
+  .pickup-hud {
+    transform: scale(0.6);
   }
 }

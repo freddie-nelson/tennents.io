@@ -24,7 +24,7 @@ import { censorProfanity } from "../censor";
 
 export class GameRoom extends Room<GameState> {
   maxClients = 12;
-  private TIME_TO_START = process.env.NODE_ENV === "production" ? 30 : 100;
+  private TIME_TO_START = process.env.NODE_ENV === "production" ? 30 : 5;
   private MESSAGE_COOLDOWN = 500;
 
   private timeToStartInterval: NodeJS.Timeout | undefined;
