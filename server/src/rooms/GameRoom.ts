@@ -30,6 +30,7 @@ export class GameRoom extends Room<GameState> {
   private playerClients: Map<string, number> = new Map(); // client.sessionId -> entity.id
 
   onCreate(options: any) {
+    this.setMetadata({ joinable: true });
     this.setState(new GameState());
 
     this.setPatchRate(1000 / 30);
@@ -194,7 +195,11 @@ export class GameRoom extends Room<GameState> {
   onJoin(client: Client, options: { name: string }) {
     console.log(client.sessionId, "joined!");
 
-    if (this.state.state === GameStateType.STARTED || this.state.state === GameStateType.ENDED) {
+    if (
+      this.state.state === GameStateType.ENDED ||
+      this.state.state === GameStateType.STARTED ||
+      this.clients.length > this.maxClients
+    ) {
       client.leave();
       return;
     }
@@ -207,6 +212,7 @@ export class GameRoom extends Room<GameState> {
         if (this.state.timeToStart === 0) {
           clearInterval(this.timeToStartInterval);
           this.timeToStartInterval = undefined;
+          this.setMetadata({ joinable: false });
           this.state.state = GameStateType.STARTED;
         }
       }, 1000);
@@ -318,6 +324,8 @@ export class GameRoom extends Room<GameState> {
   handlePlayerProjectileCollision(playerId: number, projectileId: number) {
     const player = <Player>this.state.entities.get(`${playerId}`);
     const projectile = <Projectile>this.state.entities.get(`${projectileId}`);
+
+    if (!player || !projectile) return;
 
     // remove player health
     const drunkinessAmount = getDrunkinessAmountFromWeaponType(projectile.projectileType);
