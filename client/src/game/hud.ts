@@ -31,6 +31,7 @@ export default class HUD {
   placement: number;
   game: Game;
   scale: number;
+  loseShown: boolean;
 
   constructor(game: Game, scale = 1) {
     // Main HUD Div
@@ -356,9 +357,10 @@ export default class HUD {
         this.updateHeals(heal);
       }
 
-      if (state.you === undefined || this.drunkness >= 100) {
+      if (!this.loseShown && (!state.you || this.drunkness >= 100)) {
         this.removeHUD();
-        loseScreen(this.placement);
+        loseScreen(this.placement + 1);
+        this.loseShown = true;
       }
     });
   }
