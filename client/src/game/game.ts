@@ -139,7 +139,7 @@ export default class Game {
             soundManager.playSound("tennentsLite");
             break;
           default:
-            console.warn("Unknown weapon type");
+            break;
         }
       } else if (e.button === 2) {
         // right click
@@ -162,7 +162,7 @@ export default class Game {
             soundManager.playSound("kebab");
             break;
           default:
-            console.warn("Unknown healing type");
+            break;
         }
       }
     });
