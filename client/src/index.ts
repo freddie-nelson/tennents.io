@@ -1,5 +1,6 @@
 import { API, Room } from "./api/colyseus";
 import Game, { gameContainer } from "./game/game";
+import isMobile from "./game/isMobile";
 import { initChat } from "./game/messages";
 import { SoundManager } from "./game/soundManager";
 import Textures from "./game/Textures";
@@ -55,4 +56,24 @@ joinForm.addEventListener("submit", async (event) => {
   soundManager.playSound("backgroundMusic", true, soundManager.getVolume() === 0 ? 0 : 0.1);
 
   initChat(game);
+});
+
+const fullscreenMobileButtonContainer = document.querySelector(".fullscreen-mobile") as HTMLElement;
+const fullscreenMobileButton = fullscreenMobileButtonContainer.querySelector("button") as HTMLButtonElement;
+
+fullscreenMobileButton.addEventListener("click", () => {
+  document.documentElement.requestFullscreen();
+});
+
+if (isMobile()) {
+  fullscreenMobileButtonContainer.style.display = "flex";
+}
+
+document.addEventListener("fullscreenchange", () => {
+  const isFullscreen = document.fullscreenElement !== null;
+  if (!isFullscreen && isMobile()) {
+    fullscreenMobileButtonContainer.style.display = "flex";
+  } else {
+    fullscreenMobileButtonContainer.style.display = "none";
+  }
 });

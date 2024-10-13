@@ -375,3 +375,28 @@ h1 {
     transform: scale(0.6);
   }
 }
+
+.fullscreen-mobile {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 50;
+  padding: 1.5rem;
+  background: linear-gradient(180deg, rgba(0, 0, 0, 1), rgba(0, 0, 0, 0));
+}
+
+.fullscreen-mobile button {
+  padding: 1rem;
+  background-color: red;
+  color: white;
+  font-weight: bold;
+  font-size: 1.5rem;
+  border: none;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  border: 2px solid white;
+}
