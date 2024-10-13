@@ -22,7 +22,7 @@ export class SoundManager {
   public static initSounds() {
     // Initialize sounds
     const soundManager = SoundManager.getInstance();
-    
+
     // Throwing
     soundManager.loadSound("throw", "/SFX/throwSFX.mp3");
 
@@ -51,6 +51,10 @@ export class SoundManager {
 
   // Play sound by key
   public playSound(key: string, loop: boolean = false, volume: number = this.soundVolume): void {
+    if (this.soundVolume === 0) {
+      volume = 0;
+    }
+
     const sounds = this.sounds.get(key);
     if (!sounds) {
       return;
@@ -107,5 +111,15 @@ export class SoundManager {
         sound.volume = volume;
       });
     });
+  }
+
+  public setVolumeKey(key: string, volume: number) {
+    this.sounds.get(key)?.forEach((v) => {
+      v.volume = volume;
+    });
+  }
+
+  public getVolume() {
+    return this.soundVolume;
   }
 }

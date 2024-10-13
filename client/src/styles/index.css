@@ -177,3 +177,29 @@ h1 {
 .back-to-main-menu-btn.show {
   opacity: 1;
 }
+
+.bottom-right {
+  position: absolute;
+  bottom: 1rem;
+  right: 1rem;
+  display: flex;
+  gap: 2rem;
+  width: auto;
+}
+
+.sound-btn {
+  background-image: url("/images/volume-icon.png");
+  display: block;
+  width: 5rem !important;
+  height: 5rem !important;
+  background-size: 65%;
+  background-position: center;
+  background-repeat: no-repeat;
+  border-radius: 0.5rem;
+  border: 2px solid white;
+  background-color: red;
+}
+
+.sound-btn-muted {
+  background-image: url("/images/muted-icon.png");
+}

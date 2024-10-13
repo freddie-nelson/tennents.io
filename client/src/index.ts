@@ -17,6 +17,18 @@ const joinForm = document.getElementById("join-form") as HTMLFormElement;
 const nameInput = document.getElementById("name") as HTMLInputElement;
 const joinButton = joinForm.querySelector("button") as HTMLButtonElement;
 
+const soundButton = document.querySelector(".sound-btn");
+soundButton.addEventListener("click", () => {
+  if (soundManager.getVolume() === 0) {
+    soundManager.setVolume(0.5);
+    soundManager.setVolumeKey("backgroundMusic", 0.1);
+    soundButton.classList.remove("sound-btn-muted");
+  } else {
+    soundManager.setVolume(0);
+    soundButton.classList.add("sound-btn-muted");
+  }
+});
+
 joinForm.addEventListener("submit", async (event) => {
   event.preventDefault();
 
@@ -39,5 +51,5 @@ joinForm.addEventListener("submit", async (event) => {
 
   game = new Game(room);
   game.init();
-  soundManager.playSound("backgroundMusic", true, 0.1);
+  soundManager.playSound("backgroundMusic", true, soundManager.getVolume() === 0 ? 0 : 0.1);
 });

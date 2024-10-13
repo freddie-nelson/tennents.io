@@ -23,6 +23,7 @@ export default function loseScreen(placement: number) {
   );
 
   video?.appendChild(source);
+  video.muted = SoundManager.getInstance().getVolume() === 0;
 
   video.load();
   video.play();
