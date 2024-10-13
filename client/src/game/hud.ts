@@ -1,6 +1,9 @@
 import { State } from "pixi.js";
 import Game from "./game";
 import loseScreen from "./loseScreen";
+import { generatePlacement } from "./generatePlacement";
+import { WeaponType } from "../../../server/src/rooms/schema/enums/WeaponType";
+import { HealingType } from "../../../server/src/rooms/schema/enums/HealingType";
 
 enum RarityColours {
     COMMON = "#989FA4",
@@ -14,17 +17,21 @@ export default class HUD {
 
     // HTML Elements
     HUDElement: Element;
-    HUDItemIcon: HTMLDivElement;
-    HUDItemDisplay: HTMLDivElement;
-    HUDItemName: HTMLDivElement;
+    HUDWeaponIcon: HTMLDivElement;
+    HUDWeaponDisplay: HTMLDivElement;
+    HUDWeaponName: HTMLDivElement;
+    HUDHealingIcon: HTMLDivElement;
+    HUDHealingDisplay: HTMLDivElement;
     HUDDrunkBar: HTMLDivElement;
     HUDDrunkBarNumber: HTMLDivElement;
-
-
+    HUDPlacementNumber: HTMLDivElement
+    HUDPlacementSuffix: HTMLDivElement
 
     // Variables
     drunkness: number;
+    placement: number;
     game: Game;
+    scale: number;
 
     constructor(game:Game, scale=1) {
 
@@ -48,43 +55,47 @@ export default class HUD {
         HUDRightFlex.style.flexDirection = "column";
         HUDRightFlex.style.flexGrow = "3"
 
-        const HUDItemDisplay = document.createElement("div")
-        HUDItemDisplay.style.display = "flex"
-        HUDItemDisplay.style.flexWrap = "wrap"
-        HUDItemDisplay.style.alignContent = "center"
-        HUDItemDisplay.style.justifyContent = "center"
-        HUDItemDisplay.style.height = this.scaling(150, scale)
-        HUDItemDisplay.style.width = this.scaling(150, scale)
-        HUDItemDisplay.style.borderStyle = "solid"
-        HUDItemDisplay.style.borderWidth = this.scaling(10, scale)
-        HUDItemDisplay.style.borderColor = "#ffffff"
+        const HUDWeaponDisplay = document.createElement("div")
+        HUDWeaponDisplay.style.display = "flex"
+        HUDWeaponDisplay.style.flexWrap = "wrap"
+        HUDWeaponDisplay.style.alignContent = "center"
+        HUDWeaponDisplay.style.justifyContent = "center"
+        HUDWeaponDisplay.style.height = this.scaling(150, scale)
+        HUDWeaponDisplay.style.width = this.scaling(150, scale)
+        HUDWeaponDisplay.style.borderStyle = "solid"
+        HUDWeaponDisplay.style.borderWidth = this.scaling(10, scale)
+        HUDWeaponDisplay.style.borderColor = "#ffffff"
 
-        const HUDItemIcon = document.createElement("div")
-        HUDItemIcon.style.background = "background: url('/images/Attack/TENNENTS_KEG.svg')"
-        HUDItemIcon.style.height = this.scaling(120, scale)
-        HUDItemIcon.style.width = this.scaling(120, scale)
-        HUDItemIcon.style.position = "relative"
-        HUDItemIcon.style.zIndex = "1001"
+        const HUDWeaponIcon = document.createElement("div")
+        HUDWeaponIcon.style.background = "url('/images/Attack/TENNENTS_KEG.svg')"
+        HUDWeaponIcon.style.backgroundSize = this.scaling(120, scale) + " " + this.scaling(120, scale)
+        HUDWeaponIcon.style.objectFit = "contain"
+        HUDWeaponIcon.style.height = this.scaling(120, scale)
+        HUDWeaponIcon.style.width = this.scaling(120, scale)
+        HUDWeaponIcon.style.position = "relative"
+        HUDWeaponIcon.style.zIndex = "1001"
 
-        HUDItemDisplay.appendChild(HUDItemIcon)
+        HUDWeaponDisplay.appendChild(HUDWeaponIcon)
 
-        const HUDItemName = document.createElement("div")
-        HUDItemName.textContent = "Tennents Lager"
-        HUDItemName.style.fontSize = this.scaling(18, scale)
-        HUDItemName.style.display = "flex"
-        HUDItemName.style.flexWrap = "wrap"
-        HUDItemName.style.alignContent = "center"
-        HUDItemName.style.justifyContent = "center"
-        HUDItemName.style.height = this.scaling(30, scale)
-        HUDItemName.style.color = "#ffffff"
-        HUDItemName.style.textAlign = "center"
+        const HUDWeaponName = document.createElement("div")
+        HUDWeaponName.textContent = "Tennents Lager"
+        HUDWeaponName.style.fontSize = this.scaling(18, scale)
+        HUDWeaponName.style.display = "flex"
+        HUDWeaponName.style.flexWrap = "wrap"
+        HUDWeaponName.style.alignContent = "center"
+        HUDWeaponName.style.justifyContent = "center"
+        HUDWeaponName.style.height = this.scaling(30, scale)
+        HUDWeaponName.style.color = "#ffffff"
+        HUDWeaponName.style.textAlign = "center"
         
         const HUDDrunkBar = document.createElement("div")
         HUDDrunkBar.style.display = "flex"
         HUDDrunkBar.style.alignItems = "center"
         HUDDrunkBar.style.height = this.scaling(80, scale)
         HUDDrunkBar.style.width = this.scaling(450, scale)
-        HUDDrunkBar.style.borderStyle = "solid"
+        HUDDrunkBar.style.borderTopStyle = "solid"
+        HUDDrunkBar.style.borderBottomStyle = "solid"
+        HUDDrunkBar.style.borderRightStyle = "solid"
         HUDDrunkBar.style.borderWidth = this.scaling(10, scale)
         HUDDrunkBar.style.borderColor = "#ffffff"
         HUDDrunkBar.style.background = "linear-gradient(90deg, #00000000, #00000000 50%, #00000000 65%, #ff000090 100%), linear-gradient(90deg, #F3AE1A, #F3AE1A " + this.drunknessInt() + "%, #ffffff " + this.drunknessInt() + "%, #ffffff " + this.drunknessInt(1) + "%, #00000000 " + this.drunknessInt(1) + "%, #00000000 100%)"
@@ -99,48 +110,90 @@ export default class HUD {
         HUDDrunkBarNumber.style.textAlign = "center"
         HUDDrunkBarNumber.style.fontSize = this.scaling(40, scale)
 
+        const HUDHealingDisplay = document.createElement("div")
+        HUDHealingDisplay.style.display = "flex"
+        HUDHealingDisplay.style.flexWrap = "wrap"
+        HUDHealingDisplay.style.alignContent = "center"
+        HUDHealingDisplay.style.justifyContent = "center"
+        HUDHealingDisplay.style.height = this.scaling(70, scale)
+        HUDHealingDisplay.style.width = this.scaling(70, scale)
+        HUDHealingDisplay.style.borderBottomStyle = "solid"
+        HUDHealingDisplay.style.borderRightStyle = "solid"
+        HUDHealingDisplay.style.borderWidth = this.scaling(5, scale)
+        HUDHealingDisplay.style.borderColor = "#ffffff"
+
+        const HUDHealingIcon = document.createElement("div")
+        HUDHealingIcon.style.background = "url('/images/Attack/TENNENTS_KEG.svg')"
+        HUDHealingIcon.style.backgroundSize = this.scaling(55, scale) + " " + this.scaling(55, scale)
+        HUDHealingIcon.style.height = this.scaling(55, scale)
+        HUDHealingIcon.style.width = this.scaling(55, scale)
+        HUDHealingIcon.style.position = "relative"
+        HUDHealingIcon.style.zIndex = "1001"
+
+        HUDHealingDisplay.appendChild(HUDHealingIcon)
+
         HUDDrunkBar.appendChild(HUDDrunkBarNumberPadding)
         HUDDrunkBar.appendChild(HUDDrunkBarNumber)
 
-        HUDLeftFlex.appendChild(HUDItemDisplay)
-        HUDLeftFlex.appendChild(HUDItemName)
+        HUDLeftFlex.appendChild(HUDWeaponDisplay)
+        HUDLeftFlex.appendChild(HUDWeaponName)
         HUDRightFlex.appendChild(HUDDrunkBar)
+        HUDRightFlex.appendChild(HUDHealingDisplay)
 
         HUDLeftContainer.appendChild(HUDLeftFlex)
         HUDLeftContainer.appendChild(HUDRightFlex)
 
         HUDElement.appendChild(HUDLeftContainer)
 
-        this.setRarity(RarityColours.COMMON)
-
-
         // Right Hand Side HUD Element (Current Position)
+        const HUDRightContainer = document.createElement("div")
+        HUDRightContainer.style.display = "flex";
+        HUDRightContainer.style.width = this.scaling(150, scale);
+        HUDRightContainer.style.position = "fixed";
+        HUDRightContainer.style.bottom = this.scaling(25, scale);
+        HUDRightContainer.style.right = this.scaling(50, scale);
 
+        const HUDPlacementNumber = document.createElement("div")
+        HUDPlacementNumber.style.width = this.scaling(110, scale);
+        HUDPlacementNumber.style.height = this.scaling(200, scale);
+        HUDPlacementNumber.style.fontSize = this.scaling(200, scale);
+        HUDPlacementNumber.style.color = "#ffffff"
+        HUDPlacementNumber.textContent = "N/A"
 
+        const HUDPlacementSuffix = document.createElement("div")
+        HUDPlacementSuffix.style.position = "relative"
+        HUDPlacementSuffix.style.width = this.scaling(40, scale);
+        HUDPlacementSuffix.style.height = this.scaling(200, scale);
+        HUDPlacementSuffix.style.fontSize = this.scaling(50, scale);
+        HUDPlacementSuffix.style.top = this.scaling(25, scale);
+        HUDPlacementSuffix.style.color = "#ffffff"
+        HUDPlacementSuffix.textContent = "th"
+
+        HUDRightContainer.appendChild(HUDPlacementNumber)
+        HUDRightContainer.appendChild(HUDPlacementSuffix)
+
+        HUDElement.appendChild(HUDRightContainer)
 
         // Mocking Starting Values
         this.game = game
-        this.drunkness = 50
+        this.drunkness = 0
+        this.placement = 0
+        this.scale = scale;
         
         this.HUDElement = HUDElement
-        this.HUDItemIcon = HUDItemIcon
-        this.HUDItemDisplay = HUDItemDisplay
-        this.HUDItemName = HUDItemName
+        this.HUDWeaponIcon = HUDWeaponIcon
+        this.HUDWeaponDisplay = HUDWeaponDisplay
+        this.HUDWeaponName = HUDWeaponName
+        this.HUDHealingIcon = HUDHealingIcon
+        this.HUDHealingDisplay = HUDHealingDisplay
         this.HUDDrunkBar = HUDDrunkBar
         this.HUDDrunkBarNumber = HUDDrunkBarNumber
+        this.HUDPlacementNumber = HUDPlacementNumber
+        this.HUDPlacementSuffix = HUDPlacementSuffix
 
-        this.update()
-    }
-
-    private update() {
-        const updateInterval = setInterval(() => {
-            this.updateDrunknessDisplay()
-            if (this.drunkness >= 100) {
-                clearInterval(updateInterval)
-                this.removeHUD()
-                loseScreen(4)
-            }
-        }, 50);
+        this.setWeaponRarity(RarityColours.COMMON)
+        this.setHealingRarity(RarityColours.COMMON)
+        this.updateGame()
     }
 
     private scaling(px:number, scale:number) {
@@ -163,8 +216,20 @@ export default class HUD {
         this.drunkness = this.drunkness + x;
     }
 
-    public setRarity(x:RarityColours) {
-        this.HUDItemDisplay.style.background = x + "40"
+    public setWeaponRarity(x:RarityColours) {
+        this.HUDWeaponDisplay.style.background = x + "40"
+    }
+
+    public setHealingRarity(x:RarityColours) {
+        this.HUDHealingDisplay.style.background = x + "40"
+    }
+
+    public setWeaponIcon(x:string) {
+        this.HUDWeaponIcon.style.background = this.scaling(120, this.scale) + " / " + this.scaling(120, this.scale) + " url('/images/Attack/" + x + ".svg')"
+    }
+
+    public setHealingIcon(x:string) {
+        this.HUDHealingIcon.style.background = this.scaling(55, this.scale) + " / " + this.scaling(55, this.scale) + " url('/images/Heal/" + x + ".svg')"
     }
 
     public updateDrunknessDisplay() {
@@ -172,8 +237,72 @@ export default class HUD {
         this.HUDDrunkBar.style.background = "linear-gradient(90deg, #00000000, #00000000 50%, #00000000 65%, #ff000090 100%), linear-gradient(90deg, #F3AE1A, #F3AE1A " + this.drunknessString() + "%, #ffffff " + this.drunknessString() + "%, #ffffff " + this.drunknessString(1) + "%, #00000000 " + this.drunknessString(1) + "%, #00000000 100%)"
     }
 
-    public setItemText(x:string) {
-        this.HUDItemName.textContent = x
+    public updatePlacementDisplay() {
+        const formattedPlacement = generatePlacement(this.placement)
+        this.HUDPlacementNumber.textContent = formattedPlacement.slice(0, -2)
+        this.HUDPlacementSuffix.textContent = formattedPlacement.slice(-2)
+    }
+
+    public updateWeapon(weapon:WeaponType) {
+        switch (weapon) {
+            case WeaponType.TENNENTS_LIGHT:
+                this.setWeaponIcon("TENNENTS_LIGHT")
+                this.setWeaponRarity(RarityColours.COMMON)
+                break;
+            case WeaponType.TENNENTS_PINT:
+                this.setWeaponIcon("TENNENTS_PINT")
+                this.setWeaponRarity(RarityColours.UNCOMMON)
+                break;
+            case WeaponType.TENNENTS_ORIGINAL:
+                this.setWeaponIcon("TENNENTS_ORIGINAL")
+                this.setWeaponRarity(RarityColours.RARE)
+                break;
+            case WeaponType.TENNENTS_SUPER:
+                this.setWeaponIcon("TENNENTS_SUPER")
+                this.setWeaponRarity(RarityColours.EPIC)
+                break;
+            case WeaponType.TENNENTS_KEG:
+                this.setWeaponIcon("TENNENTS_KEG")
+                this.setWeaponRarity(RarityColours.LEGENDARY)
+                break;
+            default:
+                this.setWeaponIcon("TENNENTS_LIGHT")
+                this.setWeaponRarity(RarityColours.COMMON)
+                break;
+        }
+    }
+
+    public updateHeals(heal:HealingType) {
+        switch (heal) {
+            case HealingType.TENNENTS_ZERO:
+                this.setHealingIcon("TENNENTS_ZERO")
+                this.setHealingRarity(RarityColours.COMMON)
+                break;
+            case HealingType.WATER:
+                this.setHealingIcon("WATER")
+                this.setHealingRarity(RarityColours.UNCOMMON)
+                break;
+            case HealingType.COFFEE:
+                this.setHealingIcon("COFFEE")
+                this.setHealingRarity(RarityColours.RARE)
+                break;
+            case HealingType.ORANGE_JUICE:
+                this.setHealingIcon("ORANGE_JUICE")
+                this.setHealingRarity(RarityColours.EPIC)
+                break;
+            case HealingType.DONER_KEBAB:
+                this.setHealingIcon("DONER_KEBAB")
+                this.setHealingRarity(RarityColours.LEGENDARY)
+                break;
+            default:
+                this.setHealingIcon("TENNENTS_ZERO")
+                this.setHealingRarity(RarityColours.COMMON)
+                break;
+        }
+    }
+
+    public setWeaponText(x:string) {
+        this.HUDWeaponName.textContent = x
     }
 
     private removeHUD() {
@@ -183,8 +312,26 @@ export default class HUD {
     private updateGame() {
         this.game.onStageChange((state) => {
             this.drunkness = state.you?.drunkiness ?? 0
+            this.placement = state.room.state.players.size
+
+            const weapon = state.you?.weapon ?? null
+            const heal = state.you?.healing ?? null
+
             this.updateDrunknessDisplay()
+            this.updatePlacementDisplay()
+
+            if (weapon != null) {
+                this.updateWeapon(weapon)
+            }
+
+            if (heal != null) {
+                this.updateHeals(heal)
+            }
+
+            if (this.drunkness >= 100) {
+                this.removeHUD()
+                loseScreen(this.placement)
+            }
         })
     }
-
 }

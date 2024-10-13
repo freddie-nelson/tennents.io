@@ -19,6 +19,7 @@ import { GameStateType } from "../../../server/src/rooms/schema/enums/GameStateT
 import { SoundManager } from './soundManager';
 import { WeaponType } from "../../../server/src/rooms/schema/enums/WeaponType";
 import { HealingType } from "../../../server/src/rooms/schema/enums/HealingType";
+import HUD from "./hud";
 
 export const gameContainer = document.querySelector(".game") as HTMLElement;
 export const startingContainer = document.querySelector(".starting") as HTMLElement;
@@ -199,6 +200,7 @@ export default class Game {
   private update() {
     if (startingContainer.style.display !== "none") {
       if (this.room.state.state === GameStateType.STARTED) {
+        const hud = new HUD(this, 1) // Good Values -> 0.8 - 1.3
         startingContainer.style.display = "none";
       } else if (this.room.state.state === GameStateType.WAITING) {
         startingContainerText.innerText = `Waiting for players... (${this.room.state.players.size}/${this.room.state.config.maxPlayers})`;
