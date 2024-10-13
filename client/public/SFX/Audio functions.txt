@@ -1,12 +1,23 @@
 Weapons-
 
 Keg - Burp sound
+Tennents Super - RAHHHH
+Tennents classic - wine glass clink
+Tennents - Opening beer
 Tennents lite - Chug
 
 
 Damage-
 Very hurt - Pipe
-
+Hurt a lot - Elite sound
+Hurt very much - Yoda sound
+Hurt rather badly - Roblox sound
+Hurt - Minecraft sound
 
 Heal-
 Kebab - Chew
+OJ - short choir
+Coffee - Coffee
+Water - short choir
+Tennents zero - Tennents zero
+
