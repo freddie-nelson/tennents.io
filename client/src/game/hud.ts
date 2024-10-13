@@ -7,6 +7,10 @@ import { WeaponType } from "../../../server/src/rooms/schema/enums/WeaponType";
 import { HealingType } from "../../../server/src/rooms/schema/enums/HealingType";
 import { SoundManager } from "./soundManager";
 import { addBackToMainMenuButton } from "./backToMainMenu";
+import { EntityType } from "../../../server/src/rooms/schema/enums/EntityType";
+import Weapon from "./Weapon";
+import Healing from "./Healing";
+import { GameStateType } from "../../../server/src/rooms/schema/enums/GameStateType";
 
 enum RarityColours {
   COMMON = "#989FA4",
@@ -31,6 +35,8 @@ export default class HUD {
   controlableFade: HTMLDivElement;
   screenEffects: HTMLDivElement;
   drunkVignette: HTMLDivElement;
+  pickupHud: HTMLDivElement;
+  pickupHudImage: HTMLImageElement;
 
   // Variables
   drunkness: number;
@@ -210,6 +216,18 @@ export default class HUD {
     screenEffectsContainer.appendChild(screenEffects);
     screenEffectsContainer.appendChild(controlableFade);
 
+    const pickupHud = document.createElement("div");
+    pickupHud.classList.add("pickup-hud", "pickup-hud-hidden");
+
+    const pickupHudText = document.createElement("p");
+    pickupHudText.innerText = "Press E to pick up";
+    pickupHud.appendChild(pickupHudText);
+
+    const pickupHudImage = document.createElement("img");
+    pickupHud.appendChild(pickupHudImage);
+
+    HUDElement.appendChild(pickupHud);
+
     // Mocking Starting Values
     this.game = game;
     this.drunkness = 0;
@@ -229,6 +247,8 @@ export default class HUD {
     this.controlableFade = controlableFade;
     this.screenEffects = screenEffects;
     this.drunkVignette = drunkVignette;
+    this.pickupHud = pickupHud;
+    this.pickupHudImage = pickupHudImage;
 
     this.setWeaponRarity(RarityColours.COMMON);
     this.setHealingRarity(RarityColours.COMMON);
@@ -402,6 +422,19 @@ export default class HUD {
       this.drunkness = state.you?.drunkiness ?? 0;
       this.placement = state.room.state.players.size;
 
+      if (state.you?.canPickup) {
+        this.pickupHud.classList.remove("pickup-hud-hidden");
+
+        const pickupEntity = this.game.entities.get(state.you.canPickup);
+        if (pickupEntity && pickupEntity.type === EntityType.WEAPON) {
+          this.pickupHudImage.src = `/images/Attack/${WeaponType[(pickupEntity as Weapon).weaponType]}.svg`;
+        } else if (pickupEntity && pickupEntity.type === EntityType.HEALING) {
+          this.pickupHudImage.src = `/images/Heal/${HealingType[(pickupEntity as Healing).healingType]}.svg`;
+        }
+      } else {
+        this.pickupHud.classList.add("pickup-hud-hidden");
+      }
+
       const weapon = state.you?.weapon ?? null;
       const heal = state.you?.healing ?? null;
 
@@ -428,7 +461,7 @@ export default class HUD {
         }, 12000);
       }
 
-      if (!this.loseShown && (this.placement = 1)) {
+      if (!this.loseShown && this.placement === 1) {
         this.setScreenFade("fadeIO");
         setTimeout(() => {
           this.removeHUD();
