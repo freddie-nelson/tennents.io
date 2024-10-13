@@ -2,22 +2,25 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, user-scalable=no" />
     <title>tennents.io | Pints, Pints, Pints</title>
 
     <link rel="stylesheet" href="./src/styles/index.css" />
     <link rel="stylesheet" href="./src/styles/fonts.css" />
-    <link rel="shortcut icon" href="/images/Attack/TENNENTS_PINT.svg" type="image/svg" />    
+    <link rel="shortcut icon" href="/images/Attack/TENNENTS_PINT.svg" type="image/svg" />
     <script type="module" src="./src/index.ts"></script>
   </head>
   <body>
-    <div class="fullscreen overlay" style="position: fixed;"></div>       <!-- Used for end animations -->
-    <div class="fullscreen HUD" style="position: fixed;"></div>           <!-- Used for HUD Elements -->
-    <div class="fullscreen screenEffects" style="position: fixed;"></div> <!-- Used for Screen Effects -->
+    <div class="fullscreen overlay" style="position: fixed"></div>
+    <!-- Used for end animations -->
+    <div class="fullscreen HUD" style="position: fixed"></div>
+    <!-- Used for HUD Elements -->
+    <div class="fullscreen screenEffects" style="position: fixed"></div>
+    <!-- Used for Screen Effects -->
 
     <!-- Background Video -->
-    <video autoplay muted loop id="background-video"> 
-      <source src="/videos/landingScreen.mp4" type="video/mp4">
+    <video autoplay muted loop id="background-video">
+      <source src="/videos/landingScreen.mp4" type="video/mp4" />
       Your browser does not support the video tag.
     </video>
 
@@ -25,7 +28,7 @@
     <form id="join-form" class="join-container">
       <h1>TENNENTS.io</h1>
       <input type="text" id="name" placeholder="Pick your name to play..." />
-      <button type="submit">Join</button> 
+      <button type="submit">Join</button>
       <div class="bottom-right">
         <button type="button" class="sound-btn"></button>
       </div>
@@ -33,6 +36,22 @@
 
     <div class="starting" style="display: none">
       <h1></h1>
+
+      <div class="chat">
+        <div class="messages"></div>
+
+        <form id="message-form">
+          <input
+            type="text"
+            name="message"
+            placeholder="Type your message..."
+            maxlength="255"
+            required
+            minlength="1"
+          />
+          <button type="submit">Send</button>
+        </form>
+      </div>
     </div>
 
     <div class="game" style="display: none"></div>
