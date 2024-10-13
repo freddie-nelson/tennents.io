@@ -1,5 +1,7 @@
 import { API, Room } from "./api/colyseus";
 import Game, { gameContainer } from "./game/game";
+import isMobile from "./game/isMobile";
+import { initChat } from "./game/messages";
 import { SoundManager } from "./game/soundManager";
 import Textures from "./game/Textures";
 
@@ -19,43 +21,59 @@ const joinButton = joinForm.querySelector("button") as HTMLButtonElement;
 
 const soundButton = document.querySelector(".sound-btn");
 soundButton.addEventListener("click", () => {
-	if (soundManager.getVolume() === 0) {
-		soundManager.setVolume(0.5);
-		soundManager.setVolumeKey("backgroundMusic", 0.1);
-		soundButton.classList.remove("sound-btn-muted");
-	} else {
-		soundManager.setVolume(0);
-		soundButton.classList.add("sound-btn-muted");
-	}
+  if (soundManager.getVolume() === 0) {
+    soundManager.setVolume(0.5);
+    soundManager.setVolumeKey("backgroundMusic", 0.1);
+    soundButton.classList.remove("sound-btn-muted");
+  } else {
+    soundManager.setVolume(0);
+    soundButton.classList.add("sound-btn-muted");
+  }
 });
 
 joinForm.addEventListener("submit", async (event) => {
-	event.preventDefault();
+  event.preventDefault();
 
-	const name = nameInput.value;
+  const name = nameInput.value;
 
-	if (typeof name !== "string" || name.length === 0 || name.length >= 20) {
-		alert(
-			"Name must be a string with at least 1 character and less than 20 characters"
-		);
-		return;
-	}
+  if (typeof name !== "string" || name.length === 0 || name.length >= 20) {
+    alert("Name must be a string with at least 1 character and less than 20 characters");
+    return;
+  }
 
-	joinButton.innerText = "Joining...";
+  joinButton.innerText = "Joining...";
 
-	await Textures.initTextures();
-	SoundManager.initSounds();
+  joinForm.style.display = "none";
+  gameContainer.style.display = "block";
 
-	room = await api.joinOrCreate(name);
+  await Textures.initTextures();
+  SoundManager.initSounds();
 
-	joinForm.style.display = "none";
-	gameContainer.style.display = "block";
+  room = await api.joinOrCreate(name);
 
-	game = new Game(room);
-	game.init();
-	soundManager.playSound(
-		"backgroundMusic",
-		true,
-		soundManager.getVolume() === 0 ? 0 : 0.1
-	);
+  game = new Game(room);
+  game.init();
+  soundManager.playSound("backgroundMusic", true, soundManager.getVolume() === 0 ? 0 : 0.1);
+
+  initChat(game);
+});
+
+const fullscreenMobileButtonContainer = document.querySelector(".fullscreen-mobile") as HTMLElement;
+const fullscreenMobileButton = fullscreenMobileButtonContainer.querySelector("button") as HTMLButtonElement;
+
+fullscreenMobileButton.addEventListener("click", () => {
+  document.documentElement.requestFullscreen();
+});
+
+if (isMobile()) {
+  fullscreenMobileButtonContainer.style.display = "flex";
+}
+
+document.addEventListener("fullscreenchange", () => {
+  const isFullscreen = document.fullscreenElement !== null;
+  if (!isFullscreen && isMobile()) {
+    fullscreenMobileButtonContainer.style.display = "flex";
+  } else {
+    fullscreenMobileButtonContainer.style.display = "none";
+  }
 });

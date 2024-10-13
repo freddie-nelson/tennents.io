@@ -20,6 +20,15 @@ enum RarityColours {
   LEGENDARY = "#DD6D0D",
 }
 
+export function getHudScale() {
+  const width = window.innerWidth;
+  const height = window.innerHeight;
+
+  const scale = Math.max(0.3, Math.min(width / 1200, height / 650));
+
+  return scale;
+}
+
 export default class HUD {
   // HTML Elements
   HUDElement: Element;
@@ -406,6 +415,8 @@ export default class HUD {
 
   private removeHUD() {
     this.HUDElement.innerHTML = "";
+    this.game.moveJoystick?.hide();
+    this.game.shootJoystick?.hide();
   }
 
   private updateGame() {

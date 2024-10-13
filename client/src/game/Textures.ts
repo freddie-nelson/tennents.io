@@ -8,10 +8,9 @@ export default abstract class Textures {
   public static textures = new Map<string, Texture>();
 
   static async initTextures() {
-    const playerColors = Object.values(PlayerSkinType).filter((c) => typeof c !== "string");
-
     const promises: Promise<any>[] = [];
 
+    const playerColors: PlayerSkinType[] = Object.values(PlayerSkinType).filter((c) => typeof c !== "string");
     for (const color of playerColors) {
       const key = PlayerSkinType[color][0] + PlayerSkinType[color].toLowerCase().slice(1);
       promises.push(

@@ -19,10 +19,12 @@ import { GameStateType } from "../../../server/src/rooms/schema/enums/GameStateT
 import { SoundManager } from "./soundManager";
 import { WeaponType } from "../../../server/src/rooms/schema/enums/WeaponType";
 import { HealingType } from "../../../server/src/rooms/schema/enums/HealingType";
-import HUD from "./hud";
+import HUD, { getHudScale } from "./hud";
 import { map } from "./spriteSheet";
 import { TileType } from "../../../shared/map/enums/TileType";
 import { Sprite } from "pixi.js";
+import isMobile from "./isMobile";
+import Joystick from "./Joystick";
 
 export const gameContainer = document.querySelector(".game") as HTMLElement;
 export const startingContainer = document.querySelector(".starting") as HTMLElement;
@@ -55,8 +57,14 @@ window.addEventListener("mouseup", () => {
 const isKeyDown = (...k: string[]) =>
   typeof k === "string" ? key.get(k) ?? false : k.some((k) => key.get(k) ?? false);
 
+const getGameScale = () => {
+  const scale = Math.min(1, Math.min(window.innerWidth / 800, window.innerHeight / 600)) * 45;
+  return scale;
+};
+
 export default class Game {
-  public static readonly SCALE = 45;
+  public static readonly SCALE = getGameScale();
+  public static readonly SHOOT_COOLDOWN = 8;
 
   public readonly app: Application;
   public readonly world: Container = new Container();
@@ -66,6 +74,9 @@ export default class Game {
 
   public onStageChanges: ((game: Game) => void)[] = [];
   public shootTimer: number = 0;
+
+  public moveJoystick: Joystick | null = null;
+  public shootJoystick: Joystick | null = null;
 
   constructor(room: Room) {
     this.app = new Application();
@@ -118,7 +129,7 @@ export default class Game {
           return;
         }
 
-        this.shootTimer = 5;
+        this.shootTimer = Game.SHOOT_COOLDOWN;
         this.room.send(MessageType.SHOOT);
 
         // Play weapon sound based on the player's weapon
@@ -185,6 +196,16 @@ export default class Game {
     this.app.start();
   }
 
+  initMobileControls() {
+    this.moveJoystick = new Joystick();
+    this.moveJoystick.container.classList.add("right-joystick");
+    this.moveJoystick.show();
+
+    this.shootJoystick = new Joystick();
+    this.shootJoystick.container.classList.add("left-joystick");
+    this.shootJoystick.show();
+  }
+
   async mapInit() {
     const tileSize = 2;
     map.tiles.forEach((t) => {
@@ -205,8 +226,12 @@ export default class Game {
   private update() {
     if (startingContainer.style.display !== "none") {
       if (this.room.state.state === GameStateType.STARTED) {
-        const hud = new HUD(this, 1); // Good Values -> 0.8 - 1.3
+        const hud = new HUD(this, getHudScale()); // Good Values -> 0.8 - 1.3
         startingContainer.style.display = "none";
+
+        if (isMobile()) {
+          this.initMobileControls();
+        }
       } else if (this.room.state.state === GameStateType.WAITING) {
         startingContainerText.innerText = `Waiting for players... (${this.room.state.players.size}/${this.room.state.config.maxPlayers})`;
       } else if (this.room.state.state === GameStateType.STARTING) {
@@ -240,6 +265,7 @@ export default class Game {
 
     this.handleMovement();
     this.handleRotation();
+    this.handleMobileShoot();
   }
 
   private handleMovement() {
@@ -255,6 +281,11 @@ export default class Game {
     }
     if (isKeyDown("d", "ArrowRight")) {
       moveVec.x += 1;
+    }
+
+    if (this.moveJoystick) {
+      moveVec.x = this.moveJoystick.getDirectionX();
+      moveVec.y = this.moveJoystick.getDirectionY();
     }
 
     if (this.you && (moveVec.x !== 0 || moveVec.y !== 0)) {
@@ -277,15 +308,37 @@ export default class Game {
   }
 
   private handleRotation() {
-    if (this.you) {
-      const dir = mousePos.sub(new Vec2(this.app.screen.width / 2, this.app.screen.height / 2)).normalize();
-      const rotation = dir.angle();
+    if (!this.you) {
+      return;
+    }
 
-      if (rotation === this.you.rotation || this.room.state.state !== GameStateType.STARTED) {
+    let rotation = this.you.rotation;
+    if (this.shootJoystick) {
+      rotation = this.shootJoystick.getDirection().angle();
+    } else {
+      const dir = mousePos.sub(new Vec2(this.app.screen.width / 2, this.app.screen.height / 2)).normalize();
+      rotation = dir.angle();
+    }
+
+    if (rotation === this.you.rotation || this.room.state.state !== GameStateType.STARTED) {
+      return;
+    }
+
+    this.room.send(MessageType.ROTATE, { r: rotation });
+  }
+
+  private handleMobileShoot() {
+    if (!this.shootJoystick || !this.you) {
+      return;
+    }
+
+    if (this.shootJoystick.getDirection().length() > 0.5) {
+      if (this.shootTimer > 0) {
         return;
       }
 
-      this.room.send(MessageType.ROTATE, { r: rotation });
+      this.shootTimer = Game.SHOOT_COOLDOWN;
+      this.room.send(MessageType.SHOOT);
     }
   }
 

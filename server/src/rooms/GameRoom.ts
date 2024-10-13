@@ -20,14 +20,18 @@ import { Weapon } from "./schema/Weapon";
 
 import { getHealingAmountFromHealingType } from "../rules/healing";
 import { getDrunkinessAmountFromWeaponType } from "../rules/weapon";
+import { censorProfanity } from "../censor";
 
 export class GameRoom extends Room<GameState> {
-  maxClients = 10;
-  private TIME_TO_START = process.env.NODE_ENV === "production" ? 30 : 3;
+  maxClients = 12;
+  private TIME_TO_START = process.env.NODE_ENV === "production" ? 30 : 5;
+  private MESSAGE_COOLDOWN = 500;
+
   private timeToStartInterval: NodeJS.Timeout | undefined;
-  private playersToStart = process.env.NODE_ENV === "production" ? 4 : 1;
+  private playersToStart = process.env.NODE_ENV === "production" ? 2 : 1;
   private engine: GameEngine = new GameEngine(this.onCollisionStart.bind(this));
   private playerClients: Map<string, number> = new Map(); // client.sessionId -> entity.id
+  private messageSentTime: Map<string, number> = new Map(); // client.sessionId -> timestamp
 
   onCreate(options: any) {
     this.setMetadata({ joinable: true });
@@ -189,6 +193,21 @@ export class GameRoom extends Room<GameState> {
       this.state.entities.delete(`${player.canPickup}`);
 
       player.canPickup = undefined;
+    });
+
+    this.onMessage(MessageType.SEND_MESSAGE, (client, message) => {
+      if (typeof message !== "string" || message.length === 0 || message.length > 255) return;
+
+      const now = Date.now();
+      const timeSinceLastMessage = now - (this.messageSentTime.get(client.sessionId) ?? 0);
+      if (timeSinceLastMessage < this.MESSAGE_COOLDOWN) return;
+
+      this.messageSentTime.set(client.sessionId, now);
+
+      const player = <Player>this.state.entities.get(`${this.playerClients.get(client.sessionId)}`);
+      const name = player?.name ?? "Unknown";
+
+      this.state.messages.push(`${name}: ${censorProfanity(message)}`);
     });
   }
 
