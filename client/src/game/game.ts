@@ -19,6 +19,9 @@ import { GameStateType } from "../../../server/src/rooms/schema/enums/GameStateT
 import { SoundManager } from "./soundManager";
 import { WeaponType } from "../../../server/src/rooms/schema/enums/WeaponType";
 import { HealingType } from "../../../server/src/rooms/schema/enums/HealingType";
+import { map, spritesheet } from "./spriteSheet";
+import { TileType } from "../../../shared/map/enums/TileType";
+import { Sprite } from "pixi.js"
 
 export const gameContainer = document.querySelector(".game") as HTMLElement;
 export const startingContainer = document.querySelector(".starting") as HTMLElement;
@@ -201,7 +204,21 @@ export default class Game {
       }
     });
 
+    this.mapInit();
+
     this.app.start();
+  }
+
+  async mapInit(){
+    const tileSize = 2;
+    map.tiles.forEach(t=>{
+      const sprite = new Sprite(Textures.textures.get(TileType[t.type]));
+      sprite.position.x = t.x * tileSize;
+      sprite.position.y = t.y * tileSize;
+      sprite.width = tileSize;
+      sprite.height = tileSize;
+      this.world.addChild(sprite);
+    });
   }
 
   onStageChange(cb: (game: Game) => void) {

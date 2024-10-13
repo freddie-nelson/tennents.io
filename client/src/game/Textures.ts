@@ -2,9 +2,10 @@ import { Assets, Texture } from "pixi.js";
 import { PlayerSkinType } from "../../../server/src/rooms/schema/enums/PlayerSkinType";
 import { WeaponType } from "../../../server/src/rooms/schema/enums/WeaponType";
 import { HealingType } from "../../../server/src/rooms/schema/enums/HealingType";
+import { TileType } from "../../../shared/map/enums/TileType";
 
 export default abstract class Textures {
-  private static textures = new Map<string, Texture>();
+  public static textures = new Map<string, Texture>();
 
   static async initTextures() {
     const playerColors = Object.values(PlayerSkinType).filter((c) => typeof c !== "string");
@@ -26,6 +27,13 @@ export default abstract class Textures {
     for (const type of healingTypes) {
       const key = HealingType[type];
       const texture = await Assets.load(`/images/Heal/${key}.svg`);
+      this.textures.set(key, texture);
+    }
+
+    const tileTypes = Object.values(TileType).filter((t) => typeof t !== "string");
+    for (const type of tileTypes) {
+      const key = TileType[type];
+      const texture = await Assets.load(`/images/Tileset/${key}.png`);
       this.textures.set(key, texture);
     }
   }

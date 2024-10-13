@@ -1,4 +1,6 @@
-import { Spritesheet ,Texture, AnimatedSprite} from "pixi.js"
+import { Spritesheet ,Texture, Assets} from "pixi.js";
+import mapJson from '../../../shared/assets/map.json';
+import { GameMap } from "../../../shared/map/map";
 
 const atlasData = {
     frames: {
@@ -127,38 +129,18 @@ const atlasData = {
         },
     },
     meta: {
-        image: '../../images/TileSet.png',
+        image: '/images/Tileset/TileSet.png',
         format: 'RGBA8888',
         size: { w: 3176, h: 3176 },
         scale: 1
-    },
-    animations: {
-        enemy: ["BAR_DOWN",
-                "BAR_LEFT",
-                "BAR_LEFT_DRAFT",
-                "BAR_RIGHT",
-                "BAR_RIGHT_DRAFTBAR_UP",
-                "COBBLESTONE",
-                "ELEVATOR_LEFT",
-                "ELEVATOR_RIGHT",
-                "POOL_BOTTOM_LEFT",
-                "POOL_BOTTOM_RIGHT",
-                "POOL_LEFTPOOL_RIGHT",
-                "POOL_TOP_LEFT",
-                "POOL_RIGHT_LEFT",
-                "SINK",
-                "STONE_TILE",
-                "STONE_WALL_UP",
-                "STONE_WALL_SIDE",
-                "TABLE_UP",
-                "TABLE_SIDE",
-                "TOILET",
-                "WOODEN_FLOOR"
-                ] //array of frames by name
     }
 };
 
-const spritesheet = new Spritesheet(
-    Texture.from(atlasData.meta.image),
-    atlasData
-);
+//export const spritesheet = new Spritesheet(
+ //   Texture.from(atlasData.meta.image),
+ //   atlasData
+//);
+
+export const map = new GameMap(
+    mapJson
+)
