@@ -19,6 +19,7 @@ import { GameStateType } from "../../../server/src/rooms/schema/enums/GameStateT
 import { SoundManager } from "./soundManager";
 import { WeaponType } from "../../../server/src/rooms/schema/enums/WeaponType";
 import { HealingType } from "../../../server/src/rooms/schema/enums/HealingType";
+import HUD from "./hud";
 import { map } from "./spriteSheet";
 import { TileType } from "../../../shared/map/enums/TileType";
 import { Sprite } from "pixi.js"
@@ -222,6 +223,7 @@ export default class Game {
   private update() {
     if (startingContainer.style.display !== "none") {
       if (this.room.state.state === GameStateType.STARTED) {
+        const hud = new HUD(this, 1) // Good Values -> 0.8 - 1.3
         startingContainer.style.display = "none";
       } else if (this.room.state.state === GameStateType.WAITING) {
         startingContainerText.innerText = `Waiting for players... (${this.room.state.players.size}/${this.room.state.config.maxPlayers})`;
