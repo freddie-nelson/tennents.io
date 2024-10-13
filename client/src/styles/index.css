@@ -124,9 +124,15 @@ h1 {
 }
 
 @keyframes fadeInOut {
-  0% {opacity: 0;}
-  50% {opacity: 1;}
-  100% {opacity: 0;}
+  0% {
+    opacity: 0;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
 }
 
 .starting {
@@ -140,4 +146,34 @@ h1 {
 .starting h1 {
   font-size: 5rem;
   text-transform: uppercase;
+}
+
+.back-to-main-menu {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  z-index: 1001;
+  padding-bottom: 5%;
+}
+
+.back-to-main-menu-btn {
+  background-color: red;
+  color: white;
+  font-weight: bold;
+  font-size: 2rem;
+  padding: 1rem;
+  border-radius: 0.5rem;
+  border: 2px solid white;
+  opacity: 0;
+  transition: opacity 1s ease;
+  cursor: pointer;
+}
+
+.back-to-main-menu-btn.show {
+  opacity: 1;
 }
