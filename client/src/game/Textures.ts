@@ -10,32 +10,48 @@ export default abstract class Textures {
   static async initTextures() {
     const playerColors = Object.values(PlayerSkinType).filter((c) => typeof c !== "string");
 
+    const promises: Promise<any>[] = [];
+
     for (const color of playerColors) {
       const key = PlayerSkinType[color][0] + PlayerSkinType[color].toLowerCase().slice(1);
-      const texture: Texture = await Assets.load(`/images/Players/${key}Player.svg`);
-      this.textures.set(`player_${color}`, texture);
+      promises.push(
+        Assets.load(`/images/Players/${key}Player.svg`).then((t) => {
+          this.textures.set(`player_${color}`, t);
+        })
+      );
     }
 
     const weaponTypes = Object.values(WeaponType).filter((t) => typeof t !== "string");
     for (const type of weaponTypes) {
       const key = WeaponType[type];
-      const texture = await Assets.load(`/images/Attack/${key}.svg`);
-      this.textures.set(key, texture);
+      promises.push(
+        Assets.load(`/images/Attack/${key}.svg`).then((t) => {
+          this.textures.set(key, t);
+        })
+      );
     }
 
     const healingTypes = Object.values(HealingType).filter((t) => typeof t !== "string");
     for (const type of healingTypes) {
       const key = HealingType[type];
-      const texture = await Assets.load(`/images/Heal/${key}.svg`);
-      this.textures.set(key, texture);
+      promises.push(
+        Assets.load(`/images/Heal/${key}.svg`).then((t) => {
+          this.textures.set(key, t);
+        })
+      );
     }
 
     const tileTypes = Object.values(TileType).filter((t) => typeof t !== "string");
     for (const type of tileTypes) {
       const key = TileType[type];
-      const texture = await Assets.load(`/images/Tileset/${key}.png`);
-      this.textures.set(key, texture);
+      promises.push(
+        Assets.load(`/images/Tileset/${key}.png`).then((t) => {
+          this.textures.set(key, t);
+        })
+      );
     }
+
+    await Promise.all(promises);
   }
 
   static getWeaponTexture(weaponType: WeaponType): Texture {
