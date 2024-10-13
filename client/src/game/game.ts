@@ -22,7 +22,7 @@ import { HealingType } from "../../../server/src/rooms/schema/enums/HealingType"
 import HUD from "./hud";
 import { map } from "./spriteSheet";
 import { TileType } from "../../../shared/map/enums/TileType";
-import { Sprite } from "pixi.js"
+import { Sprite } from "pixi.js";
 
 export const gameContainer = document.querySelector(".game") as HTMLElement;
 export const startingContainer = document.querySelector(".starting") as HTMLElement;
@@ -204,14 +204,15 @@ export default class Game {
     this.app.start();
   }
 
-  async mapInit(){
+  async mapInit() {
     const tileSize = 2;
-    map.tiles.forEach(t=>{
+    map.tiles.forEach((t) => {
       const sprite = new Sprite(Textures.textures.get(TileType[t.type]));
       sprite.position.x = t.x * tileSize;
       sprite.position.y = t.y * tileSize;
       sprite.width = tileSize;
       sprite.height = tileSize;
+      sprite.anchor.set(0.5);
       this.world.addChild(sprite);
     });
   }
