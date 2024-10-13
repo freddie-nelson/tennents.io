@@ -324,6 +324,8 @@ export class GameRoom extends Room<GameState> {
     const player = <Player>this.state.entities.get(`${playerId}`);
     const projectile = <Projectile>this.state.entities.get(`${projectileId}`);
 
+    if (!player || !projectile) return;
+
     // remove player health
     const drunkinessAmount = getDrunkinessAmountFromWeaponType(projectile.projectileType);
     player.drunkiness += drunkinessAmount;
