@@ -11,6 +11,8 @@ import { EntityType } from "../../../server/src/rooms/schema/enums/EntityType";
 import Weapon from "./Weapon";
 import Healing from "./Healing";
 import { GameStateType } from "../../../server/src/rooms/schema/enums/GameStateType";
+import isMobile from "./isMobile";
+import { MessageType } from "../../../server/src/rooms/schema/enums/MessageType";
 
 enum RarityColours {
   COMMON = "#989FA4",
@@ -229,11 +231,17 @@ export default class HUD {
     pickupHud.classList.add("pickup-hud", "pickup-hud-hidden");
 
     const pickupHudText = document.createElement("p");
-    pickupHudText.innerText = "Press E to pick up";
+    pickupHudText.innerText = isMobile() ? "Tap here to pick up" : "Press E to pick up";
     pickupHud.appendChild(pickupHudText);
 
     const pickupHudImage = document.createElement("img");
     pickupHud.appendChild(pickupHudImage);
+
+    if (isMobile()) {
+      pickupHud.addEventListener("click", () => {
+        this.game.room.send(MessageType.PICKUP);
+      });
+    }
 
     HUDElement.appendChild(pickupHud);
 
