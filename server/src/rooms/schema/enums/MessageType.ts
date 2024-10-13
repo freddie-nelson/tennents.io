@@ -1,7 +1,8 @@
 export enum MessageType {
-	ROTATE,
-	MOVE,
-	PICKUP,
-	SHOOT,
-	HEAL,
+  ROTATE,
+  MOVE,
+  PICKUP,
+  SHOOT,
+  HEAL,
+  SEND_MESSAGE,
 }
