@@ -5,7 +5,7 @@ export default function loseScreen(placement:number) {
     document.body.style.background = "#00000000"
 
     const source = document.createElement("source");
-    source.src = "public/videos/loseScreen.webm"
+    source.src = "videos/loseScreen.webm"
     source.type = "video/webm"
 
     const video = document.createElement("video");
