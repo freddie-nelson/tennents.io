@@ -356,7 +356,8 @@ export default class HUD {
         this.updateHeals(heal);
       }
 
-      if (state.you === undefined || this.drunkness >= 100) {
+      if (!state.you || this.drunkness >= 100) {
+        
         this.removeHUD();
         loseScreen(this.placement);
       }
