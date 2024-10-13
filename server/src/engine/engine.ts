@@ -10,10 +10,10 @@ import mapJson from "../../../shared/assets/map.json";
 export class GameEngine {
   static readonly DRUNKINESS_LOSS: number = 0.1;
   static readonly PLAYER_RADIUS: number = 1;
-  static readonly PLAYER_SPEED: number = 0.1;
+  static readonly PLAYER_SPEED: number = 0.175;
   static readonly PROJECTILE_RADIUS: number = 0.5;
   static readonly PROJECTILE_LIFETIME: number = 100;
-  static readonly PROJECTILE_SPEED: number = 0.2;
+  static readonly PROJECTILE_SPEED: number = 0.35;
   static readonly PICKUP_RADIUS: number = 2.5;
   static readonly TILE_SIZE: number = 2;
 
