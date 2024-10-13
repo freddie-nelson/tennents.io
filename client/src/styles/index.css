@@ -156,3 +156,102 @@ h1 {
   z-index: 1000;
   pointer-events: none;
 }
+
+.video-style {
+  object-fit: cover;
+}
+
+.fallingText {
+  text-align: center;
+  width: 80vw;
+  color: #ff0000;
+  z-index: 1001;
+  font-size: 12vh;
+  overflow: hidden;
+}
+
+.flexCenterParent {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.fallingTextAnimation {
+  animation-name: fallingTextAnim;
+  animation-duration: 0.075s;
+  animation-timing-function: ease-in;
+}
+
+.fadeIO {
+  animation-name: fadeInOut;
+  animation-duration: 2s;
+  animation-timing-function: ease-in-out;
+}
+
+@keyframes fallingTextAnim {
+  0% {
+    top: -50vh;
+  }
+  100% {
+    top: 0vh;
+  }
+}
+
+@keyframes fadeInOut {
+  0% {
+    opacity: 0;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+.starting {
+  position: absolute;
+  top: 0;
+  left: 0;
+  flex-direction: column;
+  z-index: 10;
+  background: url("/images/bg.webp");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+.starting h1 {
+  font-size: 5rem;
+  text-transform: uppercase;
+}
+
+.back-to-main-menu {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  z-index: 1001;
+  padding-bottom: 5%;
+}
+
+.back-to-main-menu-btn {
+  background-color: red;
+  color: white;
+  font-weight: bold;
+  font-size: 2rem;
+  padding: 1rem;
+  border-radius: 0.5rem;
+  border: 2px solid white;
+  opacity: 0;
+  transition: opacity 1s ease;
+  cursor: pointer;
+}
+
+.back-to-main-menu-btn.show {
+  opacity: 1;
+}
