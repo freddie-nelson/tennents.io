@@ -1,7 +1,7 @@
 import Vec2 from "./Vec2";
 
 import { EntityType } from "../../../server/src/rooms/schema/enums/EntityType";
-import { Container, Sprite } from "pixi.js";
+import { Container, Sprite, Text, TextStyle } from "pixi.js";
 import Textures from "./Textures";
 import Player from "./Player";
 import Weapon from "./Weapon";
@@ -9,6 +9,7 @@ import Healing from "./Healing";
 import { WeaponType } from "../../../server/src/rooms/schema/enums/WeaponType";
 import { HealingType } from "../../../server/src/rooms/schema/enums/HealingType";
 import Projectile from "./Projectile";
+import Game from "./game";
 
 export default class Entity {
   public sprite: Container | null = null;
@@ -39,6 +40,10 @@ export default class Entity {
     } else {
       this.sprite!.rotation = this.rotation - Math.PI / 2;
     }
+
+    // if (this.type === EntityType.PLAYER) {
+    //   this.sprite.getChildByLabel("name")!.rotation = -this.rotation;
+    // }
   }
 
   createSprite() {
@@ -88,6 +93,31 @@ export default class Entity {
 
     if (this.type === EntityType.PLAYER) {
       const p = this as any as Player;
+
+      const textStyle = new TextStyle({
+        fill: 0xffffff,
+        fontSize: 30,
+        fontFamily: "Arial",
+        fontWeight: "bold",
+        stroke: {
+          color: 0x000000,
+          width: 2,
+          join: "round",
+        },
+      });
+
+      const textContainer = new Container();
+      textContainer.label = "name";
+      textContainer.position.set(0, -sprite.height * 0.65);
+
+      const text = new Text({ text: p.name, style: textStyle });
+      text.scale.set(0.015);
+      text.anchor.set(0.5);
+      text.rotation = Math.PI;
+
+      textContainer.addChild(text);
+
+      this.sprite.addChild(textContainer);
 
       if (p.weapon !== undefined) {
         const weaponSprite = new Sprite();
