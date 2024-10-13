@@ -110,6 +110,8 @@ export default class Game {
         return;
       }
 
+      const soundManager = SoundManager.getInstance();
+
       if (e.button === 0) {
         // left click
         if (this.shootTimer > 0) {
@@ -120,7 +122,6 @@ export default class Game {
         this.room.send(MessageType.SHOOT);
 
         // Play weapon sound based on the player's weapon
-        const soundManager = SoundManager.getInstance();
         switch (this.you.weapon) {
           case WeaponType.TENNENTS_KEG:
             soundManager.playSound("keg");

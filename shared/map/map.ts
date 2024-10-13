@@ -47,7 +47,13 @@ export class GameMap {
       type === TileType.SINK ||
       type === TileType.ELEVATOR_LEFT ||
       type === TileType.ELEVATOR_RIGHT ||
-      type === TileType.COBBLESTONE
+      type === TileType.COBBLESTONE ||
+      type === TileType.BAR_DOWN ||
+      type === TileType.BAR_LEFT ||
+      type === TileType.BAR_LEFT_DRAUGHT ||
+      type === TileType.BAR_RIGHT ||
+      type === TileType.BAR_RIGHT_DRAUGHT ||
+      type === TileType.BAR_UP
     ) {
       return false;
     }
