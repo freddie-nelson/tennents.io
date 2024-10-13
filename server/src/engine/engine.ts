@@ -253,7 +253,7 @@ export class GameEngine {
 
       entity.plugin.lifetime--;
       if (entity.plugin.lifetime <= 0) {
-        this.removeEntity(entity.id);
+        this.removeEntity(entity.plugin.id);
         stateEntities.delete(`${entity.plugin.id}`);
       }
     }
