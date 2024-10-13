@@ -82,7 +82,7 @@ export class GameMap {
       type === TileType.BAR_LEFT ||
       type === TileType.BAR_LEFT_DRAUGHT ||
       type === TileType.BAR_RIGHT ||
-      type === TileType.BAR_RIGHT_DRAGHT ||
+      type === TileType.BAR_RIGHT_DRAuGHT ||
       type === TileType.BAR_UP
     ) {
       return Math.random() < 0.3;

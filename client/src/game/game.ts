@@ -19,7 +19,7 @@ import { GameStateType } from "../../../server/src/rooms/schema/enums/GameStateT
 import { SoundManager } from "./soundManager";
 import { WeaponType } from "../../../server/src/rooms/schema/enums/WeaponType";
 import { HealingType } from "../../../server/src/rooms/schema/enums/HealingType";
-import { map, spritesheet } from "./spriteSheet";
+import { map } from "./spriteSheet";
 import { TileType } from "../../../shared/map/enums/TileType";
 import { Sprite } from "pixi.js"
 
