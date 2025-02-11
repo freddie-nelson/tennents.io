@@ -198,11 +198,11 @@ export default class Game {
 
   initMobileControls() {
     this.moveJoystick = new Joystick();
-    this.moveJoystick.container.classList.add("right-joystick");
+    this.moveJoystick.container.classList.add("left-joystick");
     this.moveJoystick.show();
 
     this.shootJoystick = new Joystick();
-    this.shootJoystick.container.classList.add("left-joystick");
+    this.shootJoystick.container.classList.add("right-joystick");
     this.shootJoystick.show();
   }
 
