@@ -63,7 +63,7 @@ const fullscreenMobileButton = fullscreenMobileButtonContainer.querySelector("bu
 
 fullscreenMobileButton.addEventListener("click", () => {
   document.documentElement.requestFullscreen();
-  fullscreenMobileButtonContainer.style.display = "none"
+  fullscreenMobileButton.style.display = "none"
 });
 
 if (isMobile()) {
