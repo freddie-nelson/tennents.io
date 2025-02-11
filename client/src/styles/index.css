@@ -18,6 +18,7 @@ body,
   background-position: center;
   text-align: center;
   position: relative; /* Make sure the body is relative */
+  touch-action: none;
 }
 
 #background-video {

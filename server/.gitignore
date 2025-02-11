@@ -2,3 +2,7 @@ node_modules
 
 .env
 build
+
+# Lock files
+package-lock.json
+pnpm-lock.yaml
